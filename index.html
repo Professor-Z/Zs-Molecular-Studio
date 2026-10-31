@@ -147,7 +147,8 @@
     .hint-sm { font-size: 0.7rem; color: #94a3b8; margin: -0.2rem 0 0.6rem; }
     .sec { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.14em; color: #94a3b8; margin: 0.15rem 0 0.45rem; }
     .btn-row { display: grid; gap: 0.35rem; margin-bottom: 0.6rem; }
-    .btn-row.two { grid-template-columns: 1fr 1fr; } .btn-row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .btn-row.two { grid-template-columns: 1fr 1fr; } .btn-row.three { grid-template-columns: 1fr 1fr 1fr; } .btn-row.four { grid-template-columns: 1fr 1fr 1fr 1.5fr; }
+    .glow-sw { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 0.6rem; } .glow-sw button { width: 19px; height: 19px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.25); cursor: pointer; padding: 0; } .glow-sw button:hover { border-color: #fff; }
     .slider-row { margin-bottom: 0.55rem; }
     .slider-row .lbl { display: flex; justify-content: space-between; font-size: 0.74rem; color: #cbd5e1; margin-bottom: 0.25rem; }
     .slider-row .lbl span:last-child { color: #a5b4fc; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -213,15 +214,15 @@
     body.light .chip { background: #e2e8f0; color: #0f172a; }
     body.light #sketch-wrap { box-shadow: 0 0 0 1px #cbd5e1; }
     body.light .el[data-el="C"], body.light .el[data-el="H"] { color: #1e293b !important; } body.light .el[data-pseudo] { color: #a21caf !important; }
-    body.light #pause3d { background: rgba(255,255,255,0.92); color: #0f172a; } body.light #pause3d.active { background: #2563eb; color: #fff; }
+    body.light #pause3d.active { background: #2563eb; color: #fff; } body.light #center3d { background: rgba(255,255,255,0.92); color: #0f172a; }
     body.light #bondpanel { background: rgba(255,255,255,0.95); color: #0f172a; }
     body.light .restore { background: #f1f5f9; color: #0f172a; box-shadow: 0 0 0 1px #cbd5e1; }
     #sketch-wrap.dropping { outline: 3px dashed #2563eb; outline-offset: -6px; }
     #pct { font-size: 0.75rem; color: #cbd5e1; display: inline-flex; gap: 8px; flex-wrap: wrap; } #pct b { color: #fff; }
     #b-pct { padding: 0.3rem 0.5rem; font-size: 0.68rem; }
-    #pause3d { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 6; border-radius: 999px; padding: 0.5rem 1.1rem;
-        background: rgba(30,41,59,0.9); border: 1px solid rgba(255,255,255,0.15); }
-    #pause3d.active { background: #2563eb; }
+    #pause3d { white-space: nowrap; padding-left: 0.3rem; padding-right: 0.3rem; } #pause3d.active { background: #2563eb; color: #fff; }
+    #center3d { position: absolute; right: 52px; bottom: 12px; z-index: 6; border-radius: 999px; padding: 0.45rem 0.9rem; background: rgba(30,41,59,0.9); border: 1px solid rgba(255,255,255,0.15); }
+    #main.anim { transition: grid-template-columns 0.45s ease; }
     #hint3d { position: absolute; left: 12px; top: 10px; font-size: 0.7rem; color: rgba(226,232,240,0.7); pointer-events: none; }
 </style>
 </head>
@@ -272,7 +273,10 @@
                         <div class="btn-row two"><button class="btn tg" id="b-glow" title="A soft pulsing glow around the molecule">GLOW: OFF</button>
                             <label class="lbl2 glow-col">Glow color <input type="color" id="glow-col" value="#7dd3fc"></label></div>
                         <div class="slider-row"><div class="lbl"><label for="s-glowr">Glow radius</label><span id="v-glowr"></span></div>
-                            <input id="s-glowr" type="range" min="0.2" max="2.5" step="0.05" value="0.9"></div>
+                            <input id="s-glowr" type="range" min="0.2" max="10" step="0.1" value="0.9"></div>
+                        <div class="slider-row"><div class="lbl"><label for="s-glowb">Glow brightness</label><span id="v-glowb"></span></div>
+                            <input id="s-glowb" type="range" min="0.1" max="3" step="0.05" value="1"></div>
+                        <div class="glow-sw" id="glow-presets" role="group" aria-label="Glow color presets"></div>
                         <div class="slider-row"><div class="lbl"><label for="s-glowp">Glow pulse</label><span id="v-glowp"></span></div>
                             <input id="s-glowp" type="range" min="0" max="3" step="0.1" value="1"></div>
                     </div>
@@ -308,15 +312,17 @@
                     <div>
                         <div class="sec">CAMERA</div>
                         <div class="lbl2">Auto‑rotate</div>
-                        <div class="btn-row three">
+                        <div class="btn-row four">
                             <button class="btn tg" id="b-rx" title="Tumble forward (screen x axis)">X</button>
                             <button class="btn tg active" id="b-ry" title="Spin left–right (screen y axis)">Y</button>
                             <button class="btn tg" id="b-rz" title="Roll (screen z axis)">Z</button>
+                            <button class="btn" id="pause3d" title="Pause or resume the motion">❚❚ PAUSE</button>
                         </div>
                         <div class="slider-row"><div class="lbl"><label for="s-speed">Rotation speed</label><span id="v-speed"></span></div>
                             <input id="s-speed" type="range" min="2" max="90" step="1" value="15"></div>
-                        <div class="btn-row two"><button class="btn" id="b-reset">RESET VIEW</button><button class="btn primary" id="b-gif" title="Export an animated GIF of one full turn (loops seamlessly)">EXPORT GIF</button></div>
-                        <div class="hint-sm">Arrow keys move the model while the pointer is over this window.</div>
+                        <div class="btn-row two"><button class="btn" id="b-reset">RESET VIEW</button><button class="btn" id="b-center" title="Bring the model back to the middle of the window (keeps the zoom and angle)">CENTER MODEL</button></div>
+                        <div class="btn-row"><button class="btn primary" id="b-gif" title="Export an animated GIF of one full turn (loops seamlessly)">EXPORT GIF</button></div>
+                        <div class="hint-sm">Arrow keys (or right-drag) move the model; it always turns about its center of mass.</div>
                     </div>
                     <div class="el-colors">
                         <div class="sec">ELEMENT COLORS</div>
@@ -327,7 +333,7 @@
                 <button class="tab-btn" id="tab" aria-expanded="false">STYLE<span class="chev">▲</span></button>
             </div>
             <div id="busy" hidden>Building 3D model…</div>
-            <button class="btn" id="pause3d">❚❚ PAUSE</button>
+            <button class="btn" id="center3d" title="Center the model in the window">⌖ CENTER</button>
             <div id="bondpanel" hidden>
                 <span>Bond <b id="bp-name" style="min-width:0;text-align:left"></b></span>
                 <button class="btn" id="bp-m" title="Turn 15° one way">⟲ 15°</button>
@@ -869,7 +875,89 @@ function layout2D(m, seed) {
             if (sc < best.sc) best = { sc, pos: cc.atoms.map(a => [a.x, a.y]) };
         } catch (err) { if (typeof process !== 'undefined' && process.env.LDBG) console.log('err', err.message); }
     }
-    best.pos.forEach((p, i) => { m.atoms[i].x = p[0]; m.atoms[i].y = p[1]; });
+    best.pos.forEach((p, i) => { m.atoms[i].x = p[0]; m.atoms[i].y = p[1]; delete m.atoms[i].dz; });
+    m.bonds.forEach(b => { if (b.autoBold) { delete b.bold; delete b.autoBold; } });
+    // bridged ring systems (norbornane, adamantane, morphine, cocaine…): draw them as the 3D shape seen from the clearest angle
+    if (isBridged(m) && m.atoms.length <= 90) { try { perspectiveLayout(m); } catch (err) { if (typeof process !== 'undefined' && process.env.LDBG) console.log('persp err', err.message); } }
+}
+function isBridged(m) {
+    const rs = findRings(m, 8);
+    for (let x = 0; x < rs.length; x++) for (let y = x + 1; y < rs.length; y++) if (rs[x].filter(v => rs[y].includes(v)).length >= 3) return true;
+    return false;
+}
+// project a 3D model onto the view that keeps bonds long and atoms apart, keep the depth (a.dz, in bond units, + toward the viewer),
+// and thicken the ring bonds of the bridge nearest the viewer (b.bold, tapered where they run back into the rest of the frame)
+function perspectiveLayout(m) {
+    const n = m.atoms.length;
+    const g = embed3D({ atoms: m.atoms.map(a => ({ ...a, p3: undefined })), bonds: m.bonds.map(b => ({ ...b, wedge: undefined })) }, { seed: 3, iters: 900 });
+    const P = g.atoms.slice(0, n).map(p => [p.x, p.y, p.z]);
+    const c = [0, 1, 2].map(k => P.reduce((s, p) => s + p[k], 0) / n);
+    P.forEach(p => { p[0] -= c[0]; p[1] -= c[1]; p[2] -= c[2]; });
+    const L3 = m.bonds.reduce((s, b) => s + Math.hypot(P[b.a][0] - P[b.b][0], P[b.a][1] - P[b.b][1], P[b.a][2] - P[b.b][2]), 0) / Math.max(1, m.bonds.length) || 1.5;
+    P.forEach(p => { p[0] /= L3; p[1] /= L3; p[2] /= L3; });
+    const nb = neighbors(m), bonded = new Set(m.bonds.map(b => b.a < b.b ? b.a * 4096 + b.b : b.b * 4096 + b.a));
+    const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2], cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    const nrm = (a) => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+    const basis = (d) => { const e3 = nrm(d), t = Math.abs(e3[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0]; const e1 = nrm(cross(t, e3)), e2 = cross(e3, e1); return [e1, e2, e3]; };
+    const segT = (p, q, r, s) => { const d1x = q[0] - p[0], d1y = q[1] - p[1], d2x = s[0] - r[0], d2y = s[1] - r[1], den = d1x * d2y - d1y * d2x; if (Math.abs(den) < 1e-9) return null;
+        const t = ((r[0] - p[0]) * d2y - (r[1] - p[1]) * d2x) / den, u = ((r[0] - p[0]) * d1y - (r[1] - p[1]) * d1x) / den; return t > 0 && t < 1 && u > 0 && u < 1 ? [t, u] : null; };
+    function score(Q) {
+        let s = 0;
+        m.bonds.forEach(b => { const l = Math.hypot(Q[b.a][0] - Q[b.b][0], Q[b.a][1] - Q[b.b][1]); if (l < 0.8) s += 12 * (0.8 - l) * (0.8 - l) * 4; });
+        for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) { if (bonded.has(i * 4096 + j)) continue; const d = Math.hypot(Q[i][0] - Q[j][0], Q[i][1] - Q[j][1]); if (d < 0.75) s += 40 * (0.75 - d); }
+        for (let x = 0; x < m.bonds.length; x++) for (let y = x + 1; y < m.bonds.length; y++) { const a = m.bonds[x], b = m.bonds[y];
+            if (a.a === b.a || a.a === b.b || a.b === b.a || a.b === b.b) continue; const tu = segT(Q[a.a], Q[a.b], Q[b.a], Q[b.b]); if (!tu) continue;
+            s += 1.2; const e = Math.min(tu[0], 1 - tu[0], tu[1], 1 - tu[1]); if (e < 0.22) s += 4 * (0.22 - e) / 0.22; }
+        // atoms sitting on a bond they don't belong to
+        m.bonds.forEach(b => { const A = Q[b.a], B = Q[b.b], dx = B[0] - A[0], dy = B[1] - A[1], l2 = dx * dx + dy * dy || 1;
+            for (let i = 0; i < n; i++) { if (i === b.a || i === b.b) continue; const t = ((Q[i][0] - A[0]) * dx + (Q[i][1] - A[1]) * dy) / l2; if (t < 0.1 || t > 0.9) continue;
+                const d = Math.abs((Q[i][0] - A[0]) * dy - (Q[i][1] - A[1]) * dx) / Math.sqrt(l2); if (d < 0.35) s += 25 * (0.35 - d); } });
+        return s;
+    }
+    // candidate view directions: a Fibonacci hemisphere (the far side gives the mirror view, handled below)
+    let best = null; const N = n > 45 ? 110 : n > 30 ? 180 : 260;
+    for (let k = 0; k < N; k++) {
+        const zz = 1 - (k + 0.5) / N, r = Math.sqrt(1 - zz * zz), ph = k * 2.399963;
+        const E = basis([r * Math.cos(ph), zz, r * Math.sin(ph)]);
+        const Q = P.map(p => [dot(p, E[0]), dot(p, E[1])]);
+        const sc = score(Q); if (!best || sc < best.sc) best = { sc, E };
+    }
+    let [e1, e2, e3] = best.E;
+    // turn in the picture plane so the long axis runs across the page
+    let Q = P.map(p => [dot(p, e1), dot(p, e2)]);
+    let sxx = 0, syy = 0, sxy = 0; Q.forEach(q => { sxx += q[0] * q[0]; syy += q[1] * q[1]; sxy += q[0] * q[1]; });
+    const th = 0.5 * Math.atan2(2 * sxy, sxx - syy), ct = Math.cos(th), st = Math.sin(th);
+    const f1 = [e1[0] * ct + e2[0] * st, e1[1] * ct + e2[1] * st, e1[2] * ct + e2[2] * st]; e2 = cross(e3, f1); e1 = f1;
+    let X = P.map(p => [dot(p, e1), dot(p, e2), dot(p, e3)]);
+    // look from the side where the most-protruding part (the bridge) is toward the viewer: a 180° turn about the vertical keeps the handedness
+    const zmax = Math.max(...X.map(p => p[2])), zmin = Math.min(...X.map(p => p[2]));
+    if (-zmin > zmax + 0.05) X = X.map(p => [-p[0], p[1], -p[2]]);
+    // 2D: y down; small relaxation toward unit bonds while staying close to the projection
+    Q = X.map(p => [p[0], -p[1]]); const Q0 = Q.map(q => q.slice());
+    for (let it = 0; it < 300; it++) {
+        const F = Q.map(() => [0, 0]);
+        m.bonds.forEach(b => { const dx = Q[b.b][0] - Q[b.a][0], dy = Q[b.b][1] - Q[b.a][1], l = Math.hypot(dx, dy) || 1e-3, f = 0.25 * (l - 1) / l;
+            F[b.a][0] += dx * f; F[b.a][1] += dy * f; F[b.b][0] -= dx * f; F[b.b][1] -= dy * f; });
+        for (let i = 0; i < n; i++) { F[i][0] += 0.04 * (Q0[i][0] - Q[i][0]); F[i][1] += 0.04 * (Q0[i][1] - Q[i][1]);
+            for (let j = i + 1; j < n; j++) { if (bonded.has(i * 4096 + j)) continue; const dx = Q[j][0] - Q[i][0], dy = Q[j][1] - Q[i][1], d = Math.hypot(dx, dy) || 1e-3; if (d < 0.7) { const f = 0.2 * (0.7 - d) / d; F[i][0] -= dx * f; F[i][1] -= dy * f; F[j][0] += dx * f; F[j][1] += dy * f; } } }
+        Q.forEach((q, i) => { q[0] += F[i][0]; q[1] += F[i][1]; });
+    }
+    m.atoms.forEach((a, i) => { a.x = Q[i][0]; a.y = Q[i][1]; a.dz = +X[i][2].toFixed(3); });
+    // bold the bridge nearest the viewer: ring bonds (not aromatic, not double) whose ends stand well in front of the middle
+    const rs = findRings(m, 8), inRing = new Set(), aromAtom = new Set();
+    rs.forEach(r => { r.forEach(v => inRing.add(v)); if (r.length === 6) { const ds = r.filter((v, k) => { const w = r[(k + 1) % 6]; const b = m.bonds.find(bb => (bb.a === v && bb.b === w) || (bb.a === w && bb.b === v)); return b && b.order === 2; }).length; if (ds === 3) r.forEach(v => aromAtom.add(v)); } });
+    const bridgedR = new Set(); rs.forEach((r, x) => rs.forEach((q, y) => { if (x !== y && r.filter(v => q.includes(v)).length >= 3) bridgedR.add(x); }));
+    const inCage = new Set(); rs.forEach((r, x) => { if (bridgedR.has(x)) r.forEach(v => inCage.add(v)); });
+    const zs = m.atoms.filter((a, i) => inCage.has(i)).map(a => a.dz), zTop = Math.max(...zs), zBot = Math.min(...zs);
+    if (zTop - zBot < 0.9) return;
+    const zSorted = zs.slice().sort((p, q) => q - p), zCap = zSorted[Math.min(zSorted.length - 1, Math.max(1, Math.round(zSorted.length * 0.34)) - 1)];
+    const T = Math.max(zTop - Math.min(0.6, (zTop - zBot) * 0.4), zCap), front = (i) => inCage.has(i) && m.atoms[i].dz >= T;
+    m.bonds.forEach(b => {
+        if (b.order !== 1 || b.wedge || !inRing.has(b.a) || !inRing.has(b.b) || (aromAtom.has(b.a) && aromAtom.has(b.b))) return;
+        if (!rs.some((r, ri) => bridgedR.has(ri) && r.includes(b.a) && r.includes(b.b))) return;      // only the cage itself, not flat rings fused to it
+        const fa = front(b.a), fb = front(b.b); if (!fa && !fb) return;
+        b.bold = [fa ? 1 : 0, fb ? 1 : 0]; b.autoBold = true;
+    });
 }
 function layout2D1(m, seed = 7, init = null) {
     const n = m.atoms.length; if (!n) return;
@@ -1141,7 +1229,7 @@ function embed3D(m0, opts = {}) {
              bonds: m.bonds.map(b => ({ a: b.a, b: b.b, order: b.order })), chiral: chirN.length,
              chiralOK: chirN.filter(({ idx, sign }) => sign * chiralVolume(P[idx[0]], P[idx[1]], P[idx[2]], P[idx[3]]) > 0).length };
 }
-if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, stereoHint, PERIODIC, chiralVolume, drawnSign, assignWedges, ELEMENTS, newMol, cloneMol, neighbors, implicitH, formula, parseSMILES, toSMILES, findRings, layout2D, embed3D, bondLength };
+if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayout, layoutScore, layout2D1, stereoHint, PERIODIC, chiralVolume, drawnSign, assignWedges, ELEMENTS, newMol, cloneMol, neighbors, implicitH, formula, parseSMILES, toSMILES, findRings, layout2D, embed3D, bondLength };
 
 </script>
 <script>
@@ -1269,7 +1357,49 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
             }
             return { atoms, bonds };
         }
-        return { chair: () => chair(false), chair2: () => chair(true), newman, doubleNewman, fischer, haworth6: () => haworth(6), haworth5: () => haworth(5) };
+        // bicyclic skeletons traced from textbook drawings (pixel coordinates, numbered 1…n as in the drawing);
+        // dz = depth toward the viewer (bond units) so crossing bonds get a gap in the one behind; bold = [end-a thick, end-b thick]
+        function fromPix(pts, bonds, dz, bold) {
+            const ids = Object.keys(pts), P = ids.map(k => pts[k]);
+            let L = 0; bonds.forEach(([a, b]) => { L += Math.hypot(pts[a][0] - pts[b][0], pts[a][1] - pts[b][1]); }); L /= bonds.length;
+            const cx = P.reduce((s, p) => s + p[0], 0) / P.length, cy = P.reduce((s, p) => s + p[1], 0) / P.length;
+            const atoms = ids.map(k => A('C', (pts[k][0] - cx) / L, (pts[k][1] - cy) / L, dz && dz[k] != null ? { dz: dz[k] } : (dz ? { dz: 0 } : {})));
+            const bl = bonds.map(([a, b]) => { const o = { a: ids.indexOf(String(a)), b: ids.indexOf(String(b)), order: 1 }; const bk = bold && (bold[a + '-' + b]); if (bk) o.bold = bk; return o; });
+            return { atoms, bonds: bl };
+        }
+        const ring = (n) => Array.from({ length: n }, (_, k) => [k + 1, (k + 1) % n + 1]);
+        const BI = {
+            nbTop: () => fromPix({ 1: [100, 73], 2: [146, 100], 3: [146, 150], 4: [100, 176], 5: [55, 150], 6: [55, 100], 7: [82, 122] },
+                ring(6).concat([[1, 7], [7, 4]]), { 7: 0.8 }, { '1-7': [0, 1], '7-4': [1, 0] }),
+            nbSide: () => fromPix({ 1: [322, 108], 2: [371, 120], 3: [349, 165], 4: [299, 150], 5: [247, 167], 6: [275, 120], 7: [298, 60] },
+                ring(6).concat([[1, 7], [7, 4]]), { 2: 0.7, 3: 0.7, 5: -0.7, 6: -0.7 }),
+            bcoTop: () => fromPix({ 1: [110, 337], 2: [156, 361], 3: [156, 412], 4: [110, 437], 5: [70, 415], 6: [70, 362], 7: [78, 383], 8: [130, 390] },
+                ring(6).concat([[1, 7], [7, 8], [8, 4]]), { 7: 0.8, 8: 0.8 }, { '1-7': [0, 1], '8-4': [1, 0] }),
+            bcoSide: () => fromPix({ 1: [342, 380], 2: [390, 394], 3: [362, 438], 4: [315, 425], 5: [265, 440], 6: [292, 395], 7: [342, 322], 8: [313, 372] },
+                ring(6).concat([[1, 7], [7, 8], [8, 4]]), { 2: 0.7, 3: 0.7, 5: -0.7, 6: -0.7, 8: 0.2 }),
+            bcnTop: () => fromPix({ 1: [143, 573], 2: [180, 610], 3: [180, 662], 4: [143, 698], 5: [92, 698], 6: [55, 662], 7: [55, 610], 8: [92, 573], 9: [92, 635] },
+                ring(8).concat([[1, 9], [9, 5]]), { 9: 0.8 }, { '1-9': [0, 1], '9-5': [1, 0] }),
+            bcnSide: () => fromPix({ 1: [386, 620], 2: [428, 645], 3: [446, 710], 4: [412, 683], 5: [368, 660], 6: [322, 675], 7: [287, 623], 8: [340, 637], 9: [368, 568] },
+                ring(8).concat([[1, 9], [9, 5]]), { 2: 0.7, 3: 0.7, 4: 0.7, 6: -0.7, 7: -0.7, 8: -0.7 }),
+            bchTop: () => fromPix({ 1: [135, 831], 2: [86, 848], 3: [88, 899], 4: [135, 914], 5: [164, 873], 6: [102, 876] },
+                ring(5).concat([[1, 6], [6, 4]]), { 6: 0.8 }, { '1-6': [0, 1], '6-4': [1, 0] }),
+            bchSide: () => fromPix({ 1: [403, 845], 2: [362, 868], 3: [330, 915], 4: [378, 890], 5: [458, 898], 6: [378, 797] },
+                ring(5).concat([[1, 6], [6, 4]]), { 2: -0.7, 3: -0.7, 5: 0.7 }),
+            decTop: () => { const h = Math.sqrt(3) / 2; return fromPix({ 1: [0, -0.5], 2: [h, -1], 3: [2 * h, -0.5], 4: [2 * h, 0.5], 5: [h, 1], 6: [0, 0.5], 7: [-h, 1], 8: [-2 * h, 0.5], 9: [-2 * h, -0.5], 10: [-h, -1] },
+                ring(6).concat([[6, 7], [7, 8], [8, 9], [9, 10], [10, 1]])); },
+            decSide: () => fromPix({ 1: [450, 1082], 2: [500, 1096], 3: [549, 1082], 4: [523, 1124], 5: [474, 1112], 6: [426, 1127], 7: [377, 1112], 8: [328, 1127], 9: [353, 1082], 10: [402, 1096] },
+                ring(6).concat([[6, 7], [7, 8], [8, 9], [9, 10], [10, 1]]), { 2: 0.3, 3: 0.3, 4: 0.3, 5: 0.3, 7: -0.3, 8: -0.3, 9: -0.3, 10: -0.3 }),
+            adamantane: () => {     // the classic view of the diamond-lattice cage
+                const CH = [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]], CH2 = [[2, 0, 0], [-2, 0, 0], [0, 2, 0], [0, -2, 0], [0, 0, 2], [0, 0, -2]];
+                const ax = rad(5), ay = rad(15), L = Math.sqrt(3);
+                const R = (p) => { const x1 = p[0] * Math.cos(ay) + p[2] * Math.sin(ay), z1 = -p[0] * Math.sin(ay) + p[2] * Math.cos(ay), y1 = p[1];
+                    return [x1, y1 * Math.cos(ax) - z1 * Math.sin(ax), y1 * Math.sin(ax) + z1 * Math.cos(ax)]; };
+                const P = CH.concat(CH2).map(R), atoms = P.map(p => A('C', p[0] / L, -p[1] / L, { dz: +(p[2] / L).toFixed(3) })), bonds = [];
+                CH2.forEach((c, j) => { const k = c.findIndex(v => v !== 0); CH.forEach((h, i) => { if (Math.sign(h[k]) === Math.sign(c[k])) bonds.push({ a: i, b: 4 + j, order: 1 }); }); });
+                return { atoms, bonds };
+            },
+        };
+        return { chair: () => chair(false), chair2: () => chair(true), newman, doubleNewman, fischer, haworth6: () => haworth(6), haworth5: () => haworth(5), ...BI };
     })();
 
     // =====================================================================
@@ -1658,15 +1788,39 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
             return { show, h, q: a.charge || 0, angs, hInLabel, left, f: fi, elW: measureW(a.el, S) * fi, hW: measureW('H', S) * fi, nW: h > 1 ? measureW('' + h, S) * fi * 0.7 : 0 };
         });
         let bH = '', aH = '';
-        const gap = (i) => mol.atoms[i].nmBack ? NMR * (mol.atoms[i].fs || 1) : L[i].show ? L[i].f * 0.34 + S.margin : 0;
+        const spDot = (i) => !L[i].show && nb[i].length === 2 && nb[i].every(x => x.o === 2);      // allene / ketene centre: drawn as a dot, bonds stop short of it
+        const gap = (i) => mol.atoms[i].nmBack ? NMR * (mol.atoms[i].fs || 1) : L[i].show ? L[i].f * 0.34 + S.margin : spDot(i) ? S.lw * 3.4 * (mol.atoms[i].fs || 1) : 0;
         // Newman back carbons: a circle, drawn first so front bonds cross over it
         mol.atoms.forEach((a, i) => { if (a.nmBack && inA(i)) bH += `<circle cx="${a.x}" cy="${a.y}" r="${NMR * (a.fs || 1)}" fill="${paper}" stroke="${a.color || ink}"/>`; });
         const line = (ax, ay, bx, by) => `<line x1="${ax.toFixed(3)}" y1="${ay.toFixed(3)}" x2="${bx.toFixed(3)}" y2="${by.toFixed(3)}"/>`;
-        mol.bonds.forEach((b, k) => {
+        // where two bonds cross, the one nearer the viewer (depth from a.dz or a.p3) gets a paper-coloured halo, leaving a gap in the bond behind
+        const dep = (i) => { const a = mol.atoms[i]; return a.dz != null ? a.dz : a.p3 ? a.p3[2] : null; };
+        const halo = {}, bdep = (k) => { const b = mol.bonds[k], p = dep(b.a), q = dep(b.b); return p == null || q == null ? 0 : (p + q) / 2; };
+        const order = mol.bonds.map((b, k) => k);
+        if (mol.atoms.some(a => a.dz != null || a.p3)) {
+            const vis = order.filter(k => { const b = mol.bonds[k]; return inA(b.a) && inA(b.b) && dep(b.a) != null && dep(b.b) != null && Math.hypot(mol.atoms[b.a].x - mol.atoms[b.b].x, mol.atoms[b.a].y - mol.atoms[b.b].y) > 0.05; });
+            for (let x = 0; x < vis.length; x++) for (let y = x + 1; y < vis.length; y++) {
+                const p = mol.bonds[vis[x]], q = mol.bonds[vis[y]]; if (p.a === q.a || p.a === q.b || p.b === q.a || p.b === q.b) continue;
+                const P1 = mol.atoms[p.a], P2 = mol.atoms[p.b], Q1 = mol.atoms[q.a], Q2 = mol.atoms[q.b];
+                const d1x = P2.x - P1.x, d1y = P2.y - P1.y, d2x = Q2.x - Q1.x, d2y = Q2.y - Q1.y, den = d1x * d2y - d1y * d2x; if (Math.abs(den) < 1e-9) continue;
+                const t = ((Q1.x - P1.x) * d2y - (Q1.y - P1.y) * d2x) / den, u = ((Q1.x - P1.x) * d1y - (Q1.y - P1.y) * d1x) / den;
+                if (t < 0.04 || t > 0.96 || u < 0.04 || u > 0.96) continue;
+                const zp = dep(p.a) + (dep(p.b) - dep(p.a)) * t, zq = dep(q.a) + (dep(q.b) - dep(q.a)) * u; if (Math.abs(zp - zq) < 0.03) continue;
+                const fk = zp > zq ? vis[x] : vis[y], ft = zp > zq ? t : u; (halo[fk] = halo[fk] || []).push(ft);
+            }
+            order.sort((p, q) => (halo[p] ? 1 : 0) - (halo[q] ? 1 : 0) || bdep(p) - bdep(q));
+        }
+        order.forEach((k) => {
+            const b = mol.bonds[k];
             if (!inA(b.a) || !inA(b.b)) return;
             const A = mol.atoms[b.a], B = mol.atoms[b.b];
             if (Math.hypot(B.x - A.x, B.y - A.y) < 0.05) return;           // front–back bond of a Newman projection: hidden
-            const bs = ((A.fs || 1) + (B.fs || 1)) / 2, bc = b.color || null, bh0 = bH.length;
+            const bs = ((A.fs || 1) + (B.fs || 1)) / 2, bc = b.color || null;
+            if (halo[k]) { const Lb = Math.hypot(B.x - A.x, B.y - A.y), ux = (B.x - A.x) / Lb, uy = (B.y - A.y) / Lb, hl = 0.17 * bs,
+                    hw = S.lw * bs * 4.2 + (b.order >= 2 ? S.dbl * bs * 1.2 : 0) + (b.bold || b.wedge === 'wedge' ? S.lw * bs * 3.5 : 0);
+                halo[k].forEach(t => { const cx = A.x + (B.x - A.x) * t, cy = A.y + (B.y - A.y) * t;
+                    bH += `<line x1="${(cx - ux * hl).toFixed(3)}" y1="${(cy - uy * hl).toFixed(3)}" x2="${(cx + ux * hl).toFixed(3)}" y2="${(cy + uy * hl).toFixed(3)}" stroke="${paper}" stroke-width="${hw.toFixed(4)}" stroke-linecap="butt"/>`; }); }
+            const bh0 = bH.length;
             let dx = B.x - A.x, dy = B.y - A.y; const len = Math.hypot(dx, dy) || 1; dx /= len; dy /= len;
             const ga = gap(b.a), gb = gap(b.b);
             const x1 = A.x + dx * ga, y1 = A.y + dy * ga, x2 = B.x - dx * gb, y2 = B.y - dy * gb, nx = -dy, ny = dx;
@@ -1683,7 +1837,7 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
                     d += ` Q${x1 + (x2 - x1) * t0 + nx * amp * sg} ${y1 + (y2 - y1) * t0 + ny * amp * sg} ${x1 + (x2 - x1) * t1} ${y1 + (y2 - y1) * t1}`; }
                 bH += `<path d="${d}"/>`;
             } else if (b.order === 1 && b.bold) {     // Haworth front edge: thick, tapering into the side carbons
-                const bw = Array.isArray(b.bold) ? b.bold : [1, 1], wa = (bw[0] ? S.lw * 2.4 : S.lw * 0.5) * bs, wb = (bw[1] ? S.lw * 2.4 : S.lw * 0.5) * bs;
+                const bw = Array.isArray(b.bold) ? b.bold : [1, 1], thk = b.autoBold ? 1.8 : 2.4, wa = (bw[0] ? S.lw * thk : S.lw * 0.5) * bs, wb = (bw[1] ? S.lw * thk : S.lw * 0.5) * bs;
                 const ex = dx * S.lw * 0.6, ey = dy * S.lw * 0.6;
                 bH += `<polygon fill="${bc || ink}" stroke="none" points="${(x1 - ex + nx * wa).toFixed(3)},${(y1 - ey + ny * wa).toFixed(3)} ${(x2 + ex + nx * wb).toFixed(3)},${(y2 + ey + ny * wb).toFixed(3)} ${(x2 + ex - nx * wb).toFixed(3)},${(y2 + ey - ny * wb).toFixed(3)} ${(x1 - ex - nx * wa).toFixed(3)},${(y1 - ey - ny * wa).toFixed(3)}"/>`; }
             else if (b.order === 1) bH += line(x1, y1, x2, y2);
@@ -2189,6 +2343,9 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
             else if (tool.kind === 'lasso') { drag.lasso = true; lassoPts = [p]; }
             else drag.rubber = true;
             if (drag.moveSnap) commit();
+            // an atom (or group) hanging off the rest by one bond swings around its attachment, keeping the bond length (arrow keys still nudge freely)
+            if (drag.moveSnap && !e.altKey) { const tt = onSel ? selItems() : ai >= 0 ? { atoms: [ai], arrows: [] } : null;
+                if (tt && !tt.arrows.length && tt.atoms.length) { const pv = pivotOf(tt); if (pv.att >= 0) drag.orbit = { att: pv.att, cx: pv.x, cy: pv.y, a0: Math.atan2(p.y - pv.y, p.x - pv.x) }; } }
         } else if (tool.kind === 'lp' || tool.kind === 'radical') startLP(p, tool.kind === 'radical');
     });
     function startLP(p, radMode) {
@@ -2257,6 +2414,11 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
             else th = Math.round(th / (Math.PI / 2)) * Math.PI / 2;                 // 90° steps (Shift: 15°, Alt/Ctrl: free)
             R.th = th; rotateFrom(R.snap, R.cx, R.cy, th); render(); return;
         }
+        if (drag.moveSnap && drag.orbit) { const O = drag.orbit; let th = wrapAng(Math.atan2(p.y - O.cy, p.x - O.cx) - O.a0); if (e.shiftKey) th = Math.round(th / (15 * deg)) * 15 * deg;
+            rotateFrom(drag.moveSnap, O.cx, O.cy, th);
+            const P0 = O.att >= 0 && mol.atoms[O.att].p3; if (P0) { const c2 = Math.cos(-th), s2 = Math.sin(-th);      // 3D hints turn about the attachment too
+                drag.moveSnap.atoms.forEach(o => { if (!o.p3) return; const v = [o.p3[0] - P0[0], o.p3[1] - P0[1]]; mol.atoms[o.i].p3 = [P0[0] + v[0] * c2 - v[1] * s2, P0[1] + v[0] * s2 + v[1] * c2, o.p3[2]]; }); }
+            render(); return; }
         if (drag.moveSnap) { moveItems(drag.moveSnap, p.x - drag.p0.x, p.y - drag.p0.y); render(); return; }
         if (drag.rubber) { rubber = { x0: drag.p0.x, y0: drag.p0.y, x1: p.x, y1: p.y }; drawHover(); return; }
         if (drag.lasso) { const q = lassoPts[lassoPts.length - 1]; if (Math.hypot(q.x - p.x, q.y - p.y) > px2u(4)) { lassoPts.push(p); drawHover(); } return; }
@@ -2458,6 +2620,27 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
     // =====================================================================
     const sv = (inner) => `<svg viewBox="0 0 24 24">${inner}</svg>`;
     const stroke = 'stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"';
+    // toolbar icon drawn from a template's own coordinates (bold bonds thick, crossing bonds behind get a small gap)
+    function tplIcon(name) {
+        const T = TPL[name](), xs = T.atoms.map(a => a.x), ys = T.atoms.map(a => a.y);
+        const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), k = 18 / Math.max(x1 - x0, y1 - y0, 1e-3);
+        const P = T.atoms.map(a => [12 + (a.x - (x0 + x1) / 2) * k, 12 + (a.y - (y0 + y1) / 2) * k]), dz = (i) => T.atoms[i].dz || 0;
+        let out = '', halo = '';
+        T.bonds.forEach((b, n) => {
+            const [ax, ay] = P[b.a], [bx, by] = P[b.b];
+            if (b.bold) { const dx = bx - ax, dy = by - ay, l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l, wa = b.bold[0] ? 1.9 : 0.5, wb = b.bold[1] ? 1.9 : 0.5;
+                out += `<polygon fill="currentColor" points="${ax + nx * wa},${ay + ny * wa} ${bx + nx * wb},${by + ny * wb} ${bx - nx * wb},${by - ny * wb} ${ax - nx * wa},${ay - ny * wa}"/>`; return; }
+            // a gap where a bond nearer the viewer crosses this one
+            let segs = [[0, 1]];
+            T.bonds.forEach(c => { if (c === b || c.a === b.a || c.a === b.b || c.b === b.a || c.b === b.b) return;
+                const [cx, cy] = P[c.a], [ex, ey] = P[c.b], d1x = bx - ax, d1y = by - ay, d2x = ex - cx, d2y = ey - cy, den = d1x * d2y - d1y * d2x; if (Math.abs(den) < 1e-9) return;
+                const t = ((cx - ax) * d2y - (cy - ay) * d2x) / den, u = ((cx - ax) * d1y - (cy - ay) * d1x) / den; if (t < 0.05 || t > 0.95 || u < 0.05 || u > 0.95) return;
+                if (dz(b.a) + (dz(b.b) - dz(b.a)) * t >= dz(c.a) + (dz(c.b) - dz(c.a)) * u) return;
+                const g = 1.6 / Math.hypot(bx - ax, by - ay); segs = segs.flatMap(([p, q]) => t - g > p && t + g < q ? [[p, t - g], [t + g, q]] : [[p, q]]); });
+            segs.forEach(([p, q]) => { out += `<path d="M${(ax + (bx - ax) * p).toFixed(2)} ${(ay + (by - ay) * p).toFixed(2)}L${(ax + (bx - ax) * q).toFixed(2)} ${(ay + (by - ay) * q).toFixed(2)}"/>`; });
+        });
+        return `<g stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round">${out}</g>`;
+    }
     const I = {
         select: `<rect x="3.5" y="3.5" width="13" height="13" rx="1" ${stroke} stroke-dasharray="2.6 2.2"/><path d="M12 11l8 3.2-3.4 1.2-1.2 3.4z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>`,
         pan: `<path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V12M11 11V5a1.5 1.5 0 0 1 3 0v6M14 11V6.5a1.5 1.5 0 0 1 3 0V14c0 4-2.5 7-6 7-2.5 0-3.8-1.2-5.2-3.5L4 14.5a1.4 1.4 0 0 1 2.3-1.6L8 15" ${stroke}/>`,
@@ -2536,6 +2719,18 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
             { id: 't-fischer', icon: I.fischer, tip: 'Fischer projection (D-glucose): horizontal bonds toward you, vertical bonds away', set: { kind: 'template', tpl: 'fischer' } },
             { id: 't-haworth6', icon: I.haworth6, tip: 'Haworth projection, 6-membered ring: change a carbon to O, and click the open positions to add groups', set: { kind: 'template', tpl: 'haworth6' } },
             { id: 't-haworth5', icon: I.haworth5, tip: 'Haworth projection, 5-membered ring', set: { kind: 'template', tpl: 'haworth5' } }] },
+        { id: 'g-bicyc', items: [
+            { id: 't-nbTop', icon: tplIcon('nbTop'), tip: 'Bicyclo[2.2.1]heptane (norbornane), top view: click to place', set: { kind: 'template', tpl: 'nbTop' } },
+            { id: 't-nbSide', icon: tplIcon('nbSide'), tip: 'Bicyclo[2.2.1]heptane (norbornane), side view: click to place', set: { kind: 'template', tpl: 'nbSide' } },
+            { id: 't-bcoTop', icon: tplIcon('bcoTop'), tip: 'Bicyclo[2.2.2]octane, top view: click to place', set: { kind: 'template', tpl: 'bcoTop' } },
+            { id: 't-bcoSide', icon: tplIcon('bcoSide'), tip: 'Bicyclo[2.2.2]octane, side view: click to place', set: { kind: 'template', tpl: 'bcoSide' } },
+            { id: 't-bcnTop', icon: tplIcon('bcnTop'), tip: 'Bicyclo[3.3.1]nonane, top view: click to place', set: { kind: 'template', tpl: 'bcnTop' } },
+            { id: 't-bcnSide', icon: tplIcon('bcnSide'), tip: 'Bicyclo[3.3.1]nonane, side view: click to place', set: { kind: 'template', tpl: 'bcnSide' } },
+            { id: 't-bchTop', icon: tplIcon('bchTop'), tip: 'Bicyclo[2.1.1]hexane, top view: click to place', set: { kind: 'template', tpl: 'bchTop' } },
+            { id: 't-bchSide', icon: tplIcon('bchSide'), tip: 'Bicyclo[2.1.1]hexane, side view: click to place', set: { kind: 'template', tpl: 'bchSide' } },
+            { id: 't-decTop', icon: tplIcon('decTop'), tip: 'Bicyclo[4.4.0]decane (decalin), flat: click to place', set: { kind: 'template', tpl: 'decTop' } },
+            { id: 't-decSide', icon: tplIcon('decSide'), tip: 'Bicyclo[4.4.0]decane (trans-decalin), chairs: click to place', set: { kind: 'template', tpl: 'decSide' } },
+            { id: 't-adamantane', icon: tplIcon('adamantane'), tip: 'Adamantane: click to place', set: { kind: 'template', tpl: 'adamantane' } }] },
         { id: 'g-shape', items: [
             { id: 'sh-rect', icon: I.rect, tip: 'Rectangle: drag to draw (Shift for a square) · style it in the options bar', set: { kind: 'shape', shape: 'rect' } },
             { id: 'sh-round', icon: I.roundrect, tip: 'Rounded rectangle', set: { kind: 'shape', shape: 'round' } },
@@ -2586,7 +2781,7 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
     });
     ['s1', 's2', 's3', 's4', 's5'].forEach(id => addSep(toolsBar, id));
     ACTIONS.forEach(t => { const b = document.createElement('button'); b.className = 'tool'; b.dataset.id = 'act-' + t.id; b.draggable = true; b.title = t.tip; b.setAttribute('aria-label', t.tip); b.innerHTML = sv(t.icon); b.addEventListener('click', t.act); toolsBar.appendChild(b); });
-    { const order = ['g-select', 'act-clean', 'g-erase', 's1', 'g-bond', 'g-stereo', 'g-chain', 's2', 'g-ring', 'g-tpl', 's3', 'g-charge', 'g-lp', 'g-fill', 'g-shape', 'g-text', 's4', 'g-arrow', 's5', 'act-undo', 'act-redo', 'act-clear'];
+    { const order = ['g-select', 'act-clean', 'g-erase', 's1', 'g-bond', 'g-stereo', 'g-chain', 's2', 'g-ring', 'g-tpl', 'g-bicyc', 's3', 'g-charge', 'g-lp', 'g-fill', 'g-shape', 'g-text', 's4', 'g-arrow', 's5', 'act-undo', 'act-redo', 'act-clear'];
       const byId = {}; toolsBar.querySelectorAll(':scope > [data-id]').forEach(x => byId[x.dataset.id] = x);
       order.forEach(id => byId[id] && toolsBar.appendChild(byId[id])); }
     function paintGroup(gi) { const g = GROUPS[gi], it = ALL[g.cur], b = groupBtns[gi];
@@ -2596,7 +2791,7 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
     function openFlyout(gi, btn) {
         const g = GROUPS[gi]; fly.innerHTML = '';
         g.items.forEach(it => { const b = document.createElement('button'); b.className = 'tool' + (it.id === curTool ? ' active' : ''); b.title = it.tip; b.setAttribute('aria-label', it.tip);
-            b.innerHTML = sv(it.icon); b.addEventListener('click', () => { setTool(it.id); closeFlyout(); }); fly.appendChild(b); });
+            b.dataset.id = it.id; b.innerHTML = sv(it.icon); b.addEventListener('click', () => { setTool(it.id); closeFlyout(); }); fly.appendChild(b); });
         const dock = btn.closest('.dock'), side = dock ? dock.dataset.side : 'left', vertBar = side === 'left' || side === 'right';
         fly.style.flexDirection = vertBar ? 'row' : 'column'; fly.hidden = false;
         const r = btn.getBoundingClientRect(), fw = fly.offsetWidth, fh = fly.offsetHeight;
@@ -2908,7 +3103,7 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
     }
 
     // ---- dockable bars, re-orderable icons, hide / show
-    const LAYOUT_KEY = 'molstudio-layout-v3';
+    const LAYOUT_KEY = 'molstudio-layout-v4';
     const BARS = { tools: { el: toolsBar, name: 'Drawing tools', side: 'left' }, els: { el: elBar, name: 'Elements', side: 'bottom' },
                    view: { el: viewBar, name: 'View & file', side: 'top' }, ctx: { el: ctxBar, name: 'Selection & options', side: 'top' } };
     const layout = Object.assign({ order: {}, hidden: {} }, store.get(LAYOUT_KEY) || {});
@@ -3235,7 +3430,7 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
     // =====================================================================
     //  SMILES box, examples, formula
     // =====================================================================
-    const EXAMPLES = {"Psychoactive & medicinal (stereo not shown)": [["Caffeine", "Cn1cnc2c1c(=O)n(C)c(=O)n2C"], ["Theobromine (chocolate)", "Cn1cnc2c1c(=O)[nH]c(=O)n2C"], ["Nicotine", "CN1CCC[C@H]1c1cccnc1"], ["Ethanol", "CCO"], ["THC (Δ9-tetrahydrocannabinol)", "CCCCCc1cc(O)c2C3C=C(C)CCC3C(C)(C)Oc2c1"], ["CBD (cannabidiol)", "CCCCCc1cc(O)c(C2C=C(C)CCC2C(C)=C)c(O)c1"], ["Psilocybin", "CN(C)CCc1c[nH]c2cccc(OP(=O)(O)O)c12"], ["Psilocin", "CN(C)CCc1c[nH]c2cccc(O)c12"], ["DMT", "CN(C)CCc1c[nH]c2ccccc12"], ["Mescaline", "COc1cc(CCN)cc(OC)c1OC"], ["LSD", "CCN(CC)C(=O)C1CN(C)C2Cc3c[nH]c4cccc(C2=C1)c34"], ["MDMA", "CNC(C)Cc1ccc2OCOc2c1"], ["Amphetamine", "CC(N)Cc1ccccc1"], ["Methamphetamine", "CNC(C)Cc1ccccc1"], ["Cocaine", "COC(=O)C1C(OC(=O)c2ccccc2)CC2CCC1N2C"], ["Morphine", "CN1CCC23C4Oc5c3c(CC1C2C=CC4O)ccc5O"], ["Codeine", "CN1CCC23C4Oc5c3c(CC1C2C=CC4O)ccc5OC"], ["Ketamine", "CNC1(CCCCC1=O)c1ccccc1Cl"], ["Diazepam (Valium)", "CN1C(=O)CN=C(c2ccccc2)c2cc(Cl)ccc21"], ["Fluoxetine (Prozac)", "CNCCC(Oc1ccc(cc1)C(F)(F)F)c1ccccc1"], ["Sertraline (Zoloft)", "CNC1CCC(c2ccc(Cl)c(Cl)c2)c2ccccc12"], ["GHB", "OCCCC(=O)O"], ["Salvinorin A", "COC(=O)C1CC(OC(C)=O)C(=O)C2C1(C)CCC1C(=O)OC(c3ccoc3)CC21C"], ["Muscimol", "NCc1cc(O)no1"]],
+    const EXAMPLES = {"Psychoactive & medicinal (stereo not shown)": [["Caffeine", "Cn1cnc2c1c(=O)n(C)c(=O)n2C"], ["Theobromine (chocolate)", "Cn1cnc2c1c(=O)[nH]c(=O)n2C"], ["Nicotine", "CN1CCC[C@H]1c1cccnc1"], ["Ethanol", "CCO"], ["THC (Δ9-tetrahydrocannabinol)", "CCCCCc1cc(O)c2C3C=C(C)CCC3C(C)(C)Oc2c1"], ["CBD (cannabidiol)", "CCCCCc1cc(O)c(C2C=C(C)CCC2C(C)=C)c(O)c1"], ["Psilocybin", "CN(C)CCc1c[nH]c2cccc(OP(=O)(O)O)c12"], ["Psilocin", "CN(C)CCc1c[nH]c2cccc(O)c12"], ["DMT", "CN(C)CCc1c[nH]c2ccccc12"], ["Mescaline", "COc1cc(CCN)cc(OC)c1OC"], ["LSD", "CCN(CC)C(=O)C1CN(C)C2Cc3c[nH]c4cccc(C2=C1)c34"], ["MDMA", "CNC(C)Cc1ccc2OCOc2c1"], ["Amphetamine", "CC(N)Cc1ccccc1"], ["Methamphetamine", "CNC(C)Cc1ccccc1"], ["Cocaine", "COC(=O)C1C(OC(=O)c2ccccc2)CC2CCC1N2C"], ["Morphine", "CN1CCC23C4Oc5c3c(CC1C2C=CC4O)ccc5O"], ["Codeine", "CN1CCC23C4Oc5c3c(CC1C2C=CC4O)ccc5OC"], ["Ibogaine", "CCC1CC2CC3C1N(C2)CCc1c3[nH]c2ccc(OC)cc12"], ["Ketamine", "CNC1(CCCCC1=O)c1ccccc1Cl"], ["Diazepam (Valium)", "CN1C(=O)CN=C(c2ccccc2)c2cc(Cl)ccc21"], ["Fluoxetine (Prozac)", "CNCCC(Oc1ccc(cc1)C(F)(F)F)c1ccccc1"], ["Sertraline (Zoloft)", "CNC1CCC(c2ccc(Cl)c(Cl)c2)c2ccccc12"], ["GHB", "OCCCC(=O)O"], ["Salvinorin A", "COC(=O)C1CC(OC(C)=O)C(=O)C2C1(C)CCC1C(=O)OC(c3ccoc3)CC21C"], ["Muscimol", "NCc1cc(O)no1"]],
         "Amino acids": [["Glycine", "NCC(=O)O"],
         ["L-Alanine", "N[C@@H](C)C(=O)O"],
         ["L-Serine", "N[C@@H](CO)C(=O)O"],
@@ -3360,7 +3555,7 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
         ['2d', 'both', '3d'].forEach(k => $('v-' + k).classList.toggle('active', k === m));
         requestAnimationFrame(() => { render(); if (m !== '3d') fitView(); });
     }
-    ['2d', 'both', '3d'].forEach(k => $('v-' + k).addEventListener('click', () => setLayout(k)));
+    ['2d', 'both', '3d'].forEach(k => $('v-' + k).addEventListener('click', () => { if (typeof styleFold !== 'undefined') styleFold = null; setLayout(k); }));
 
     // =====================================================================
     //  3D viewer: cartoon shading, ink outlines, lines between atoms
@@ -3537,6 +3732,8 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
         let g;
         try { g = embed3D(mol, { seed: 4242 }); } catch (err) { showMsg('3D: ' + err.message); return; }
         const base = g.atoms.map(a => V(a.x, a.y, a.z)), cur = base.map(v => v.clone());
+        { const c = V(0, 0, 0); let W = 0; g.atoms.forEach((a, i) => { const m = (ELEMENTS[a.el] && ELEMENTS[a.el].m) || 12; c.addScaledVector(base[i], m); W += m; });      // centre of mass at the origin: the model turns about it
+          c.multiplyScalar(1 / (W || 1)); base.forEach(v => v.sub(c)); cur.forEach(v => v.sub(c)); g.atoms.forEach(a => { a.x -= c.x; a.y -= c.y; a.z -= c.z; }); }
         const objects = [], parts = [];
         const byEl = {}; g.atoms.forEach((a, i) => (byEl[a.el] ||= []).push(i));
         Object.entries(byEl).forEach(([el, idx]) => {
@@ -3707,11 +3904,59 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
     const panR = V(0, 0, 0), panU = V(0, 0, 0);
     function pan3D(key, big) {
         camera.updateMatrixWorld(); panR.setFromMatrixColumn(camera.matrixWorld, 0); panU.setFromMatrixColumn(camera.matrixWorld, 1);
-        const d = camera.position.distanceTo(controls.target) * (big ? 0.12 : 0.03);
-        const v = key === 'ArrowLeft' ? panR.clone().multiplyScalar(d) : key === 'ArrowRight' ? panR.clone().multiplyScalar(-d) :
-                  key === 'ArrowUp' ? panU.clone().multiplyScalar(-d) : panU.clone().multiplyScalar(d);
-        camera.position.add(v); controls.target.add(v);       // the model appears to move the way the arrow points
+        // moving the model shifts the picture, not the pivot, so it keeps turning about its centre of mass
+        const d = big ? 60 : 15;
+        if (key === 'ArrowLeft') VOFF.x -= d; else if (key === 'ArrowRight') VOFF.x += d; else if (key === 'ArrowUp') VOFF.y -= d; else VOFF.y += d;
     }
+    const VOFF = { x: 0, y: 0, sx: 0, sxT: 0 };      // user shift (px) and the slide that makes room for the STYLE panel
+    function applyOffset(dt) {
+        VOFF.sx += (VOFF.sxT - VOFF.sx) * Math.min(1, dt * 7); if (Math.abs(VOFF.sxT - VOFF.sx) < 0.3) VOFF.sx = VOFF.sxT;
+        const w = vwrap.clientWidth, h = vwrap.clientHeight, ox = VOFF.x + VOFF.sx, oy = VOFF.y;
+        if (Math.abs(ox) < 0.05 && Math.abs(oy) < 0.05) { if (camera.view && camera.view.enabled) camera.clearViewOffset(); }
+        else if (w && h) camera.setViewOffset(w, h, -ox, -oy, w, h);
+    }
+    function centerModel() {
+        VOFF.x = VOFF.y = 0;
+        if (M3 && !NV) {      // put the (current) centre of mass back on the pivot, keeping the zoom and viewing angle
+            world.updateMatrixWorld(); const c = V(0, 0, 0); let W = 0;
+            M3.g.atoms.forEach((a, i) => { const m = (ELEMENTS[a.el] && ELEMENTS[a.el].m) || 12; c.addScaledVector(M3.cur[i], m); W += m; });
+            c.multiplyScalar(1 / (W || 1)).applyMatrix4(world.matrixWorld);
+            const off = camera.position.clone().sub(controls.target);
+            world.position.sub(c); controls.target.set(0, 0, 0); camera.position.copy(off);
+        }
+    }
+    $('b-center').addEventListener('click', centerModel); $('center3d').addEventListener('click', centerModel);
+    // right-drag moves the model on screen
+    controls.enablePan = false;
+    { let rd = null;
+      renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+      renderer.domElement.addEventListener('pointerdown', (e) => { if (e.button !== 2) return; rd = { x: e.clientX, y: e.clientY, ox: VOFF.x, oy: VOFF.y }; renderer.domElement.setPointerCapture(e.pointerId); });
+      renderer.domElement.addEventListener('pointermove', (e) => { if (!rd) return; VOFF.x = rd.ox + e.clientX - rd.x; VOFF.y = rd.oy + e.clientY - rd.y; });
+      renderer.domElement.addEventListener('pointerup', () => { rd = null; }); }
+    // opening STYLE: fold the 2D editor away (if it was showing) and slide the model left of the panel; closing puts both back
+    let styleFold = null;
+    function animSplit(from, to, done) {
+        const main = $('main'), t0 = performance.now(), D = 420;
+        const step = (now) => { const k = Math.min(1, (now - t0) / D), e = k * k * (3 - 2 * k); main.style.setProperty('--split', (from + (to - from) * e) + '%');
+            if (k < 1) requestAnimationFrame(step); else if (done) done(); };
+        requestAnimationFrame(step);
+    }
+    function onStyleToggle(open) {
+        const panelW = Math.max(0, $('stylebar').offsetWidth - 34);
+        if (open) {
+            if (layoutMode === 'both' && innerWidth > 900) {
+                const sp = disp.split || 50; styleFold = { split: sp };
+                animSplit(sp, 0, () => { if (styleFold) { setLayout('3d'); $('main').style.setProperty('--split', sp + '%'); requestAnimationFrame(() => { VOFF.sxT = -Math.min(panelW, vwrap.clientWidth * 0.6) / 2; }); } });
+            } else { styleFold = null; VOFF.sxT = -Math.min(panelW, vwrap.clientWidth * 0.6) / 2; }
+        } else {
+            VOFF.sxT = 0;
+            if (styleFold && layoutMode === '3d') { const sp = styleFold.split; styleFold = null; $('main').style.setProperty('--split', '0%'); setLayout('both'); animSplit(0, sp, () => { fitView(); }); }
+            styleFold = null;
+        }
+    }
+    new MutationObserver(() => { const open = !$('stylebar').classList.contains('collapsed'); if (open !== onStyleToggle.last) { onStyleToggle.last = open; onStyleToggle(open); } })
+        .observe($('stylebar'), { attributes: true, attributeFilter: ['class'] });
+    onStyleToggle.last = !$('stylebar').classList.contains('collapsed');
 
     // ---- molecular mechanics: a small force field (bond stretch, angle bend, torsions, sp2 planarity, van der Waals)
     const mm = { running: false };
@@ -3946,7 +4191,13 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
     function addGlow(mesh, n) { const gm = new THREE.InstancedMesh(sphereLo, GLOW, n); gm.instanceMatrix = mesh.instanceMatrix; gm.frustumCulled = false; gm.visible = st.glow; gm.renderOrder = 5; world.add(gm); return gm; }
     $('b-glow').addEventListener('click', (e) => { st.glow = !st.glow; e.currentTarget.classList.toggle('active', st.glow); e.currentTarget.textContent = st.glow ? 'GLOW: ON' : 'GLOW: OFF'; if (M3) M3.glows.forEach(g => { g.visible = st.glow; }); });
     $('glow-col').addEventListener('input', (e) => GLOWU.col.value.set(e.target.value));
-    bindSlider('s-glowr', v => v.toFixed(2) + '×', v => { GLOWU.r.value = v; });
+    // brightness: large halos overlap a lot, so their strength is eased down as the radius grows
+    const glowK = () => { GLOWU.k.value = 0.75 * (st.glowB || 1) / (1 + 0.32 * Math.max(0, GLOWU.r.value - 1)); };
+    bindSlider('s-glowr', v => v.toFixed(1) + '×', v => { GLOWU.r.value = v; glowK(); });
+    bindSlider('s-glowb', v => Math.round(v * 100) + '%', v => { st.glowB = v; glowK(); });
+    ['#7dd3fc', '#60a5fa', '#a78bfa', '#f472b6', '#f87171', '#fb923c', '#fbbf24', '#4ade80', '#2dd4bf', '#ffffff'].forEach(c => {
+        const b = document.createElement('button'); b.style.background = c; b.title = 'Glow ' + c; b.setAttribute('aria-label', 'Glow color ' + c);
+        b.addEventListener('click', () => { GLOWU.col.value.set(c); $('glow-col').value = c; if (!st.glow) $('b-glow').click(); }); $('glow-presets').appendChild(b); });
     bindSlider('s-glowp', v => v ? v.toFixed(1) + ' /s' : 'steady', v => { st.glowSpeed = v; });
     let glowT = 0;
     const glowPulse = (ph) => 0.62 + 0.38 * Math.sin(ph);
@@ -4157,7 +4408,7 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
     let gifPrevTimer = null, gifSnap = null;
     function openGif() {
         if (!M3) { showMsg('Draw or load a molecule first'); return; }
-        GIFS.open = true; gifSnap = gifSnapshot(); $('gifbox').hidden = false; $('gif-status').textContent = '';
+        GIFS.open = true; gifSnap = gifSnapshot(); if (camera.view && camera.view.enabled) camera.clearViewOffset(); $('gifbox').hidden = false; $('gif-status').textContent = '';
         const cv = $('gif-prev'), ctx = cv.getContext('2d'); let t0 = performance.now();
         const tick = () => { if (!GIFS.open) return; const ph = ((performance.now() - t0) / 1000 / GIFS.dur) % 1; gifFrame(gifSnap, ph, cv.width, cv.height, ctx); gifPrevTimer = requestAnimationFrame(tick); };
         tick();
@@ -4254,6 +4505,7 @@ if (typeof module !== 'undefined') module.exports = { layoutScore, layout2D1, st
         controls.update();
         if (BG.n && M3) { if (!st.paused) bgStep(dt); bgFill(); }
         if (st.glow) { glowT += dt * st.glowSpeed * 2 * Math.PI; GLOWU.amp.value = st.glowSpeed ? glowPulse(glowT) : 1; }
+        applyOffset(dt);
         draw3D(TOON.res.value.x, TOON.res.value.y);
         requestAnimationFrame(frame);
     }
