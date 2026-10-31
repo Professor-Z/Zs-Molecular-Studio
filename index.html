@@ -1489,6 +1489,18 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         const ct = ar.ct != null ? ar.ct : 0.5, ch = ar.ch != null ? ar.ch : Math.max(0.35, 0.45 * L) / L * (ar.bend || 1);
         return { x: ar.x1 + dx * ct - dy * ch, y: ar.y1 + dy * ct + dx * ch };
     }
+    // curved arrows are drawn as a circular arc through start, apex and end (a semicircle or more when the ends are close)
+    function arcThrough(A, M, B) {
+        const d = 2 * (A.x * (M.y - B.y) + M.x * (B.y - A.y) + B.x * (A.y - M.y)); if (Math.abs(d) < 1e-7) return null;
+        const a2 = A.x * A.x + A.y * A.y, m2 = M.x * M.x + M.y * M.y, b2 = B.x * B.x + B.y * B.y;
+        const cx = (a2 * (M.y - B.y) + m2 * (B.y - A.y) + b2 * (A.y - M.y)) / d, cy = (a2 * (B.x - M.x) + m2 * (A.x - B.x) + b2 * (M.x - A.x)) / d, r = Math.hypot(A.x - cx, A.y - cy);
+        if (r > 80) return null;
+        const T = 2 * Math.PI, md = (v) => ((v % T) + T) % T, t0 = Math.atan2(A.y - cy, A.x - cx), tm = Math.atan2(M.y - cy, M.x - cx), t1 = Math.atan2(B.y - cy, B.x - cx);
+        const s01 = md(t1 - t0), s0m = md(tm - t0), dir = s0m < s01 ? 1 : -1, sweep = dir > 0 ? s01 : T - s01;
+        return { cx, cy, r, t0, dir, sweep };
+    }
+    const arcPt = (g, u) => ({ x: g.cx + g.r * Math.cos(g.t0 + g.dir * g.sweep * u), y: g.cy + g.r * Math.sin(g.t0 + g.dir * g.sweep * u) });
+    const arcOf = (ar) => arcThrough({ x: ar.x1, y: ar.y1 }, curveApex(ar), { x: ar.x2, y: ar.y2 });
     function curveApex(ar) { const c = curveCtrl(ar); return { x: (ar.x1 + 2 * c.x + ar.x2) / 4, y: (ar.y1 + 2 * c.y + ar.y2) / 4 }; }
     function setApex(ar, q) {
         const cx = 2 * q.x - (ar.x1 + ar.x2) / 2, cy = 2 * q.y - (ar.y1 + ar.y2) / 2;
@@ -1506,8 +1518,9 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             return [{ x: x0, y: y0 }, { x: x1, y: y0 }, { x: x1, y: y1 }, { x: x0, y: y1 }, { x: x0, y: y0 }];
         }
         if (!isCurved(ar)) return [{ x: ar.x1, y: ar.y1 }, { x: ar.x2, y: ar.y2 }];
-        const c = curveCtrl(ar), pts = [];
-        for (let k = 0; k <= n; k++) { const t = k / n, u = 1 - t; pts.push({ x: u * u * ar.x1 + 2 * u * t * c.x + t * t * ar.x2, y: u * u * ar.y1 + 2 * u * t * c.y + t * t * ar.y2 }); }
+        const g = arcOf(ar), pts = [];
+        if (!g) return [{ x: ar.x1, y: ar.y1 }, { x: ar.x2, y: ar.y2 }];
+        for (let k = 0; k <= n; k++) pts.push(arcPt(g, k / n));
         return pts;
     }
     function arrowAt(p, r = 0.22) {
@@ -1997,6 +2010,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         if (ar.lw && ar.lw !== 1 && ar.t !== 'plus') s = `<g stroke-width="${(S.lw * 1.15 * ar.lw).toFixed(4)}">${s}</g>`;
         return s;
     }
+    let shadowSeq = 0;
     function arrowSVG0(ar, S) {
         const esc2 = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
         if (ar.t === 'text') {      // reagent / condition text, with chemical sub- and superscripts
@@ -2012,15 +2026,20 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             const geo = (dx, dy, extra) => ar.shape === 'line' ? `<line x1="${ar.x1 + dx}" y1="${ar.y1 + dy}" x2="${ar.x2 + dx}" y2="${ar.y2 + dy}"${extra}/>`
                 : ar.shape === 'ellipse' ? `<ellipse cx="${(x0 + x1) / 2 + dx}" cy="${(y0 + y1) / 2 + dy}" rx="${(x1 - x0) / 2}" ry="${(y1 - y0) / 2}"${extra}/>`
                 : `<rect x="${x0 + dx}" y="${y0 + dy}" width="${x1 - x0}" height="${y1 - y0}"${ar.round ? ` rx="${Math.min(0.35, 0.22 * Math.min(x1 - x0, y1 - y0)).toFixed(3)}"` : ''}${extra}/>`;
-            const sh = ar.shadow && ar.shape !== 'line' ? geo(0.14, 0.14, ` fill="${ar.shadowColor || '#64748b'}" fill-opacity="0.55" stroke="none"`) : '';
+            // offset shadow: a solid copy in the border colour, masked so it only shows outside the box (never inside it)
+            let sh = '';
+            if (ar.shadow && ar.shape !== 'line') { const o = 0.1 + w * 1.4, id = 'shm' + (++shadowSeq), m = 0.5;
+                sh = `<mask id="${id}" maskUnits="userSpaceOnUse" x="${x0 - m}" y="${y0 - m}" width="${x1 - x0 + 2 * m + o}" height="${y1 - y0 + 2 * m + o}"><rect x="${x0 - m}" y="${y0 - m}" width="${x1 - x0 + 2 * m + o}" height="${y1 - y0 + 2 * m + o}" fill="#fff"/>${geo(0, 0, ` fill="#000" stroke="#000" stroke-width="${w.toFixed(4)}"`)}</mask>`
+                    + `<g mask="url(#${id})">${geo(o, o, ` fill="${col}" stroke="${col}" stroke-width="${w.toFixed(4)}"`)}</g>`; }
             return sh + geo(0, 0, ` fill="${fill}" stroke="${col}" stroke-width="${w.toFixed(4)}"${dash}`);
         }
-        const z = ar.size || 1, ink = '#1e293b', red = disp.color ? '#dc2626' : ink, hl = Math.max(0.22, S.lw * 5) * z, hw = hl * 0.42, HS = ar.head || 'barb';
+        const z = ar.size || 1, ink = '#1e293b', red = disp.color ? '#dc2626' : ink, hl0 = Math.max(0.17, S.lw * 3.9) * z, hw0 = hl0 * 0.46, HS = ar.head || 'barb';
+        let hl = hl0, hw = hw0;
         // arrowheads: barbed (default), triangle, or open (two lines); a half head for fishhooks / equilibrium
         const head = (tx, ty, ux, uy, half, color, side = 1) => {
             const bx = tx - ux * hl, by = ty - uy * hl, nx = -uy * hw, ny = ux * hw, back = HS === 'tri' ? 1 : 0.72;
             const cx = tx - ux * hl * back, cy = ty - uy * hl * back;
-            if (HS === 'open') { const w = Math.max(S.lw * 1.15, 0.035) * (ar.lw || 1);
+            if (HS === 'open') { const w = Math.max(S.lw * (isCurved(ar) ? 0.85 : 1.15), 0.03) * (ar.lw || 1);
                 return `<path d="M${bx + nx * side} ${by + ny * side} L${tx} ${ty}${half ? '' : ` L${bx - nx} ${by - ny}`}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>`; }
             if (half) return `<polygon fill="${color}" stroke="none" points="${tx},${ty} ${bx + nx * side},${by + ny * side} ${cx},${cy}"/>`;
             return `<polygon fill="${color}" stroke="none" points="${tx},${ty} ${bx + nx},${by + ny} ${cx},${cy} ${bx - nx},${by - ny}"/>`;
@@ -2035,16 +2054,18 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             return `<line x1="${ar.x1 - nx * o}" y1="${ar.y1 - ny * o}" x2="${ar.x2 - nx * o - ux * hl * 0.6}" y2="${ar.y2 - ny * o - uy * hl * 0.6}" stroke="${ink}"/>` + head(ar.x2 - nx * o, ar.y2 - ny * o, ux, uy, true, ink, -1) +
                    `<line x1="${ar.x2 + nx * o}" y1="${ar.y2 + ny * o}" x2="${ar.x1 + nx * o + ux * hl * 0.6}" y2="${ar.y1 + ny * o + uy * hl * 0.6}" stroke="${ink}"/>` + head(ar.x1 + nx * o, ar.y1 + ny * o, -ux, -uy, true, ink, -1); }
         // curved electron-pushing arrows: full head = electron pair, fishhook (half head) = one electron
-        const c = curveCtrl(ar), Bz = (s2) => { const u = 1 - s2; return { x: u * u * ar.x1 + 2 * u * s2 * c.x + s2 * s2 * ar.x2, y: u * u * ar.y1 + 2 * u * s2 * c.y + s2 * s2 * ar.y2 }; };
-        // the point on the curve one head-length back from the tip: the head points from there, and the line ends in the head's base
-        let tq = 1, Q = Bz(1); for (let k = 1; k <= 60; k++) { const s2 = 1 - k / 60, q = Bz(s2); if (Math.hypot(q.x - ar.x2, q.y - ar.y2) >= hl * 0.95) { tq = s2; Q = q; break; } }
-        const tl = Math.hypot(ar.x2 - Q.x, ar.y2 - Q.y) || 1, vx = (ar.x2 - Q.x) / tl, vy = (ar.y2 - Q.y) / tl;
-        // the sub-curve from 0 to tq (de Casteljau) so the stroke stops at the head
-        const c1 = { x: ar.x1 + (c.x - ar.x1) * tq, y: ar.y1 + (c.y - ar.y1) * tq };
-        const endP = HS === 'open' ? { x: ar.x2 - vx * hl * 0.05, y: ar.y2 - vy * hl * 0.05 } : { x: Q.x + vx * hl * 0.28, y: Q.y + vy * hl * 0.28 };
-        const side = Math.sign((c.x - ar.x1) * -dy + (c.y - ar.y1) * dx) || 1;
-        const tail = HS === 'open' ? ` L${endP.x} ${endP.y}` : ` L${endP.x} ${endP.y}`;
-        return `<path d="M${ar.x1} ${ar.y1} Q${c1.x} ${c1.y} ${Q.x} ${Q.y}${tail}" fill="none" stroke="${red}" stroke-linejoin="round"/>` + head(ar.x2, ar.y2, vx, vy, ar.t === 'fish', red, side);
+        const g = arcOf(ar), lwC = (S.lw * 0.85 * (ar.lw || 1)).toFixed(4);
+        if (g && hl > g.r * 0.7) { hl = Math.max(g.r * 0.7, hl0 * 0.6); hw = hl * 0.46; }      // a very tight bend gets a slightly smaller head
+        if (!g) return `<line x1="${ar.x1}" y1="${ar.y1}" x2="${ar.x2 - ux * hl * 0.7}" y2="${ar.y2 - uy * hl * 0.7}" stroke="${red}" stroke-width="${lwC}"/>` + head(ar.x2, ar.y2, ux, uy, ar.t === 'fish', red);
+        // the point on the arc one head-length back from the tip: the head points from there, and the stroke ends inside the head
+        // the head's axis runs from the point on the arc one head-length back to the tip; the line joins it at the base and then runs
+        // straight along the axis, so it stays midway between the two prongs and can never lie on top of one
+        let uq = 1, Q = arcPt(g, 1); for (let k = 1; k <= 160; k++) { const u2 = 1 - k / 160, q = arcPt(g, u2); if (Math.hypot(q.x - ar.x2, q.y - ar.y2) >= hl) { uq = u2; Q = q; break; } }
+        let vx = ar.x2 - Q.x, vy = ar.y2 - Q.y; const tl = Math.hypot(vx, vy) || 1; vx /= tl; vy /= tl;
+        const endP = HS === 'open' ? { x: ar.x2 - vx * hl * 0.06, y: ar.y2 - vy * hl * 0.06 } : { x: ar.x2 - vx * hl * 0.72, y: ar.y2 - vy * hl * 0.72 };
+        const M0 = curveApex(ar), side = Math.sign((M0.x - ar.x1) * -dy + (M0.y - ar.y1) * dx) || 1;
+        const large = g.sweep * uq > Math.PI ? 1 : 0, flag = g.dir > 0 ? 1 : 0;
+        return `<path d="M${ar.x1.toFixed(3)} ${ar.y1.toFixed(3)} A${g.r.toFixed(3)} ${g.r.toFixed(3)} 0 ${large} ${flag} ${Q.x.toFixed(3)} ${Q.y.toFixed(3)} L${endP.x.toFixed(3)} ${endP.y.toFixed(3)}" fill="none" stroke="${red}" stroke-width="${lwC}" stroke-linejoin="round" stroke-linecap="round"/>` + head(ar.x2, ar.y2, vx, vy, ar.t === 'fish', red, side);
     }
     function render() {
         const S = STYLES[disp.style];
@@ -2266,22 +2287,30 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
         let side = sideHint || 0;
         if (!side) { let s = 0; mol.atoms.forEach(o => { const ox = o.x - mx, oy = o.y - my, d = Math.hypot(ox, oy); if (d < 2.2) s += (ox * -dy + oy * dx) / L / (0.3 + d); }); side = s > 0 ? -1 : 1; }
-        let chm = Math.max(0.72, 0.6 / L);                 // short arrows (lone pair → next bond) still bow out clearly
+        // apex height h = chm·L/2. Close ends (atom → its own bond) get a tall, more-than-semicircular arc so the whole curve and head read clearly
+        const hShort = L < 1.3 ? 0.36 * L + (1.3 - L) * 0.3 : 0;      // between the old shallow bow and a full semicircle
+        let chm = Math.max(0.62, 2 * hShort / L);
         const clearOf = (cm) => {      // how close the middle of the curve comes to atoms and bonds
             const Cc = { x: a.x + dx * 0.5 - dy * cm * side, y: a.y + dy * 0.5 + dx * cm * side }; let g = 9;
-            for (let k = 3; k <= 9; k++) { const s2 = k / 12, u = 1 - s2, q = { x: u * u * a.x + 2 * u * s2 * Cc.x + s2 * s2 * b.x, y: u * u * a.y + 2 * u * s2 * Cc.y + s2 * s2 * b.y };
+            const arc = arcThrough(a, { x: (a.x + 2 * Cc.x + b.x) / 4, y: (a.y + 2 * Cc.y + b.y) / 4 }, b);
+            for (let k = 3; k <= 9; k++) { const s2 = k / 12, u = 1 - s2, q = arc ? arcPt(arc, s2) : { x: u * u * a.x + 2 * u * s2 * Cc.x + s2 * s2 * b.x, y: u * u * a.y + 2 * u * s2 * Cc.y + s2 * s2 * b.y };
                 mol.atoms.forEach(o => { g = Math.min(g, Math.hypot(o.x - q.x, o.y - q.y)); });
                 mol.bonds.forEach(bd => { const A2 = mol.atoms[bd.a], B2 = mol.atoms[bd.b], ex2 = B2.x - A2.x, ey2 = B2.y - A2.y, l2 = ex2 * ex2 + ey2 * ey2 || 1;
                     const tt = clamp(((q.x - A2.x) * ex2 + (q.y - A2.y) * ey2) / l2, 0, 1); g = Math.min(g, Math.hypot(A2.x + tt * ex2 - q.x, A2.y + tt * ey2 - q.y)); }); }
             return g; };
-        for (let it = 0; it < 14 && clearOf(chm) < 0.3; it++) chm += 0.1;      // swing wide of the framework when going around a bond
+        for (let it = 0; it < (hShort ? 4 : 14) && clearOf(chm) < 0.3; it++) chm += 0.1;      // swing wide of the framework when going around a bond
         const ch = chm * side, C = { x: a.x + dx * 0.5 - dy * ch, y: a.y + dy * 0.5 + dx * ch };
         const S = STYLES[disp.style];
         const clearance = (q) => {
             if (q.atom) { const o = mol.atoms[q.ai], nbs = neighbors(mol)[q.ai].length; return labelShown(o, nbs, implicitH(mol, q.ai)) ? S.font * (o.fs || 1) * 0.6 + 0.12 : 0.16; }
             if (q.bond) return 0.14; if (q.lp) return 0.13; return 0; };
-        const pull = (q) => { const c = clearance(q); if (!c) return { x: q.x, y: q.y }; const ux = C.x - q.x, uy = C.y - q.y, l = Math.hypot(ux, uy) || 1; return { x: q.x + ux / l * c, y: q.y + uy / l * c }; };
-        const A2 = pull(a), B2 = pull(b), ar = { t: type || 'curve', x1: A2.x, y1: A2.y, x2: B2.x, y2: B2.y, head: tool.head, size: tool.arrowSize, lw: tool.arrowLw };
+        // ends step clear of labels toward the bow; when the ends are close, mostly away from each other so the arc keeps its span
+        const pull = (q, o) => { const c = clearance(q); if (!c) return { x: q.x, y: q.y };
+            let ux = C.x - q.x, uy = C.y - q.y; const l = Math.hypot(ux, uy) || 1; ux /= l; uy /= l;
+            if (hShort) { let wx = q.x - o.x, wy = q.y - o.y; const wl = Math.hypot(wx, wy) || 1; wx /= wl; wy /= wl; const k = Math.min(0.85, hShort * 1.1);
+                ux = ux * (1 - k) + wx * k; uy = uy * (1 - k) + wy * k; const l2 = Math.hypot(ux, uy) || 1; ux /= l2; uy /= l2; }
+            return { x: q.x + ux * c, y: q.y + uy * c }; };
+        const A2 = pull(a, b), B2 = pull(b, a), ar = { t: type || 'curve', x1: A2.x, y1: A2.y, x2: B2.x, y2: B2.y, head: tool.headC, size: tool.arrowSize, lw: tool.arrowLw };
         // keep the control point where it was so the tip still aims at the atom's centre
         const ex = ar.x2 - ar.x1, ey = ar.y2 - ar.y1, L2 = ex * ex + ey * ey || 1, rx = C.x - ar.x1, ry = C.y - ar.y1;
         ar.ct = (rx * ex + ry * ey) / L2; ar.ch = (rx * -ey + ry * ex) / L2;
@@ -2656,11 +2685,11 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         lasso: `<path d="M12 4c5 0 8.5 2.3 8.5 5.5S17 15 12 15c-1.3 0-2.5-.15-3.6-.45" ${stroke} stroke-dasharray="2.4 2"/><path d="M8.4 14.55C5.4 13.7 3.5 11.8 3.5 9.5 3.5 6.3 7 4 12 4" ${stroke} stroke-dasharray="2.4 2"/><path d="M7.5 15.5c-1 1.2-1 2.8.4 3.6 1.2.7 2.6.1 2.9-1.2" ${stroke}/>`,
         rad: '<text x="12" y="19" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" font-family="Arial">C</text><circle cx="12" cy="4.6" r="2" fill="currentColor"/>',
         fill: `<defs><radialGradient id="ico-fill-g"><stop offset="0" stop-color="#4ade80" stop-opacity="0.15"/><stop offset="0.7" stop-color="#4ade80" stop-opacity="0.6"/><stop offset="1" stop-color="#22c55e"/></radialGradient></defs><polygon points="12,3 19.8,7.5 19.8,16.5 12,21 4.2,16.5 4.2,7.5" fill="url(#ico-fill-g)" ${stroke}/>`,
-        chair: `<path d="M7.2 8.6L12.4 10.1 17.6 8.6 14.9 13.3 9.6 11.8 4.4 13.3z" ${stroke} stroke-width="1.6" transform="translate(-11.4 -11) scale(2)"/>`,
-        chair2: `<path d="M16.6 8.6L11.4 10.1 6.2 8.6 8.9 13.3 14.2 11.8 19.4 13.3z" ${stroke} stroke-width="1.6" transform="translate(-11.4 -11) scale(2)"/>`,
+        chair: `<path d="M7.2 8.6L12.4 10.1 17.6 8.6 14.9 13.3 9.6 11.8 4.4 13.3z" ${stroke} stroke-width="1.15" transform="translate(-5.7 -5.5) scale(1.5)"/>`,
+        chair2: `<path d="M16.6 8.6L11.4 10.1 6.2 8.6 8.9 13.3 14.2 11.8 19.4 13.3z" ${stroke} stroke-width="1.15" transform="translate(-5.7 -5.5) scale(1.5)"/>`,
         rect: `<rect x="3.5" y="6" width="17" height="12" ${stroke}/>`,
         roundrect: `<rect x="3.5" y="6" width="17" height="12" rx="3.5" ${stroke}/>`,
-        shadowrect: `<rect x="6" y="8.5" width="15" height="11" fill="currentColor" opacity="0.45"/><rect x="3" y="5" width="15" height="11" fill="none" stroke="currentColor" stroke-width="1.8"/>`,
+        shadowrect: `<path d="M18.9 8.5H21.5V19.5H6.5V16.9H18.9z" fill="currentColor"/><rect x="3" y="5" width="15" height="11" fill="none" stroke="currentColor" stroke-width="1.8"/>`,
         ellipse: `<ellipse cx="12" cy="12" rx="9" ry="6.5" ${stroke}/>`,
         sline: `<path d="M4 19L20 5" ${stroke}/>`,
         text: '<text x="12" y="18" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" font-family="Georgia, serif">T</text>',
@@ -2714,23 +2743,16 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         { id: 'g-tpl', items: [
             { id: 't-chair', icon: I.chair, tip: 'Cyclohexane chair: click to place · with a bond tool, drag from a ring carbon toward an axial or equatorial position', set: { kind: 'template', tpl: 'chair' } },
             { id: 't-chair2', icon: I.chair2, tip: 'Cyclohexane chair (the other chair — after a ring flip)', set: { kind: 'template', tpl: 'chair2' } },
+            { id: 't-nbSide', icon: tplIcon('nbSide'), tip: 'Bicyclo[2.2.1]heptane (norbornane): click to place', set: { kind: 'template', tpl: 'nbSide' } },
+            { id: 't-bcoSide', icon: tplIcon('bcoSide'), tip: 'Bicyclo[2.2.2]octane: click to place', set: { kind: 'template', tpl: 'bcoSide' } },
+            { id: 't-bcnSide', icon: tplIcon('bcnSide'), tip: 'Bicyclo[3.3.1]nonane: click to place', set: { kind: 'template', tpl: 'bcnSide' } },
+            { id: 't-bchSide', icon: tplIcon('bchSide'), tip: 'Bicyclo[2.1.1]hexane: click to place', set: { kind: 'template', tpl: 'bchSide' } },
+            { id: 't-decSide', icon: tplIcon('decSide'), tip: 'trans-Decalin (bicyclo[4.4.0]decane), two chairs: click to place', set: { kind: 'template', tpl: 'decSide' } },
             { id: 't-newman', icon: I.newman, tip: 'Newman projection: click to place, then click an open position to type its group', set: { kind: 'template', tpl: 'newman' } },
             { id: 't-dnewman', icon: I.dnewman, tip: 'Double Newman projection (a chair viewed down two ring bonds): click an open position to type its group', set: { kind: 'template', tpl: 'doubleNewman' } },
             { id: 't-fischer', icon: I.fischer, tip: 'Fischer projection (D-glucose): horizontal bonds toward you, vertical bonds away', set: { kind: 'template', tpl: 'fischer' } },
             { id: 't-haworth6', icon: I.haworth6, tip: 'Haworth projection, 6-membered ring: change a carbon to O, and click the open positions to add groups', set: { kind: 'template', tpl: 'haworth6' } },
             { id: 't-haworth5', icon: I.haworth5, tip: 'Haworth projection, 5-membered ring', set: { kind: 'template', tpl: 'haworth5' } }] },
-        { id: 'g-bicyc', items: [
-            { id: 't-nbTop', icon: tplIcon('nbTop'), tip: 'Bicyclo[2.2.1]heptane (norbornane), top view: click to place', set: { kind: 'template', tpl: 'nbTop' } },
-            { id: 't-nbSide', icon: tplIcon('nbSide'), tip: 'Bicyclo[2.2.1]heptane (norbornane), side view: click to place', set: { kind: 'template', tpl: 'nbSide' } },
-            { id: 't-bcoTop', icon: tplIcon('bcoTop'), tip: 'Bicyclo[2.2.2]octane, top view: click to place', set: { kind: 'template', tpl: 'bcoTop' } },
-            { id: 't-bcoSide', icon: tplIcon('bcoSide'), tip: 'Bicyclo[2.2.2]octane, side view: click to place', set: { kind: 'template', tpl: 'bcoSide' } },
-            { id: 't-bcnTop', icon: tplIcon('bcnTop'), tip: 'Bicyclo[3.3.1]nonane, top view: click to place', set: { kind: 'template', tpl: 'bcnTop' } },
-            { id: 't-bcnSide', icon: tplIcon('bcnSide'), tip: 'Bicyclo[3.3.1]nonane, side view: click to place', set: { kind: 'template', tpl: 'bcnSide' } },
-            { id: 't-bchTop', icon: tplIcon('bchTop'), tip: 'Bicyclo[2.1.1]hexane, top view: click to place', set: { kind: 'template', tpl: 'bchTop' } },
-            { id: 't-bchSide', icon: tplIcon('bchSide'), tip: 'Bicyclo[2.1.1]hexane, side view: click to place', set: { kind: 'template', tpl: 'bchSide' } },
-            { id: 't-decTop', icon: tplIcon('decTop'), tip: 'Bicyclo[4.4.0]decane (decalin), flat: click to place', set: { kind: 'template', tpl: 'decTop' } },
-            { id: 't-decSide', icon: tplIcon('decSide'), tip: 'Bicyclo[4.4.0]decane (trans-decalin), chairs: click to place', set: { kind: 'template', tpl: 'decSide' } },
-            { id: 't-adamantane', icon: tplIcon('adamantane'), tip: 'Adamantane: click to place', set: { kind: 'template', tpl: 'adamantane' } }] },
         { id: 'g-shape', items: [
             { id: 'sh-rect', icon: I.rect, tip: 'Rectangle: drag to draw (Shift for a square) · style it in the options bar', set: { kind: 'shape', shape: 'rect' } },
             { id: 'sh-round', icon: I.roundrect, tip: 'Rounded rectangle', set: { kind: 'shape', shape: 'round' } },
@@ -2739,7 +2761,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             { id: 'sh-line', icon: I.sline, tip: 'Straight line', set: { kind: 'shape', shape: 'line' } }] },
         { id: 'g-text', items: [{ id: 'text', icon: I.text, tip: 'Text box (reagents, conditions): click to type · formulas like H2SO4 or Fe3+ get proper subscripts and superscripts', set: { kind: 'text' } }] },
         { id: 'g-fill', items: [{ id: 'fill', icon: I.fill, tip: 'Ring fill: pick a color and style in the options bar, then click inside a ring (again to remove)', set: { kind: 'fill' } }] },
-        { id: 'g-arrow', items: [
+        { id: 'g-arrow', cur: 'a-curve', items: [
             { id: 'a-rxn', icon: I.rxn, tip: 'Reaction arrow: drag (or click) to draw', set: { kind: 'arrow', arrow: 'rxn' } },
             { id: 'a-eq', icon: I.eq, tip: 'Equilibrium arrows', set: { kind: 'arrow', arrow: 'eq' } },
             { id: 'a-res', icon: I.res, tip: 'Resonance arrow', set: { kind: 'arrow', arrow: 'res' } },
@@ -2781,7 +2803,8 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     });
     ['s1', 's2', 's3', 's4', 's5'].forEach(id => addSep(toolsBar, id));
     ACTIONS.forEach(t => { const b = document.createElement('button'); b.className = 'tool'; b.dataset.id = 'act-' + t.id; b.draggable = true; b.title = t.tip; b.setAttribute('aria-label', t.tip); b.innerHTML = sv(t.icon); b.addEventListener('click', t.act); toolsBar.appendChild(b); });
-    { const order = ['g-select', 'act-clean', 'g-erase', 's1', 'g-bond', 'g-stereo', 'g-chain', 's2', 'g-ring', 'g-tpl', 'g-bicyc', 's3', 'g-charge', 'g-lp', 'g-fill', 'g-shape', 'g-text', 's4', 'g-arrow', 's5', 'act-undo', 'act-redo', 'act-clear'];
+    const TOOL_ORDER = ['g-select', 'act-clean', 'g-erase', 's1', 'g-bond', 'g-stereo', 'g-chain', 'g-ring', 'g-arrow', 's2', 'g-charge', 'g-lp', 'g-tpl', 's3', 'g-fill', 'g-shape', 'g-text', 's4', 's5', 'act-undo', 'act-redo', 'act-clear'];
+    { const order = TOOL_ORDER;
       const byId = {}; toolsBar.querySelectorAll(':scope > [data-id]').forEach(x => byId[x.dataset.id] = x);
       order.forEach(id => byId[id] && toolsBar.appendChild(byId[id])); }
     function paintGroup(gi) { const g = GROUPS[gi], it = ALL[g.cur], b = groupBtns[gi];
@@ -2996,7 +3019,8 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
       ['#ffffff', '#f1f5f9', '#fef3c7', '#fee2e2', '#dcfce7', '#dbeafe', '#ede9fe', '#fce7f3', '#facc15', '#fb923c', '#60a5fa', '#4ade80'].forEach(c => { const b = document.createElement('button'); b.className = 'csw'; b.style.background = c; b.title = c; b.addEventListener('click', () => { setShapeProp('fill', c); closeMenus(); }); box.appendChild(b); });
       const inp = document.createElement('input'); inp.type = 'color'; inp.className = 'cpick'; inp.value = '#fde68a'; inp.addEventListener('input', () => setShapeProp('fill', inp.value)); box.appendChild(inp);
       $('fill-none').addEventListener('click', () => { setShapeProp('fill', null); closeMenus(); }); }
-    tool.head = 'barb';
+    tool.head = 'barb'; tool.headC = 'open';
+    const headKey = () => tool.kind === 'arrow' && (tool.arrow === 'curve' || tool.arrow === 'fish') ? 'headC' : 'head';      // straight arrows: barbed head; curved arrows start with the open (line) head
     { const lab = document.createElement('span'); lab.className = 'ctx-lbl'; lab.textContent = 'ARROWHEAD'; ctxArrow.appendChild(lab);
       [['barb', '<path d="M3 12h13" stroke="currentColor" stroke-width="2"/><path d="M21 12l-8-5 2.5 5-2.5 5z" fill="currentColor"/>', 'Barbed head'],
        ['tri', '<path d="M3 12h11" stroke="currentColor" stroke-width="2"/><path d="M21 12l-8-5v10z" fill="currentColor"/>', 'Triangle head'],
@@ -3004,7 +3028,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         const b = document.createElement('button'); b.className = 'tool sym head-btn' + (v === tool.head ? ' active' : ''); b.dataset.head = v; b.title = tip + ' — for new arrows and the selected ones'; b.setAttribute('aria-label', tip);
         b.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22">${p}</svg>`;
         b.addEventListener('click', () => {
-            tool.head = v; ctxArrow.querySelectorAll('.head-btn').forEach(x => x.classList.toggle('active', x === b));
+            tool[headKey()] = v; ctxArrow.querySelectorAll('.head-btn').forEach(x => x.classList.toggle('active', x === b));
             const ks = [...sel.arrows].filter(k => isArrowT(mol.arrows[k]));
             if (ks.length) { commit(); ks.forEach(k => { mol.arrows[k].head = v; }); changed(); }
         });
@@ -3092,6 +3116,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         if (qA.length) $('q-size').value = mol.atoms[qA[0]].qScale || 1;
         if (selArrows) { const k = [...sel.arrows].find(k2 => isArrowT(mol.arrows[k2])), A0 = mol.arrows[k], h = A0.head || 'barb'; ctxArrow.querySelectorAll('.head-btn').forEach(x => x.classList.toggle('active', x.dataset.head === h));
             ctxArrow.querySelectorAll('.ctx-slider input').forEach(s => { s.value = A0[s.dataset.prop] || 1; }); }
+        else if (showArrow) { const h = tool[headKey()]; ctxArrow.querySelectorAll('.head-btn').forEach(x => x.classList.toggle('active', x.dataset.head === h)); }
         ctxBar.classList.toggle('empty-ctx', !showFill && !showSel && !showArrow && ctxShape.hidden && ctxText.hidden);
         if (showSel) {
             const n = selObjects().length;
@@ -3103,10 +3128,13 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     }
 
     // ---- dockable bars, re-orderable icons, hide / show
-    const LAYOUT_KEY = 'molstudio-layout-v4';
-    const BARS = { tools: { el: toolsBar, name: 'Drawing tools', side: 'left' }, els: { el: elBar, name: 'Elements', side: 'bottom' },
+    const LAYOUT_KEY = 'molstudio-layout-v5';
+    // starting layout: elements down the far left, drawing tools beside them, file / edit / view along the top
+    const BARS = { els: { el: elBar, name: 'Elements', side: 'left' }, tools: { el: toolsBar, name: 'Drawing tools', side: 'left' },
                    view: { el: viewBar, name: 'View & file', side: 'top' }, ctx: { el: ctxBar, name: 'Selection & options', side: 'top' } };
-    const layout = Object.assign({ order: {}, hidden: {} }, store.get(LAYOUT_KEY) || {});
+    const DEFAULT_ORDER = { tools: TOOL_ORDER.filter(id => !id.startsWith('act-') || id === 'act-clean'),
+        view: ['v-open', 'v-save', 'v-smiles', 'act-clear', 'act-undo', 'act-redo', 'z-out', 'z-in', 'z-fit', 'r-ccw', 'r-cw', 'f-h', 'f-v', 'b-display'] };
+    const layout = Object.assign({ order: JSON.parse(JSON.stringify(DEFAULT_ORDER)), hidden: {} }, store.get(LAYOUT_KEY) || {});
     Object.keys(BARS).forEach(k => { if (!layout[k]) layout[k] = BARS[k].side; });
     const saveLayout = () => store.set(LAYOUT_KEY, layout);
     function dockBar(bar, side) {
