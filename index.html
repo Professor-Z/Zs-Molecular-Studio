@@ -12,7 +12,7 @@
         font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
     #app { display: grid; grid-template-rows: auto 1fr; height: 100%; }
     /* ---------- top bar ---------- */
-    #topbar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px 12px; padding: 8px 12px; background: #0f172a; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    #topbar { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px 12px; padding: 8px 12px; background: #0f172a; border-bottom: 1px solid rgba(255,255,255,0.08); }
     .tb-left, .tb-right { display: flex; align-items: center; gap: 8px 12px; min-width: 0; flex-wrap: wrap; } .tb-right { justify-content: flex-end; }
     #props { display: inline-flex; flex-wrap: nowrap; align-items: center; gap: 4px 10px; justify-content: flex-end; min-width: 0; overflow: hidden; white-space: nowrap; } .tb-right { flex-wrap: nowrap; } #pct { flex-wrap: nowrap !important; gap: 6px !important; } #props[hidden] { display: none; }
     #dock-top > #smilesbar, #dock-bottom > #smilesbar, #smilesbar { flex: 1 1 100%; gap: 6px; flex-wrap: nowrap; } #smilesbar[hidden] { display: none !important; }
@@ -38,7 +38,7 @@
     .btn:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
 
     /* ---------- main split ---------- */
-    #main { display: grid; grid-template-columns: minmax(0, var(--split, 50%)) 8px minmax(0, 1fr); min-height: 0; }
+    #main { display: grid; grid-template-columns: minmax(0, calc(var(--split, 50%) - 4px)) 8px minmax(0, 1fr);      /* the divider's centre sits at the split */ min-height: 0; }
     @media (max-width: 900px) { #main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } #divider { display: none; } }
 
     #main[data-mode="2d"] { grid-template-columns: 1fr; grid-template-rows: 1fr; } #main[data-mode="2d"] #viewer, #main[data-mode="2d"] #divider { display: none; }
@@ -47,11 +47,17 @@
     .tool.grp { position: relative; } .tool.grp::after { content: ""; position: absolute; right: 3px; bottom: 3px; border: 4px solid transparent; border-right-color: currentColor; border-bottom-color: currentColor; opacity: 0.7; }
     #flyout { position: fixed; z-index: 50; display: flex; gap: 4px; padding: 6px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     #flyout[hidden], #display-menu[hidden], .ctx-typecol[hidden] { display: none !important; }
-    .menu { position: fixed; z-index: 70; width: 260px; padding: 10px 12px; background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; box-shadow: 0 10px 30px rgba(15,23,42,0.3); font-size: 0.8rem; }
+    .menu { position: fixed; z-index: 70; width: 260px; padding: 10px 12px; background: #0f172a; color: #e2e8f0; border: 1px solid #334155; border-radius: 10px; box-shadow: 0 14px 36px rgba(0,0,0,0.5); font: 500 0.8rem/1.35 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    .menu input, .menu select, .menu button { font-family: inherit; }
+    .menu select, .menu .ex-select { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; border-radius: 6px; font: 600 0.78rem/1.2 inherit; font-family: inherit; }
+    .menu select option, .menu optgroup { background: #0f172a; color: #e2e8f0; }
+    body.light .menu select, body.light .menu .ex-select { background: #f8fafc; color: #1e293b; border-color: #cbd5e1; } body.light .menu select option, body.light .menu optgroup { background: #fff; color: #1e293b; }
+    body.light .menu { background: #ffffff; color: #1e293b; border-color: #cbd5e1; box-shadow: 0 10px 30px rgba(15,23,42,0.25); }
     .menu[hidden] { display: none; }
-    .mi { display: flex; justify-content: space-between; width: 100%; text-align: left; font: inherit; font-weight: 600; padding: 6px 8px; border: none; border-radius: 6px; background: none; color: #1e293b; cursor: pointer; }
-    .mi:hover { background: #e2e8f0; } .mi span { font-weight: 400; color: #64748b; font-size: 0.72rem; }
-    .dm-head { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.12em; color: #64748b; margin: 10px 0 4px; border-top: 1px solid #e2e8f0; padding-top: 8px; }
+    .mi { display: flex; justify-content: space-between; width: 100%; text-align: left; font: inherit; font-weight: 600; letter-spacing: 0.02em; padding: 6px 8px; border: none; border-radius: 6px; background: none; color: inherit; cursor: pointer; }
+    .mi:hover { background: #1e293b; } .mi span { font-weight: 400; color: #94a3b8; font-size: 0.72rem; }
+    .dm-head { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.14em; color: #94a3b8; margin: 10px 0 4px; border-top: 1px solid #1e293b; padding-top: 8px; }
+    body.light .mi:hover { background: #e2e8f0; } body.light .mi span { color: #64748b; } body.light .dm-head { color: #64748b; border-top-color: #e2e8f0; }
     .swrow { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0 6px; }
     .dm-row input[type=range] { flex: 1; }
     /* dark bars: text / symbol buttons, colour swatches, context sections */
@@ -158,9 +164,14 @@
     .style-head { grid-column: 1 / -1; position: sticky; top: -0.9rem; z-index: 2; display: flex; align-items: center; justify-content: space-between; margin: -0.9rem -1rem 0.3rem; padding: 0.5rem 0.7rem 0.4rem 1rem;
         background: inherit; font: 800 11px system-ui; letter-spacing: 0.2em; color: #94a3b8; border-radius: 12px 12px 0 0; }
     #style-x { padding: 0.25rem 0.6rem; min-width: 0; }
-    #style.over2d { display: block; columns: 3 200px; column-gap: 1.1rem; padding: 0.7rem 0.9rem 0.5rem; }
-    #style.over2d > div { break-inside: avoid; }
-    #style.over2d > .style-head, #style.over2d > .el-colors { column-span: all; }
+    #style.over2d { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 1.1rem; row-gap: 0; padding: 0.7rem 0.9rem 0.5rem; align-items: start; }
+    #style.over2d > .style-head, #style.over2d > .el-colors { grid-column: 1 / -1; }
+    #style .el-colors { text-align: center; } #style .el-colors .sec { text-align: center; }
+    #style .el-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 10px; }
+    #style .el-row .chips { justify-content: center; } #style .el-row .btn { flex: none; }
+    #style .vig-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 0.8rem; }
+    .glow-any { position: relative; width: 19px; height: 19px; border-radius: 50%; overflow: hidden; display: inline-block; border: 2px solid rgba(255,255,255,0.25); background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red); cursor: pointer; }
+    .glow-any input { position: absolute; inset: -6px; opacity: 0; cursor: pointer; width: 36px; height: 36px; }
     #style.over2d .slider-row { margin-bottom: 0.32rem; } #style.over2d .slider-row .lbl { margin-bottom: 0.1rem; font-size: 0.7rem; }
     #style.over2d .sec { margin: 0.25rem 0 0.25rem; } #style.over2d .btn-row { margin-bottom: 0.35rem; gap: 0.28rem; }
     #style.over2d .btn { padding: 0.32rem 0.35rem; font-size: 0.68rem; } #style.over2d .hint-sm { margin: -0.1rem 0 0.35rem; font-size: 0.66rem; }
@@ -302,7 +313,16 @@
             <div id="stylebar" class="collapsed">
                 <div id="style" class="glass-panel">
                     <div class="style-head"><span>STYLE PREFERENCES, MOTION &amp; GEOMETRY SETTINGS</span><button class="btn" id="style-x" title="Close (or click anywhere else)" aria-label="Close the style window">✕</button></div>
-                    <div>
+                    <div class="scol">
+                        <div class="sec">MODEL</div>
+                        <div class="btn-row two">
+                            <button class="btn active" id="b-sf">SPACE FILLING</button>
+                            <button class="btn" id="b-bs">BALL &amp; STICK</button>
+                        </div>
+                        <div class="btn-row two">
+                            <button class="btn tg active" id="cartoon3d" title="Cartoon look: bold outlines, flat shading">CARTOON MODE</button>
+                            <button class="btn tg" id="classic3d" title="Classic look: smooth, realistic shading">CLASSIC MODE</button>
+                        </div>
                         <div class="sec">STYLING</div>
                         <div class="cartoon-only">
                         <div class="slider-row"><div class="lbl"><label for="s-outline">Outline thickness</label><span id="v-outline"></span></div>
@@ -314,46 +334,33 @@
                             <input id="s-shade" type="range" min="0" max="1" step="0.05" value="0.8"></div>
                         <div class="slider-row"><div class="lbl"><label for="s-hi">Highlight size</label><span id="v-hi"></span></div>
                             <input id="s-hi" type="range" min="0" max="1" step="0.05" value="0.6"></div>
-                        <div class="btn-row two"><button class="btn tg" id="b-glow" title="A soft pulsing glow around the molecule">GLOW: OFF</button>
-                            <label class="lbl2 glow-col">Glow color <input type="color" id="glow-col" value="#7dd3fc"></label></div>
+                    </div>
+                    <div class="scol">
+                        <div class="sec">GLOW</div>
+                        <div class="btn-row"><button class="btn tg" id="b-glow" title="A soft pulsing glow around the molecule">GLOW: OFF</button></div>
+                        <div class="glow-sw" id="glow-presets" role="group" aria-label="Glow color presets"></div>
+                        <input type="color" id="glow-col" value="#7dd3fc" hidden aria-label="Any glow color">
                         <div class="slider-row"><div class="lbl"><label for="s-glowr">Glow radius</label><span id="v-glowr"></span></div>
                             <input id="s-glowr" type="range" min="0.2" max="10" step="0.1" value="3"></div>
                         <div class="slider-row"><div class="lbl"><label for="s-glowb">Glow brightness</label><span id="v-glowb"></span></div>
                             <input id="s-glowb" type="range" min="0.1" max="3" step="0.05" value="2"></div>
-                        <div class="glow-sw" id="glow-presets" role="group" aria-label="Glow color presets"></div>
                         <div class="slider-row"><div class="lbl"><label for="s-glowp">Glow pulse</label><span id="v-glowp"></span></div>
                             <input id="s-glowp" type="range" min="0" max="3" step="0.1" value="0.5"></div>
-                    </div>
-                    <div>
-                        <div class="sec">MODEL</div>
-                        <div class="btn-row two">
-                            <button class="btn active" id="b-sf">SPACE FILLING</button>
-                            <button class="btn" id="b-bs">BALL &amp; STICK</button>
+                        <div class="sec">BACKGROUND VIGNETTE</div>
+                        <div class="vig-row">
+                            <div class="slider-row"><div class="lbl"><label for="s-vigs">Shadow</label><span id="v-vigs"></span></div>
+                                <input id="s-vigs" type="range" min="0" max="1" step="0.05" value="0.45" title="How dark the edges get"></div>
+                            <div class="slider-row"><div class="lbl"><label for="s-vigh">Highlight</label><span id="v-vigh"></span></div>
+                                <input id="s-vigh" type="range" min="0" max="1" step="0.05" value="0.3" title="How bright the centre gets"></div>
                         </div>
-                        <div class="btn-row two">
-                            <button class="btn tg active" id="cartoon3d" title="Cartoon look: bold outlines, flat shading">CARTOON MODE</button>
-                            <button class="btn tg" id="classic3d" title="Classic look: smooth, realistic shading">CLASSIC MODE</button>
-                        </div>
-                        <div class="lbl2">Background</div>
-                        <div class="slider-row"><div class="lbl"><label for="s-vig">Vignette</label><span id="v-vig"></span></div>
-                            <input id="s-vig" type="range" min="0" max="1" step="0.05" value="0.45"></div>
                         <div class="swatches" id="bg-sw" role="group" aria-label="Background color"><label class="sw sw-any" title="Any color"><input type="color" id="bg-any" value="#3a6f8f" aria-label="Any background color"></label></div>
                     </div>
-                    <div>
-                        <div class="sec">BACKGROUND MOLECULES</div>
-                        <div class="slider-row"><div class="lbl"><label for="s-bgn">Number of copies</label><span id="v-bgn"></span></div>
-                            <input id="s-bgn" type="range" min="0" max="30" step="1" value="0"></div>
-                        <div class="slider-row"><div class="lbl"><label for="s-bgblur">Depth blur</label><span id="v-bgblur"></span></div>
-                            <input id="s-bgblur" type="range" min="0" max="1" step="0.05" value="0.35"></div>
-                    </div>
-                    <div>
-                        <div class="sec">MOTION &amp; GEOMETRY</div>
+                    <div class="scol">
+                        <div class="sec">MOTION &amp; GEOMETRY OPTIMIZATION</div>
                         <div class="btn-row"><button class="btn tg active" id="b-flex" title="Let single bonds twist freely, or hold them still">SINGLE-BOND ROTATION: ON</button></div>
                         <div class="btn-row"><button class="btn primary" id="b-opt" title="Relax the structure to a minimum-energy geometry with a simple molecular-mechanics force field">⚛ OPTIMIZE GEOMETRY (MM)</button></div>
                         <div id="mm-out" role="status"></div>
                         <div class="hint-sm">Click a bond in the model to select it and turn one end about it (or Shift+drag).</div>
-                    </div>
-                    <div>
                         <div class="sec">CAMERA</div>
                         <div class="lbl2">Auto‑rotate</div>
                         <div class="btn-row four">
@@ -367,11 +374,17 @@
                         <div class="btn-row two"><button class="btn" id="b-reset">RESET VIEW</button><button class="btn" id="b-center" title="Bring the model back to the middle of the window (keeps the zoom and angle)">CENTER MODEL</button></div>
                         <div class="btn-row"><button class="btn primary" id="b-gif" title="Export an animated GIF of one full turn (loops seamlessly)">EXPORT GIF</button></div>
                         <div class="hint-sm">Arrow keys (or right-drag) move the model; it always turns about its center of mass.</div>
+                        <div class="sec">BACKGROUND MOLECULES</div>
+                        <div class="slider-row"><div class="lbl"><label for="s-bgn">Number of copies</label><span id="v-bgn"></span></div>
+                            <input id="s-bgn" type="range" min="0" max="30" step="1" value="0"></div>
+                        <div class="slider-row"><div class="lbl"><label for="s-bgblur">Depth blur</label><span id="v-bgblur"></span></div>
+                            <input id="s-bgblur" type="range" min="0" max="1" step="0.05" value="0.35"></div>
                     </div>
                     <div class="el-colors">
                         <div class="sec">ELEMENT COLORS</div>
-                        <div class="chips" id="el-chips" role="group" aria-label="Element colors"></div>
-                        <div class="btn-row two" style="max-width:340px"><button class="btn" id="b-colreset">RESET COLORS</button><span></span></div>
+                        <div class="el-row"><div class="chips" id="el-chips" role="group" aria-label="Element colors"></div>
+                            <button class="btn" id="b-colpt" title="Pick any other element from the periodic table and set its colour">⊞ PERIODIC TABLE</button>
+                            <button class="btn" id="b-colreset">RESET COLORS</button></div>
                     </div>
                 </div>
                 <button class="tab-btn" id="tab" aria-expanded="false">STYLE<span class="chev">▲</span></button>
@@ -403,6 +416,15 @@
         <div id="pt-labels"></div>
         <div class="pt-custom"><label for="pt-custom">Any symbol</label><input id="pt-custom" placeholder="e.g. R⁴, Nu⁻, OTs, Hal — then Enter" autocomplete="off">
             <label class="pt-chk"><input type="checkbox" id="pt-aslabel"> always as a label</label></div>
+    </div>
+</div>
+<div id="savebox" class="modal" hidden role="dialog" aria-label="Save drawing">
+    <div class="modal-card" style="width:min(420px,100%)">
+        <div class="modal-head"><b>Save for later editing</b></div>
+        <label class="lbl2" for="save-name">File name</label>
+        <div style="display:flex;gap:6px;align-items:center;margin:4px 0 10px"><input id="save-name" class="btn" style="flex:1;text-align:left;font-weight:500;text-transform:none;letter-spacing:0" autocomplete="off"><span class="hint-sm" style="margin:0">.mstudio</span></div>
+        <div class="hint-sm" id="save-where" style="line-height:1.45"></div>
+        <div class="btn-row two" style="margin-top:10px"><button class="btn" id="save-cancel">CANCEL</button><button class="btn primary" id="save-go">SAVE</button></div>
     </div>
 </div>
 <div id="gifbox" class="modal" hidden role="dialog" aria-label="Export animated GIF">
@@ -1593,6 +1615,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     const store = { get: (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (err) { return null; } },
                     set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (err) {} } };
     Object.assign(disp, store.get('molstudio-2d-v2') || {});
+    if (!disp.mig3) { disp.transparent = true; disp.mig3 = true; }      // transparent SVG / PNG background: on by default
     if (!STYLES[disp.style]) disp.style = 'studio';
     if (disp.hyd === true && disp.hydMode === 'off') disp.hydMode = 'expanded'; delete disp.hyd;
     const hydMode = () => disp.hydMode || 'off';
@@ -3324,7 +3347,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             b.className = 'pt-cell cat-' + catOf(e.s, e.z); b.style.gridRow = r >= 9 ? r + 1 : r; b.style.gridColumn = c;
             b.innerHTML = `<i>${e.z}</i><b>${e.s}</b><s>${e.m < 100 ? e.m.toFixed(2) : e.m.toFixed(e.m % 1 ? 1 : 0)}</s>`;
             b.title = `${e.s} (Z = ${e.z}) · ${e.m} g/mol`;
-            b.addEventListener('click', () => { useExtra(e.s, false); closeTable(); });
+            b.addEventListener('click', () => { if (ptPick) { const f = ptPick; ptPick = null; closeTable(); f(e.s); return; } useExtra(e.s, false); closeTable(); });
             g.appendChild(b);
         });
         const gap = document.createElement('div'); gap.style.gridRow = 9; gap.style.gridColumn = '1 / -1'; gap.style.height = '8px'; g.appendChild(gap);
@@ -3333,8 +3356,10 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             const b = document.createElement('button'); b.className = 'btn lbl-btn'; b.textContent = s; b.title = 'Draw the label ' + s;
             b.addEventListener('click', () => { useExtra(s, true); closeTable(); }); L.appendChild(b); });
     }
+    let ptPick = null;      // when set, the periodic table returns the picked element to this callback (element colours)
     function openTable() { if (!$('pt-grid').children.length) buildTable(); $('ptable').hidden = false; $('pt-custom').focus(); }
-    function closeTable() { $('ptable').hidden = true; }
+    function closeTable() { $('ptable').hidden = true; ptPick = null; }
+    function pickElementColor() { openTable(); ptPick = (el) => { if (!CUSTOM[el]) { CUSTOM[el] = COL3(el); saveColors(); } buildChips(); const inp = [...$('el-chips').querySelectorAll('input')].find(x => x.getAttribute('aria-label') === el + ' color'); if (inp) inp.click(); }; }
     $('pt-close').addEventListener('click', closeTable);
     $('ptable').addEventListener('pointerdown', (e) => { if (e.target.id === 'ptable') closeTable(); });
     $('pt-custom').addEventListener('keydown', (e) => {
@@ -3375,7 +3400,8 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     $('b-file').addEventListener('click', (e) => toggleMenu('file-menu', e.currentTarget));
     mkBtn(viewBar, 'v-group', ico('<rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/><path d="M15 3h6v6M9 21H3v-6" stroke-dasharray="2 2"/>'),
         'Group the selected structures, arrows, text and shapes so they move and align as one · with a single group selected, ungroup it (Ctrl+G)', () => toggleGroup(), 'tool');
-    mkBtn(viewBar, 'b-display', 'DISPLAY ▾', 'Drawing style, colors, implied atoms, lone pairs, toolbars', (e) => toggleMenu('display-menu', e.currentTarget));
+    { const db = mkBtn(viewBar, 'b-display', 'DISPLAY ▾', 'Drawing style, colors, implied atoms, lone pairs, toolbars', (e) => toggleMenu('display-menu', e.currentTarget), 'btn');
+      db.draggable = false; delete db.dataset.id; $('b-file').after(db); }      // lives in the top bar, right of FILE
 
     // ---- pop-up menus (positioned next to their button, wherever its bar is docked)
     const MENUS = ['file-menu', 'display-menu', 'export-menu', 'hl-menu', 'color-menu', 'fill-menu'];
@@ -3613,12 +3639,12 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     }
 
     // ---- dockable bars, re-orderable icons, hide / show
-    const LAYOUT_KEY = 'molstudio-layout-v6';
+    const LAYOUT_KEY = 'molstudio-layout-v7';
     // starting layout: elements down the far left, drawing tools beside them, file / edit / view along the top
     const BARS = { els: { el: elBar, name: 'Elements', side: 'left' }, tools: { el: toolsBar, name: 'Drawing tools', side: 'left' },
                    view: { el: viewBar, name: 'View & file', side: 'top' }, ctx: { el: ctxBar, name: 'Selection & options', side: 'top' } };
     const DEFAULT_ORDER = { tools: TOOL_ORDER.filter(id => !id.startsWith('act-') || id === 'act-clean'),
-        view: ['v-open', 'v-save', 'v-smiles', 'act-clear', 'act-undo', 'act-redo', 'z-out', 'z-in', 'z-fit', 'r-ccw', 'r-cw', 'f-h', 'f-v', 'v-group', 'b-display'] };
+        view: ['v-open', 'v-save', 'v-smiles', 'act-clear', 'act-undo', 'act-redo', 'z-out', 'z-in', 'z-fit', 'r-ccw', 'r-cw', 'f-h', 'f-v', 'v-group'] };
     const layout = Object.assign({ order: JSON.parse(JSON.stringify(DEFAULT_ORDER)), hidden: {} }, store.get(LAYOUT_KEY) || {});
     Object.keys(BARS).forEach(k => { if (!layout[k]) layout[k] = BARS[k].side; });
     const saveLayout = () => store.set(LAYOUT_KEY, layout);
@@ -3808,6 +3834,26 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     $('nm-copyname').addEventListener('click', () => { if (nameCtx && nameCache[nameCtx.smi]) copyText(nameCache[nameCtx.smi].name, 'Name'); });
     $('nm-copysmi').addEventListener('click', () => { if (nameCtx && nameCtx.smi) copyText(nameCtx.smi, 'SMILES'); });
 
+    async function saveAs(blob, base, ext) {
+        if (window.showSaveFilePicker) {      // pick the folder and name in the computer's own Save window
+            try {
+                const h = await window.showSaveFilePicker({ suggestedName: base + ext, types: [{ description: "Z's Molecular Studio drawing", accept: { 'application/json': [ext] } }] });
+                const w = await h.createWritable(); await w.write(blob); await w.close(); showMsg('Saved ' + h.name); return;
+            } catch (err) { if (err && err.name === 'AbortError') return; /* not allowed here (e.g. inside a frame): fall back below */ }
+        }
+        const box = $('savebox'), inp = $('save-name'); inp.value = base;
+        // this browser won't open a "Save As" window for web pages, so say how to make it ask where each download goes
+        const ua = navigator.userAgent, isFF = /Firefox\//.test(ua), isSafari = /Safari\//.test(ua) && !/Chrome|Chromium|Edg\//.test(ua);
+        $('save-where').innerHTML = isSafari
+            ? 'Safari saves to your <b>Downloads</b> folder. To choose a folder every time: <b>Safari ▸ Settings ▸ General ▸ File download location ▸ Ask for each download</b>. (Chrome and Edge show a full “Save As” window here.)'
+            : isFF ? 'Firefox saves to your <b>Downloads</b> folder. To choose a folder every time: <b>Settings ▸ General ▸ Files and Applications ▸ Downloads ▸ Always ask you where to save files</b>.'
+            : 'This page can’t open the “Save As” window from here, so the file goes to your <b>Downloads</b> folder. To choose a folder every time: <b>Settings ▸ Downloads ▸ Ask where to save each file before downloading</b>.';
+        box.hidden = false; inp.focus(); inp.select();
+        const done = (ok) => { box.hidden = true; $('save-go').onclick = $('save-cancel').onclick = inp.onkeydown = null;
+            if (!ok) return; let n = inp.value.trim() || base; if (!n.toLowerCase().endsWith(ext)) n += ext; download(blob, n); showMsg('Saved ' + n + ' (to your Downloads folder, or wherever your browser asks)'); };
+        $('save-go').onclick = () => done(true); $('save-cancel').onclick = () => done(false);
+        inp.onkeydown = (e) => { e.stopPropagation(); if (e.key === 'Enter') done(true); if (e.key === 'Escape') done(false); };
+    }
     function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800); }
     function exportSVG(items, transparent) {
         const S = STYLES[disp.style];
@@ -3856,8 +3902,8 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     $('f-save').addEventListener('click', () => {
         closeMenus();
         const doc = { format: 'molecule-studio', version: 1, saved: new Date().toISOString(), smiles: toSMILES(mol), display: { style: disp.style }, mol };
-        const smi = toSMILES(mol), nm = (nameCache[smi] && nameCache[smi].name) || 'drawing';
-        download(new Blob([JSON.stringify(doc, null, 1)], { type: 'application/json' }), nm.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_').slice(0, 120) + '.mstudio');
+        const smi = toSMILES(mol), nm = ((nameCache[smi] && nameCache[smi].name) || 'drawing').replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_').slice(0, 120);
+        saveAs(new Blob([JSON.stringify(doc, null, 1)], { type: 'application/json' }), nm, '.mstudio');
     });
     $('f-new').addEventListener('click', () => { closeMenus(); if (!mol.atoms.length && !mol.arrows.length) return; commit(); mol = normMol(newMol()); clearSel(); changed(); });
     $('f-open').addEventListener('click', () => { closeMenus(); $('file-input').value = ''; $('file-input').click(); });
@@ -4045,7 +4091,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     // drag the divider between the 2D and 3D windows
     { const dv = $('divider'), main = $('main');
       const setSplit = (pct) => { pct = clamp(pct, 18, 82); main.style.setProperty('--split', pct + '%'); disp.split = pct; };
-      if (disp.split) setSplit(disp.split);
+      setSplit(66.67);      // the 2D editor starts with two thirds of the width
       dv.addEventListener('pointerdown', (e) => { e.preventDefault(); dv.setPointerCapture(e.pointerId); dv.classList.add('dragging');
           const mv = (ev) => { const r = main.getBoundingClientRect(); setSplit((ev.clientX - r.left) / r.width * 100); };
           const up = () => { dv.removeEventListener('pointermove', mv); dv.removeEventListener('pointerup', up); dv.classList.remove('dragging'); saveDisp(); };
@@ -4240,7 +4286,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     function buildChips() {
         const box = $('el-chips'); box.innerHTML = '';
         const present = M3 ? M3.parts.map(p => p.el) : [];
-        const list = [...new Set(['C', 'H', 'N', 'O', 'S', 'P', ...present])].filter(e => ELEMENTS[e]);
+        const list = [...new Set(['C', 'H', 'N', 'O', 'S', 'P', ...present, ...Object.keys(CUSTOM).filter(k => k !== 'bond')])].filter(e => ELEMENTS[e]);
         [...list, 'bond'].forEach(el => {
             const lab = document.createElement('label'); lab.className = 'chip';
             const inp = document.createElement('input'); inp.type = 'color'; inp.value = COL3(el); inp.setAttribute('aria-label', (el === 'bond' ? 'Bond' : el) + ' color');
@@ -4421,6 +4467,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     $('b-flex').addEventListener('click', () => setFlex(!st.flex));
     ['x', 'y', 'z'].forEach(k => $('b-r' + k).addEventListener('click', (e) => { st.rot[k] = !st.rot[k]; e.currentTarget.classList.toggle('active', st.rot[k]); }));
     $('b-reset').addEventListener('click', () => fitCamera());
+    $('b-colpt').addEventListener('click', () => pickElementColor());
     $('b-colreset').addEventListener('click', () => { CUSTOM = {}; saveColors(); if (M3) { M3.parts.forEach(p => applyColor(p.el)); applyColor('bond'); } buildChips(); });
     $('pause3d').addEventListener('click', (e) => { st.paused = !st.paused; e.currentTarget.classList.toggle('active', st.paused); e.currentTarget.textContent = st.paused ? '▶ PLAY' : '❚❚ PAUSE'; });
     const BGS = [
@@ -4508,8 +4555,8 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     const styleW = () => Math.min(680, innerWidth - 80);
     function placeRight() { const v = vwrap.getBoundingClientRect(), t = tabEl.getBoundingClientRect(), w = Math.min(styleW(), t.left - 12);
         Object.assign(styleEl.style, { left: (t.left - w - 4) + 'px', top: (v.top + 8) + 'px', width: w + 'px', height: 'auto', maxHeight: (v.height - 16) + 'px' }); }
-    function placeOver() { const r = $('sketch-wrap').getBoundingClientRect(), w = Math.min(styleW(), r.width - 16);      // centred in the white drawing area
-        Object.assign(styleEl.style, { left: (r.left + (r.width - w) / 2) + 'px', top: r.top + 'px', width: w + 'px', height: 'auto', maxHeight: (r.height - 16) + 'px' });
+    function placeOver() { const r = $('sketch-wrap').getBoundingClientRect(), w = styleW();      // full size, centred on the white drawing area
+        Object.assign(styleEl.style, { left: clamp(r.left + (r.width - w) / 2, 6, innerWidth - w - 6) + 'px', top: r.top + 'px', width: w + 'px', height: 'auto', maxHeight: (r.height - 16) + 'px' });
         const h = styleEl.offsetHeight; styleEl.style.top = (r.top + Math.max(8, (r.height - h) / 2)) + 'px'; }
     function openStyle() {
         if (styleMode) return;
@@ -4704,6 +4751,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         if (s.atoms.length === 1 && g.atoms[s.mov].el === 'H') { showMsg('Turning a bond to a lone H changes nothing — pick a bond between two larger groups'); return; }
         if (st.flex) setFlex(false); else bakeConformation();
         if (mm.running) mmStop();
+        st.rot = { x: false, y: false, z: false }; ['x', 'y', 'z'].forEach(a => $('b-r' + a).classList.remove('active'));      // the model holds still while a bond is worked on
         bondSel = { k, ...s, total: 0 };
         $('bp-name').textContent = nm; $('bp-ang').value = 0; $('bp-val').textContent = '0°'; $('bondpanel').hidden = false;
         bondMark.visible = bondRing.visible = true; updateBondMarker();
@@ -4751,15 +4799,16 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     // =====================================================================
     let bgCols = BGS[0].g;
     function applyBG() {
-        const v = st.vignette, g = bgCols;
-        // more vignette = a brighter centre, a darker rim and a tighter falloff
-        const inner = hexMix(g[0], '#ffffff', v * 0.22), outer = hexMix(g[2], '#000000', Math.min(1, v * 1.05)), mid = Math.round(64 - 44 * v), size = Math.round(150 - 85 * v);
+        const g = bgCols;
+        // shadow: how dark the rim gets (and how tight the falloff); highlight: how bright the centre gets
+        const vs = st.vigS, vh = st.vigH, inner = hexMix(g[0], '#ffffff', vh * 0.45), outer = hexMix(g[2], '#000000', Math.min(1, vs * 1.05)), mid = Math.round(64 - 44 * vs), size = Math.round(150 - 85 * vs);
         vwrap.style.background = `radial-gradient(${size}% ${Math.round(size * 0.8)}% at 50% 42%, ${inner} 0%, ${g[1]} ${mid}%, ${outer} 100%)`;
     }
-    st.vignette = 0.45;
+    st.vigS = 0.45; st.vigH = 0.3;
     bgBtns.forEach((b, i) => b.addEventListener('click', () => { bgCols = BGS[i].g; applyBG(); }));
     $('bg-any').addEventListener('input', (e) => { const c = e.target.value; bgCols = [hexMix(c, '#ffffff', 0.18), c, hexMix(c, '#000000', 0.55)]; applyBG(); });
-    bindSlider('s-vig', v => Math.round(v * 100) + '%', v => { st.vignette = v; applyBG(); });
+    bindSlider('s-vigs', v => Math.round(v * 100) + '%', v => { st.vigS = v; applyBG(); });
+    bindSlider('s-vigh', v => Math.round(v * 100) + '%', v => { st.vigH = v; applyBG(); });
     // ---- Party Mode (dark mode only): neon structures and arrows on black with a faint glow; the 3D view goes black and glows the same colour
     const NEON = [['Neon blue', '#1fb6ff'], ['Neon green', '#39ff14'], ['Neon yellow', '#fff01f'], ['Neon orange', '#ff9f1c'], ['Neon red', '#ff3131'], ['Neon purple', '#bc13fe'], ['Rainbow (slowly cycles)', 'rainbow']];
     const RAINBOW = ['#1fb6ff', '#39ff14', '#fff01f', '#ff9f1c', '#ff3131', '#bc13fe'], RB_T = 42;
@@ -4774,7 +4823,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         if (on && !PARTY.on) {
             prevAtomN = mol.atoms.length;
             { const fl = document.createElement('div'); fl.className = 'party-flash'; document.body.appendChild(fl); setTimeout(() => fl.remove(), 1500); }      // a sweep of rainbow light
-            PARTY.saved = { bgCols, vig: st.vignette, glow: st.glow, gcol: '#' + GLOWU.col.value.getHexString(), r: GLOWU.r.value };
+            PARTY.saved = { bgCols, glow: st.glow, gcol: '#' + GLOWU.col.value.getHexString(), r: GLOWU.r.value };
             PARTY.on = true; bgCols = ['#000000', '#000000', '#000000']; applyBG();
             if (!st.glow) $('b-glow').click();
             if (GLOWU.r.value < 1.2) { GLOWU.r.value = 1.2; }
@@ -4795,10 +4844,10 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         b.addEventListener('click', () => setParty(true, c)); $('party-cols').appendChild(b); });
     $('b-party').addEventListener('click', () => setParty(!PARTY.on));
     function paintBG(ctx, W, H) {        // the same background on a 2D canvas (for GIF frames)
-        const v = st.vignette, g = bgCols, outer = hexMix(g[2], '#000000', v * 0.65), size = (150 - 55 * v) / 100;
+        const vs = st.vigS, vh = st.vigH, g = bgCols, inner = hexMix(g[0], '#ffffff', vh * 0.45), outer = hexMix(g[2], '#000000', Math.min(1, vs * 1.05)), size = (150 - 85 * vs) / 100;
         ctx.save(); ctx.fillStyle = outer; ctx.fillRect(0, 0, W, H);
-        ctx.translate(W * 0.5, H * 0.38); ctx.scale(size * W / 2, size * 0.78 * H / 2);
-        const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, 1.414); gr.addColorStop(0, g[0]); gr.addColorStop((62 - 30 * v) / 100, g[1]); gr.addColorStop(1, outer);
+        ctx.translate(W * 0.5, H * 0.42); ctx.scale(size * W / 2, size * 0.8 * H / 2);
+        const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, 1.414); gr.addColorStop(0, inner); gr.addColorStop((64 - 44 * vs) / 100, g[1]); gr.addColorStop(1, outer);
         ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0, 0, 3, 0, 2 * Math.PI); ctx.fill(); ctx.restore();
     }
 
@@ -4828,6 +4877,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     ['#60a5fa', '#a78bfa', '#f472b6', '#f87171', '#fb923c', '#fbbf24', '#4ade80', '#2dd4bf', '#ffffff'].forEach(c => {
         const b = document.createElement('button'); b.style.background = c; b.title = 'Glow ' + c; b.setAttribute('aria-label', 'Glow color ' + c);
         b.addEventListener('click', () => { if (PARTY.on) { setParty(true, c); return; } GLOWU.col.value.set(c); $('glow-col').value = c; if (!st.glow) $('b-glow').click(); }); $('glow-presets').appendChild(b); });
+    { const lab = document.createElement('label'); lab.className = 'glow-any'; lab.title = 'Any glow colour'; const gc = $('glow-col'); gc.hidden = false; lab.appendChild(gc); $('glow-presets').appendChild(lab); }
     bindSlider('s-glowp', v => v ? v.toFixed(1) + ' /s' : 'steady', v => { st.glowSpeed = v; });
     let glowT = 0;
     const glowPulse = (ph) => 0.62 + 0.38 * Math.sin(ph);
@@ -5030,19 +5080,29 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     let nvDrag = null;
     vwrap.addEventListener('pointerdown', (e) => {
         if (!NV || e.target !== renderer.domElement || !M3) return;
-        e.stopPropagation(); world.updateMatrixWorld(); camera.updateMatrixWorld();
+        world.updateMatrixWorld(); camera.updateMatrixWorld();
         const r = renderer.domElement.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
         let best = -1, bd = 1e9; M3.cur.forEach((_, i) => { if (i === NV.front || i === NV.back) return; const s = screenOf(M3.cur[i]), d = Math.hypot(s.x - px, s.y - py) - (NV.sides[NV.dir > 0 ? 'A' : 'B'].has(i) ? 6 : 0); if (d < bd) { bd = d; best = i; } });
-        if (best < 0 || bd > 90) return;
-        const frontSet = NV.sides[NV.front === M3.g.bonds[NV.k].a ? 'A' : 'B'], set = frontSet.has(best) ? frontSet : NV.sides[NV.front === M3.g.bonds[NV.k].a ? 'B' : 'A'];
-        const c = screenOf(M3.cur[NV.front]);
-        nvDrag = { set, cx: c.x + r.left, cy: c.y + r.top, a0: Math.atan2(-(e.clientY - (c.y + r.top)), e.clientX - (c.x + r.left)) };
+        if (best < 0 || bd > 40) {      // not on a group: leave the Newman view; this drag (and later ones) turn the whole model freely
+            CAM = null; camera.up.copy(NV.saved.up); camera.lookAt(controls.target); controls.enabled = true; NV = null;
+            $('bp-side').hidden = true; $('hint3d').textContent = 'drag to rotate · scroll to zoom · arrows move · click a bond'; return; }
+        e.stopPropagation(); controls.enabled = false;
+        const frontSet = NV.sides[NV.front === M3.g.bonds[NV.k].a ? 'A' : 'B'], isFront = frontSet.has(best), set = isFront ? frontSet : NV.sides[NV.front === M3.g.bonds[NV.k].a ? 'B' : 'A'];
+        const c = screenOf(M3.cur[NV.front]), ctr = isFront ? NV.front : NV.back;
+        // a group on the turning carbon to watch for snapping (straight up / down, every 30°)
+        const refs = M3.nb[ctr].map(x => x.j).filter(j => set.has(j) && j !== NV.front && j !== NV.back), ref = refs.find(j => M3.g.atoms[j].el !== 'H') ?? refs[0];
+        const sa = (i) => { const q = screenOf(M3.cur[i]); return Math.atan2(-(q.y - c.y), q.x - c.x); };
+        nvDrag = { set, cx: c.x + r.left, cy: c.y + r.top, a0: Math.atan2(-(e.clientY - (c.y + r.top)), e.clientX - (c.x + r.left)), raw: 0, applied: 0, ref, ref0: ref != null ? sa(ref) : 0 };
         renderer.domElement.setPointerCapture(e.pointerId);
     }, true);
     vwrap.addEventListener('pointermove', (e) => {
         if (!nvDrag) { if (NV && e.target === renderer.domElement) renderer.domElement.style.cursor = 'grab'; return; }
         const a = Math.atan2(-(e.clientY - nvDrag.cy), e.clientX - nvDrag.cx), da = Math.atan2(Math.sin(a - nvDrag.a0), Math.cos(a - nvDrag.a0)); nvDrag.a0 = a;
-        const axis = M3.base[NV.front].clone().sub(M3.base[NV.back]).normalize(), o = M3.base[NV.front].clone(); qb.setFromAxisAngle(axis, da);
+        nvDrag.raw += da;
+        let want = nvDrag.raw;
+        if (nvDrag.ref != null && !e.altKey) { const ang = nvDrag.ref0 + want, sn = Math.round(ang / (30 * deg)) * 30 * deg; if (Math.abs(ang - sn) < 6 * deg) want = sn - nvDrag.ref0; }      // snap every 30° (Alt: free)
+        const step = want - nvDrag.applied; nvDrag.applied = want; if (Math.abs(step) < 1e-6) return;
+        const axis = M3.base[NV.front].clone().sub(M3.base[NV.back]).normalize(), o = M3.base[NV.front].clone(); qb.setFromAxisAngle(axis, step);
         nvDrag.set.forEach(i => { M3.base[i].sub(o).applyQuaternion(qb).add(o); });
         for (let i = 0; i < M3.cur.length; i++) M3.cur[i].copy(M3.base[i]); place3D();
     }, true);
