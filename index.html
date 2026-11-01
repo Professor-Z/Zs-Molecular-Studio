@@ -273,6 +273,11 @@
     #center3d { position: absolute; left: 50%; transform: translateX(-50%); top: 10px; z-index: 6; border-radius: 999px; padding: 0.45rem 0.9rem; background: rgba(30,41,59,0.9); border: 1px solid rgba(255,255,255,0.15); }
     #main.anim { transition: grid-template-columns 0.45s ease; }
     #hint3d { position: absolute; left: 50%; transform: translateX(-50%); bottom: 10px; max-width: calc(100% - 90px); text-align: center; font-size: 0.7rem; color: rgba(226,232,240,0.7); pointer-events: none; z-index: 5; }
+    #v3-off { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 24px; pointer-events: none; color: #cbd5e1; font: 500 0.85rem/1.45 "Inter", system-ui, sans-serif; }
+    #v3-off[hidden] { display: none; }
+    #v3-off b { font-size: 1rem; letter-spacing: 0.04em; color: #f1f5f9; }
+    body.light #v3-off { color: #475569; } body.light #v3-off b { color: #0f172a; }
+    #topbar .seg .btn.unavail, #topbar .seg .btn.unavail:hover { opacity: 0.35; cursor: not-allowed; filter: grayscale(1); }
 </style>
 </head>
 <body>
@@ -465,7 +470,7 @@
 </div>
 <div id="file-menu" class="menu" hidden>
     <button class="mi" id="f-new">New drawing</button>
-    <button class="mi" id="f-open">Open… <span>.mstudio, .mol, .smi</span></button>
+    <button class="mi" id="f-open">Open… <span>.mstudio, .mol, .smi, ChemDraw .cdx</span></button>
     <button class="mi" id="f-save">Save for later editing <span>.mstudio · Ctrl+S</span></button>
     <div class="dm-head">Examples</div>
     <select id="examples" class="ex-select" aria-label="Example molecules"><option value="">Choose an example molecule…</option></select>
@@ -504,7 +509,7 @@
         <label class="ctx-slider" title="How far the glow spreads">RADIUS <input type="range" id="hl-glowr" min="0.08" max="0.8" step="0.02" value="0.3" aria-label="Glow radius"></label></div>
     <button class="mi" id="hl-none">Remove highlight</button>
 </div>
-<input type="file" id="file-input" accept=".mstudio,.json,.mol,.sdf,.smi,.txt" hidden>
+<input type="file" id="file-input" accept=".mstudio,.json,.mol,.sdf,.smi,.txt,.cdx" hidden>
 <script>
 // ============================================================================
 //  Chemistry core: molecule graph, valence/implicit H, SMILES in/out,
@@ -2101,7 +2106,11 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         const label = (x, y, el, info, color) => {
             // the symbol is centred on the atom; an attached "H₂" sits to its right (or left, "H₂N")
             const f = info.f, base = y + f * 0.35, fs = info.f !== f0 ? ` font-size="${f.toFixed(3)}"` : '';
-            let s = `<text x="${x.toFixed(3)}" y="${base.toFixed(3)}" text-anchor="middle" fill="${color}"${fs}>${esc(el)}</text>`;
+            let body = esc(el);
+            if (el.length > 1 && /\d|[+\-]$/.test(el) && !ELEMENTS[el]) {      // a group label (CF3, CO2H, SO3-): chemical sub- and superscripts
+                let cur = 0; body = formulaRuns(el, true).map(r => { const want = r.m === 'sub' ? f * 0.22 : r.m === 'sup' ? -f * 0.38 : 0, dy = want - cur; cur = want;
+                    return `<tspan${dy ? ` dy="${dy.toFixed(3)}"` : ''}${r.m !== 'n' ? ` font-size="${(f * 0.7).toFixed(3)}"` : ''}>${esc(r.t)}</tspan>`; }).join(''); }
+            let s = `<text x="${x.toFixed(3)}" y="${base.toFixed(3)}" text-anchor="middle" fill="${color}"${fs}>${body}</text>`;
             if (info.hInLabel) {
                 const hx = info.left ? x - info.elW / 2 : x + info.elW / 2;
                 s += `<text x="${hx.toFixed(3)}" y="${base.toFixed(3)}" text-anchor="${info.left ? 'end' : 'start'}" fill="${color}"${fs}>H` +
@@ -2475,6 +2484,11 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         view.tx = r.width / 2 - view.s * (b.x0 + b.x1) / 2; view.ty = r.height / 2 - view.s * (b.y0 + b.y1) / 2;
         render();
     }
+    let lastPtr = null; window.addEventListener('pointermove', (e) => { lastPtr = { x: e.clientX, y: e.clientY }; }, { passive: true });
+    function zoom2DAt(f) {        // zoom about the pointer (the spot under it stays put), else about the centre
+        const r = svg.getBoundingClientRect(); if (!lastPtr || lastPtr.x < r.left || lastPtr.x > r.right || lastPtr.y < r.top || lastPtr.y > r.bottom) { zoomBy(f); return; }
+        const mx = lastPtr.x - r.left, my = lastPtr.y - r.top, s2 = clamp(view.s * f, 8, 160);
+        view.tx = mx - (mx - view.tx) * s2 / view.s; view.ty = my - (my - view.ty) * s2 / view.s; view.s = s2; render(); }
     function zoomBy(f) { const r = svg.getBoundingClientRect(), mx = r.width / 2, my = r.height / 2, s2 = clamp(view.s * f, 8, 160);
         view.tx = mx - (mx - view.tx) * s2 / view.s; view.ty = my - (my - view.ty) * s2 / view.s; view.s = s2; render(); }
 
@@ -3912,7 +3926,220 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     $('editor').addEventListener('dragover', (e) => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) { e.preventDefault(); wrap.classList.add('dropping'); } });
     $('editor').addEventListener('dragleave', () => wrap.classList.remove('dropping'));
     $('editor').addEventListener('drop', (e) => { wrap.classList.remove('dropping'); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) { e.preventDefault(); openFile(f); } });
+    // =====================================================================
+    //  ChemDraw import: binary .cdx files (ChemDraw 4 and later)
+    //  structures, labels, charges, radicals, lone pairs, wedges, text, arrows (straight, curved, arc), shapes, colours
+    // =====================================================================
+    const CDX_EL = ' H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og'.split(' ');
+    function parseCDX(buf) {
+        const u8 = new Uint8Array(buf), dv = new DataView(buf);
+        if (u8.length < 30 || String.fromCharCode(...u8.slice(0, 8)) !== 'VjCD0100') throw new Error('not a ChemDraw CDX file');
+        // ---- 1. the raw object tree: { tag, id, p: Map(tag -> [offset, length]), kids: [] }
+        let pos = 22; const root = { tag: 0, kids: [] }, stack = [root];
+        while (pos + 2 <= u8.length) {
+            const tag = dv.getUint16(pos, true); pos += 2;
+            if (tag & 0x8000) { const o = { tag, id: dv.getUint32(pos, true), p: new Map(), kids: [] }; pos += 4; stack[stack.length - 1].kids.push(o); stack.push(o); }
+            else if (tag === 0) { stack.pop(); if (stack.length <= 1) break; }
+            else { let n = dv.getUint16(pos, true); pos += 2; if (n === 0xFFFF) { n = dv.getUint32(pos, true); pos += 4; }
+                if (pos + n > u8.length) break; stack[stack.length - 1].p.set(tag, [pos, n]); pos += n; }
+        }
+        const doc = root.kids.find(o => o.tag === 0x8000); if (!doc) throw new Error('no document in the file');
+        // ---- 2. property readers (integers are read by their stored size: ChemDraw 8.0 wrote some with the wrong width)
+        const has = (o, t) => o.p.has(t);
+        const int = (o, t, def) => { const r = o.p.get(t); if (!r) return def; const [s, n] = r;
+            return n >= 4 ? dv.getInt32(s, true) : n === 2 ? dv.getInt16(s, true) : n === 1 ? dv.getInt8(s) : def; };
+        const uint = (o, t, def) => { const r = o.p.get(t); if (!r) return def; const [s, n] = r; return n >= 4 ? dv.getUint32(s, true) : n === 2 ? dv.getUint16(s, true) : n === 1 ? u8[s] : def; };
+        const F = 65536;
+        const pt2 = (o, t) => { const r = o.p.get(t); if (!r || r[1] < 8) return null; return { x: dv.getInt32(r[0] + 4, true) / F, y: dv.getInt32(r[0], true) / F }; };   // stored y, x
+        const pt3 = (o, t) => { const r = o.p.get(t); if (!r || r[1] < 8) return null; return { x: dv.getInt32(r[0], true) / F, y: dv.getInt32(r[0] + 4, true) / F }; };   // stored x, y, z
+        const rect = (o) => { const r = o.p.get(0x0204); if (!r || r[1] < 16) return null; const g = (k) => dv.getInt32(r[0] + 4 * k, true) / F; return { t: g(0), l: g(1), b: g(2), r: g(3) }; };
+        const str = (o) => { const r = o.p.get(0x0700); if (!r) return null; const [s, n] = r; if (n < 2) return { text: '', runs: [] };
+            const nr = dv.getUint16(s, true), runs = []; let q = s + 2;
+            for (let k = 0; k < nr && q + 10 <= s + n; k++, q += 10) runs.push({ at: dv.getUint16(q, true), font: dv.getUint16(q + 2, true), face: dv.getUint16(q + 4, true), size: dv.getUint16(q + 6, true) / 20, color: dv.getUint16(q + 8, true) });
+            let text = ''; for (let k = q; k < s + n; k++) text += String.fromCharCode(u8[k]);
+            text = text.replace(/\r\n?/g, '\n').replace(/ /g, ' '); return { text, runs }; };
+        // ---- 3. document defaults: colour table, bond length, label size
+        const colors = ['#000000', '#ffffff'];
+        { const r = doc.p.get(0x0300); if (r) { const n = dv.getUint16(r[0], true); for (let k = 0; k < n && 2 + 6 * k + 6 <= r[1]; k++) { const c = (j) => (dv.getUint16(r[0] + 2 + 6 * k + 2 * j, true) >> 8).toString(16).padStart(2, '0'); colors.push('#' + c(0) + c(1) + c(2)); } } }
+        const colOf = (o) => { if (!has(o, 0x0301)) return null; const c = colors[uint(o, 0x0301, 0)]; return c && c !== '#000000' ? c : null; };
+        let labelPt = 10; { const r = doc.p.get(0x080A); if (r && r[1] >= 8) labelPt = dv.getUint16(r[0] + 4, true) / 20 || 10; if (has(doc, 0x081C)) labelPt = uint(doc, 0x081C, 200) / 20 || labelPt; }
+        // ---- 4. walk the drawing
+        const m = { atoms: [], bonds: [], arrows: [], fills: [] }, idx = new Map(), warn = {}, lps = [], frags = [];
+        const W = (k) => { warn[k] = (warn[k] || 0) + 1; };
+        let grpSeq = 0;
+        const labelOf = (node) => { const t = node.kids.find(o => o.tag === 0x8006); const s = t && str(t); return s ? s.text.replace(/\n/g, '').trim() : ''; };
+        function fragment(fr, grp) {
+            const mine = [];
+            fr.kids.forEach(o => {
+                if (o.tag !== 0x8004) return;
+                const P = pt2(o, 0x0200); if (!P) return;
+                const type = int(o, 0x0400, 1), Z = int(o, 0x0402, 6), lab = labelOf(o);
+                if (type === 12) return;                                   // external connection point (inside an abbreviation)
+                const a = { el: CDX_EL[Z] || 'C', charge: 0, hx: null, x: P.x, y: P.y };
+                if (has(o, 0x0421)) { const r = o.p.get(0x0421); a.charge = r[1] >= 4 ? dv.getInt32(r[0], true) >> 24 : int(o, 0x0421, 0); }
+                const rad = int(o, 0x0422, 0); if (rad === 2) a.rad = 1; else if (rad === 1 || rad === 3) a.rad = 2;
+                const isEl = type === 1 || type === 0 && !lab;
+                if (!isEl || (lab && !new RegExp('^' + a.el + '(H\\d*)?$|^(H\\d*)?' + a.el + '$').test(lab.replace(/[+\-−•.:]+$/, '')))) {
+                    if (lab) { a.el = lab.replace(/[−]/g, '-'); a.pseudo = true; a.charge = 0; delete a.rad; } else return; }
+                else if (a.el === 'C' && lab) { const hm = lab.match(/H(\d*)/); a.hx = has(o, 0x042B) ? int(o, 0x042B, 0) : hm ? +(hm[1] || 1) : 0; }      // a carbon drawn with its label (CH3, CH2 ...)
+                if (grp) a.grp = grp;
+                idx.set(o.id, m.atoms.length); mine.push({ i: m.atoms.length, lab, node: o }); m.atoms.push(a);
+            });
+            let nb = 0;
+            fr.kids.forEach(o => {
+                if (o.tag !== 0x8005) return;
+                let i = idx.get(uint(o, 0x0604, -1)), j = idx.get(uint(o, 0x0605, -1)); if (i == null || j == null || i === j) return;
+                const ord = int(o, 0x0600, 1), disp = int(o, 0x0601, 0);
+                const b = { a: i, b: j, order: ord & 4 ? 3 : ord & 2 ? 2 : 1 };
+                if (ord & 0x0100) b.order = 2; if (ord & 0x0200) b.order = 3;
+                if (has(o, 0x0603) && b.order === 2) { const dp = int(o, 0x0603, 0) & 0xFF; b.side = dp === 1 ? -1 : dp === 2 ? 1 : 0; if (!(int(o, 0x0603, 0) & 0x100) && dp === 0) delete b.side; }
+                let flip = false;
+                if (disp === 6) b.wedge = 'wedge'; else if (disp === 7) { b.wedge = 'wedge'; flip = true; }
+                else if (disp === 3) b.wedge = 'hash'; else if (disp === 4) { b.wedge = 'hash'; flip = true; }
+                else if (disp === 9) b.wedge = 'wedge'; else if (disp === 10) { b.wedge = 'wedge'; flip = true; }
+                else if (disp === 8 || disp === 11 || disp === 12) b.wedge = 'wavy';
+                else if (disp === 2) b.wedge = 'hash';
+                else if (disp === 5) b.bold = true;
+                if (flip) { b.a = j; b.b = i; if (b.side) b.side = -b.side; }
+                const c = colOf(o); if (c) b.color = c;
+                m.bonds.push(b); nb++;
+            });
+            // a lone label with no bonds (a reagent, an answer letter, "HBr") becomes a text box, written as ChemDraw showed it
+            if (!nb && mine.length === 1 && mine[0].lab) {
+                const { i, lab, node } = mine[0], a = m.atoms[i], t = node.kids.find(o => o.tag === 0x8006), s = t && str(t);
+                let txt = lab; if (!a.pseudo && a.charge && !/[+\-]$/.test(txt)) txt += (Math.abs(a.charge) > 1 ? Math.abs(a.charge) : '') + (a.charge > 0 ? '+' : '-');
+                frags.push({ i, text: { t: 'text', x1: 0, y1: 0, text: txt, size: 1, fmt: true, _box: t && rect(t), _pt: s && s.runs[0] ? s.runs[0].size : labelPt, _anchor: { x: a.x, y: a.y }, ...(s && s.runs[0] && colors[s.runs[0].color] && colors[s.runs[0].color] !== '#000000' ? { color: colors[s.runs[0].color] } : {}), ...(grp ? { grp } : {}) } });
+            }
+            fr.kids.forEach(o => walk(o, grp));
+        }
+        function textObj(o, grp) {
+            const s = str(o); if (!s || !s.text.trim()) return;
+            let text = s.text; const ls = o.p.get(0x0704);
+            if (ls && !/\n/.test(text)) { const n = dv.getUint16(ls[0], true), cuts = []; for (let k = 1; k < n; k++) cuts.push(dv.getUint16(ls[0] + 2 + 2 * k, true));
+                cuts.reverse().forEach(c => { if (c > 0 && c < text.length) text = text.slice(0, c).replace(/\s+$/, '') + '\n' + text.slice(c).replace(/^\s+/, ''); }); }
+            const fmt = s.runs.some(r => r.face & 0x60);
+            const c0 = s.runs[0] && colors[s.runs[0].color];
+            m.arrows.push({ t: 'text', x1: 0, y1: 0, text: text.replace(/[ \t]+$/gm, ''), size: 1, fmt, _box: rect(o), _pt: s.runs[0] ? s.runs[0].size : labelPt, _anchor: pt2(o, 0x0200), ...(c0 && c0 !== '#000000' ? { color: c0 } : {}), ...(grp ? { grp } : {}) });
+        }
+        // curved arrows: the app stores start, end and a bow; ChemDraw stores an arc (centre + angle) or a Bezier path
+        const curved = (tail, head, apex, half, grp, color, headType) => {
+            const ar = { t: half ? 'fish' : 'curve', x1: tail.x, y1: tail.y, x2: head.x, y2: head.y, head: headType || 'barb', ...(color ? { color } : {}), ...(grp ? { grp } : {}) };
+            const cx = 2 * apex.x - (tail.x + head.x) / 2, cy = 2 * apex.y - (tail.y + head.y) / 2, dx = head.x - tail.x, dy = head.y - tail.y, L2 = dx * dx + dy * dy || 1, rx = cx - tail.x, ry = cy - tail.y;
+            ar.ct = (rx * dx + ry * dy) / L2; ar.ch = (rx * -dy + ry * dx) / L2; m.arrows.push(ar);
+        };
+        const arcApex = (C, tail, head, deg) => {      // the middle of the arc of `deg` degrees from tail to head around C
+            const r = (Math.hypot(tail.x - C.x, tail.y - C.y) + Math.hypot(head.x - C.x, head.y - C.y)) / 2, t0 = Math.atan2(tail.y - C.y, tail.x - C.x), t1 = Math.atan2(head.y - C.y, head.x - C.x);
+            let d = t1 - t0; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI;
+            if (Math.abs(deg) > 180.5) d = d > 0 ? d - 2 * Math.PI : d + 2 * Math.PI;      // the long way round
+            const tm = t0 + d / 2; return { x: C.x + r * Math.cos(tm), y: C.y + r * Math.sin(tm) };
+        };
+        const straight = (tail, head, kind, grp, color, lt) => {
+            if (Math.hypot(head.x - tail.x, head.y - tail.y) < 1e-3) return;
+            if (kind === 'line') { m.arrows.push({ t: 'shape', shape: 'line', x1: tail.x, y1: tail.y, x2: head.x, y2: head.y, color: color || '#1e293b', fill: null, lw: lt & 2 ? 2 : 1, dash: lt & 1 ? 'dash' : null, ...(grp ? { grp } : {}) }); return; }
+            m.arrows.push({ t: kind, x1: tail.x, y1: tail.y, x2: head.x, y2: head.y, head: 'barb', size: 1, ...(color ? { color } : {}), ...(grp ? { grp } : {}) });
+        };
+        const kindOf = (at) => at & 8 ? 'eq' : at & 4 ? 'res' : at & (1 | 2 | 16 | 32 | 128) ? 'rxn' : 'line';
+        function graphic(o, grp) {
+            if (has(o, 0x0012)) return;                                    // superseded by a newer arrow object
+            const gt = int(o, 0x0A00, 0), R = rect(o), color = colOf(o);
+            const P1 = R && { x: R.l, y: R.t }, P2 = R && { x: R.r, y: R.b };
+            const H3 = pt3(o, 0x0207), T3 = pt3(o, 0x0208);
+            if (gt === 1) { const at = int(o, 0x0A02, 0); straight(T3 || P1, H3 || P2, kindOf(at), grp, color, int(o, 0x0A01, 0)); return; }
+            if (gt === 2) {                                                // arc: centre, end point, angular size (an old-style curved arrow)
+                const at = int(o, 0x0A02, 0), deg = int(o, 0x0A21, 900) / 10 || 90; if (!at) { W('plain arcs'); return; }
+                let tail, head; const C = P1;
+                if (H3 && T3) { head = H3; tail = T3; }
+                else { const th = -deg * Math.PI / 180, vx = P2.x - C.x, vy = P2.y - C.y; head = P2; tail = { x: C.x + vx * Math.cos(th) - vy * Math.sin(th), y: C.y + vx * Math.sin(th) + vy * Math.cos(th) }; }
+                curved(tail, head, arcApex(C, tail, head, deg), at === 1, grp, color); return; }
+            if (gt === 3) { const rt = int(o, 0x0A03, 0);
+                m.arrows.push({ t: 'shape', shape: 'rect', x1: P1.x, y1: P1.y, x2: P2.x, y2: P2.y, round: !!(rt & 1), shadow: !!(rt & 2), color: color || '#1e293b', fill: rt & 8 ? (color || '#1e293b') : null, lw: rt & 0x20 ? 2 : 1, dash: rt & 0x10 ? 'dash' : null, ...(grp ? { grp } : {}) }); return; }
+            if (gt === 4) { const ot = int(o, 0x0A04, 0); let rx = Math.hypot(P2.x - P1.x, P2.y - P1.y), ry = rx;
+                const MA = pt3(o, 0x020E), MI = pt3(o, 0x020F), C3 = pt3(o, 0x020D);
+                if (MA && MI && C3) { rx = Math.hypot(MA.x - C3.x, MA.y - C3.y); ry = Math.hypot(MI.x - C3.x, MI.y - C3.y); if (Math.abs(MA.y - C3.y) > Math.abs(MA.x - C3.x)) [rx, ry] = [ry, rx]; }
+                m.arrows.push({ t: 'shape', shape: 'ellipse', x1: P1.x - rx, y1: P1.y - ry, x2: P1.x + rx, y2: P1.y + ry, round: false, shadow: !!(ot & 0x20), color: color || '#1e293b', fill: ot & 4 ? (color || '#1e293b') : null, lw: ot & 0x10 ? 2 : 1, dash: ot & 8 ? 'dash' : null, ...(grp ? { grp } : {}) }); return; }
+            if (gt === 7) { if (has(o, 0x000E)) return;                    // a symbol that only draws an atom's charge / radical (we draw those ourselves)
+                const sy = int(o, 0x0A07, -1); if (sy === 0 || sy === 1) lps.push({ x: P1.x, y: P1.y, e: sy === 1 }); else if (sy >= 2 && sy <= 9) lps.push({ x: P1.x, y: P1.y, q: sy === 2 || sy === 4 || sy === 8 ? 1 : -1 }); else W('symbols'); return; }
+            W(gt === 5 ? 'orbitals' : gt === 6 ? 'brackets' : 'other graphics');
+        }
+        function curve(o, grp) {
+            const r = o.p.get(0x0A23); if (!r) return;
+            const n = dv.getUint16(r[0], true), P = []; for (let k = 0; k < n && 2 + 8 * k + 8 <= r[1]; k++) P.push({ x: dv.getInt32(r[0] + 2 + 8 * k + 4, true) / F, y: dv.getInt32(r[0] + 2 + 8 * k, true) / F });
+            if (P.length < 2) return;
+            // the Bezier path as a polyline (point list = anchors with their handles)
+            const segs = []; if (P.length % 3 === 1) for (let k = 0; k + 3 < P.length; k += 3) segs.push([P[k], P[k + 1], P[k + 2], P[k + 3]]);
+            else { const A = []; for (let k = 0; k + 2 < P.length; k += 3) A.push({ i: P[k], p: P[k + 1], o: P[k + 2] }); for (let k = 0; k + 1 < A.length; k++) segs.push([A[k].p, A[k].o, A[k + 1].i, A[k + 1].p]); }
+            if (!segs.length) { W('curves'); return; }
+            const pl = []; segs.forEach(([a, b, c, d]) => { for (let s = 0; s <= 24; s++) { const t = s / 24, u = 1 - t; pl.push({ x: u * u * u * a.x + 3 * u * u * t * b.x + 3 * u * t * t * c.x + t * t * t * d.x, y: u * u * u * a.y + 3 * u * u * t * b.y + 3 * u * t * t * c.y + t * t * t * d.y }); } });
+            const ct = int(o, 0x0A08, 0), hh = int(o, 0x0A35, 0), ht = int(o, 0x0A36, 0);
+            let atEnd = !!(ct & 0x28) || hh >= 2, atStart = !!(ct & 0x50) || ht >= 2, half = !!(ct & 0x60) || hh >= 3 || (!atEnd && ht >= 3);
+            if (!atEnd && !atStart) { W('curves without arrowheads'); return; }
+            if (!atEnd) pl.reverse();
+            const L = []; let tot = 0; pl.forEach((p, k) => { if (k) tot += Math.hypot(p.x - pl[k - 1].x, p.y - pl[k - 1].y); L.push(tot); });
+            const mk = L.findIndex(v => v >= tot / 2);
+            curved(pl[0], pl[pl.length - 1], pl[Math.max(0, mk)], half, grp, colOf(o), int(o, 0x0A2F, 1) === 3 ? 'open' : 'barb');
+        }
+        function arrowObj(o, grp) {                                        // ChemDraw 9+ arrows (straight, curved, equilibrium ...)
+            const head = pt3(o, 0x0207), tail = pt3(o, 0x0208); if (!head || !tail) return;
+            const hh = int(o, 0x0A35, 2), ht = int(o, 0x0A36, 1), deg = int(o, 0x0A21, 0) / 10, C = pt3(o, 0x020D), color = colOf(o), headType = int(o, 0x0A2F, 1) === 3 ? 'open' : 'barb';
+            if (deg && C) { let t = tail, h = head, hp = hh; if (hh < 2 && ht >= 2) { t = head; h = tail; hp = ht; } if (hp < 2) { W('plain arcs'); return; }
+                curved(t, h, arcApex(C, t, h, deg), hp >= 3, grp, color, headType); return; }
+            const kind = hh >= 2 && ht >= 2 ? (hh >= 3 && ht >= 3 && int(o, 0x0A33, 0) ? 'eq' : 'res') : hh >= 2 ? 'rxn' : ht >= 2 ? 'rxnR' : 'line';
+            if (kind === 'rxnR') straight(head, tail, 'rxn', grp, color); else straight(tail, head, kind, grp, color);
+        }
+        function walk(o, grp) {
+            if (o.tag === 0x8003) fragment(o, grp);
+            else if (o.tag === 0x8006) textObj(o, grp);
+            else if (o.tag === 0x8007) graphic(o, grp);
+            else if (o.tag === 0x8008) curve(o, grp);
+            else if (o.tag === 0x8021) arrowObj(o, grp);
+            else if (o.tag === 0x8002) { const g = 'cdx' + Date.now().toString(36) + (++grpSeq); o.kids.forEach(k => walk(k, grp || g)); }
+            else if (o.tag === 0x8001) o.kids.forEach(k => walk(k, grp));
+            else if (o.tag === 0x8004 || o.tag === 0x8005 || o.tag === 0x800D || o.tag === 0x800E || o.tag === 0x8011) { }
+            else if (o.tag === 0x8009 || o.tag === 0x8012) W('pictures');
+            else if (o.tag >= 0x801D && o.tag <= 0x801F || o.tag >= 0x8023 && o.tag <= 0x8025 && o.tag !== 0x8021) W('TLC plates');
+            else if (o.tag === 0x8017 || o.tag === 0x8018 || o.tag === 0x8019) { }
+            else if (o.kids) o.kids.forEach(k => walk(k, grp));
+        }
+        doc.kids.forEach(o => walk(o, null));
+        // ---- 5. lone single-label fragments → text boxes (remove those atoms)
+        if (frags.length) { const drop = new Set(frags.map(f => f.i)), map = new Map(); const keep = [];
+            m.atoms.forEach((a, i) => { if (!drop.has(i)) { map.set(i, keep.length); keep.push(a); } }); m.atoms = keep;
+            m.bonds = m.bonds.filter(b => map.has(b.a) && map.has(b.b)).map(b => ({ ...b, a: map.get(b.a), b: map.get(b.b) }));
+            frags.forEach(f => m.arrows.push(f.text)); }
+        // ---- 6. scale: one bond length = 1 (ChemDraw's document bond length, else the typical bond in the file)
+        const lens = m.bonds.map(b => Math.hypot(m.atoms[b.a].x - m.atoms[b.b].x, m.atoms[b.a].y - m.atoms[b.b].y)).filter(v => v > 1e-3).sort((x, y) => x - y);
+        let BL = lens.length ? lens[lens.length >> 1] : 0; if (!BL) BL = has(doc, 0x0805) ? int(doc, 0x0805, 14.4 * F) / F : 14.4;
+        const s = 1 / BL;
+        m.atoms.forEach(a => { a.x *= s; a.y *= s; });
+        // lone pairs / electrons / free +,− symbols go to the nearest atom
+        lps.forEach(q => { const x = q.x * s, y = q.y * s; let bi = -1, bd = 0.75; m.atoms.forEach((a, i) => { const d = Math.hypot(a.x - x, a.y - y); if (d < bd) { bd = d; bi = i; } });
+            if (bi < 0) { W('symbols'); return; } const a = m.atoms[bi], ang = Math.atan2(y - a.y, x - a.x);
+            if (q.q) { if (!a.charge) { a.charge = q.q; a.qAng = ang; } return; }
+            if (q.e) { a.rad = (a.rad || 0) + 1; (a.radAng = a.radAng || []).push(ang); }
+            else { a.lp = true; (a.lpAng = a.lpAng || []).push(ang); } });
+        m.arrows.forEach(ar => {
+            ['x1', 'y1', 'x2', 'y2'].forEach(k => { if (ar[k] != null) ar[k] *= s; });
+            if (ar.t === 'text') {        // size relative to ChemDraw's atom-label size; centred where ChemDraw drew it
+                ar.size = Math.max(0.3, Math.min(6, (ar._pt || labelPt) / labelPt)); ar.fs0 = (ar._pt || labelPt) * s;
+                const B = ar._box, A0 = ar._anchor;
+                if (B) { ar.x1 = (B.l + B.r) / 2 * s; ar.yTop = B.t * s; } else if (A0) { ar.x1 = A0.x * s; ar.y1 = A0.y * s; }
+                delete ar._box; delete ar._pt; delete ar._anchor; }
+        });
+        return { mol: m, warn };
+    }
     async function openFile(f) {
+        const head = new Uint8Array(await f.slice(0, 8).arrayBuffer());
+        if (/\.cdx$/i.test(f.name) || String.fromCharCode(...head) === 'VjCD0100') {
+            try {
+                const { mol: m, warn } = parseCDX(await f.arrayBuffer());
+                if (!m.atoms.length && !m.arrows.length) throw new Error('nothing in it that can be drawn here');
+                m.arrows.forEach(ar => { if (ar.t === 'text' && ar.yTop != null) { ar.y1 = ar.yTop + textSize(ar) * 0.62; delete ar.yTop; } delete ar.fs0; });
+                commit(); mol = normMol(m); clearSel(); changed(true); fitView();
+                const w = Object.keys(warn); showMsg('Opened ' + f.name + (w.length ? ' — left out: ' + w.map(k => warn[k] + ' ' + k).join(', ') : ''));
+            } catch (err) { showMsg('Could not open ' + f.name + ': ' + err.message); }
+            return;
+        }
+        if (/\.cdxml$/i.test(f.name)) { showMsg('CDXML files are not supported yet — please use the .cdx file'); return; }
         const txt = await f.text();
         try {
             let m;
@@ -3951,9 +4178,14 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     //  Keyboard
     // =====================================================================
     let over3D = false;
+    let over2D = false; { const sw = $('sketch-wrap') || svg; sw.addEventListener('pointerenter', () => { over2D = true; }); sw.addEventListener('pointerleave', () => { over2D = false; }); }
     window.addEventListener('keydown', (e) => {
         const t = document.activeElement && document.activeElement.tagName;
         if (e.key === 'Escape' && MENUS.some(id => !$(id).hidden)) { closeMenus(); if (document.activeElement) document.activeElement.blur(); return; }
+        if ((e.ctrlKey || e.metaKey) && !e.altKey && ['+', '=', '-', '_'].includes(e.key) && (over2D || over3D)) {     // Ctrl + / Ctrl −: zoom whichever window the pointer is over
+            e.preventDefault(); const f = (e.key === '-' || e.key === '_') ? 0.8 : 1.25;
+            if (over3D) zoom3D(f); else zoom2DAt(f); return;
+        }
         if (t === 'INPUT' || t === 'SELECT' || t === 'TEXTAREA') return;
         if (over3D && e.key.startsWith('Arrow') && !e.ctrlKey && !e.metaKey) { e.preventDefault(); pan3D(e.key, e.shiftKey); return; }
         if (e.key === ' ') { spaceDown = true; svg.classList.add('move'); e.preventDefault(); return; }
@@ -3972,6 +4204,11 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         if (hasSel() && e.key.startsWith('Arrow')) {      // nudge the selection
             e.preventDefault(); commit(); const stp = e.shiftKey ? 0.5 : 0.1, dx = e.key === 'ArrowLeft' ? -stp : e.key === 'ArrowRight' ? stp : 0, dy = e.key === 'ArrowUp' ? -stp : e.key === 'ArrowDown' ? stp : 0;
             moveItems(snapshotItems(selItems()), dx, dy); changed(); return;
+        }
+        if (over2D && e.key.startsWith('Arrow')) {      // nothing selected: arrow keys slide the whole 2D drawing (Shift = bigger steps)
+            e.preventDefault(); const d = e.shiftKey ? 120 : 30;
+            if (e.key === 'ArrowLeft') view.tx -= d; else if (e.key === 'ArrowRight') view.tx += d; else if (e.key === 'ArrowUp') view.ty -= d; else view.ty += d;
+            render(); return;
         }
         const keyEl = { c: 'C', h: 'H', n: 'N', o: 'O', s: 'S', p: 'P', f: 'F', l: 'Cl', b: 'Br', i: 'I' }[e.key];
         if (keyEl && hover.atom >= 0) { commit(); const a = mol.atoms[hover.atom]; a.el = keyEl; a.hx = null; delete a.pseudo; changed(); return; }
@@ -4133,7 +4370,38 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         ['2d', 'both', '3d'].forEach(k => $('v-' + k).classList.toggle('active', k === m));
         requestAnimationFrame(() => { render(); if (m !== '3d') fitView(); });
     }
-    ['2d', 'both', '3d'].forEach(k => $('v-' + k).addEventListener('click', () => { if (typeof styleMode !== 'undefined' && styleMode) closeStyle(); setLayout(k); }));
+    ['2d', 'both', '3d'].forEach(k => $('v-' + k).addEventListener('click', () => { if ($('v-' + k).disabled) return; if (typeof styleMode !== 'undefined' && styleMode) closeStyle(); autoLay = null; layAnim++; setLayout(k); }));
+    // ---- more than 2 structures: the 3D view switches off; the window slides over to 2D and the 3D / COMBO buttons grey out
+    let autoLay = null, layAnim = 0, avail3D = true;
+    function smoothFit2D(ms = 380) {        // ease the 2D view to its fitted position
+        const v0 = { ...view }; fitView(); const v1 = { ...view }; Object.assign(view, v0); render();
+        const t0 = performance.now(), tok = layAnim;
+        const step = (now) => { if (tok !== layAnim) return; const u = Math.min(1, (now - t0) / ms), e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+            view.s = v0.s + (v1.s - v0.s) * e; view.tx = v0.tx + (v1.tx - v0.tx) * e; view.ty = v0.ty + (v1.ty - v0.ty) * e; render(); if (u < 1) requestAnimationFrame(step); };
+        requestAnimationFrame(step);
+    }
+    function slideSplit(from, to, ms, done) {   // animate the 2D / 3D dividing line (percent of the width for the 2D side)
+        const main = $('main'), t0 = performance.now(), tok = ++layAnim;
+        const step = (now) => { if (tok !== layAnim) return; const u = Math.min(1, (now - t0) / ms), e = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+            main.style.setProperty('--split', (from + (to - from) * e) + '%'); render();
+            if (u < 1) requestAnimationFrame(step); else { main.style.setProperty('--split', (disp.split || 66.67) + '%'); done && done(tok); } };
+        requestAnimationFrame(step);
+    }
+    function layoutTo(target) {        // a smooth change between 2D, COMBO and 3D
+        const from = layoutMode, sp = disp.split || 66.67; if (from === target) return;
+        if (typeof styleMode !== 'undefined' && styleMode) closeStyle();
+        const finish = (m) => (tok) => { if (tok !== layAnim) return; layoutMode = m; $('main').dataset.mode = m; ['2d', 'both', '3d'].forEach(k => $('v-' + k).classList.toggle('active', k === m)); render(); if (m !== '3d') smoothFit2D(); };
+        ['2d', 'both', '3d'].forEach(k => $('v-' + k).classList.toggle('active', k === target));
+        $('main').dataset.mode = 'both'; layoutMode = 'both';
+        const a = from === '2d' ? 100 : from === '3d' ? 0 : sp, b = target === '2d' ? 100 : target === '3d' ? 0 : sp;
+        $('main').style.setProperty('--split', a + '%'); slideSplit(a, b, 650, finish(target));
+    }
+    function set3DAvailable(ok) {
+        if (ok === avail3D) return; avail3D = ok;
+        ['both', '3d'].forEach(k => { const b = $('v-' + k); b.disabled = !ok; b.classList.toggle('unavail', !ok); b.title = ok ? (k === '3d' ? 'Show only the 3D model' : 'Show the 2D editor and the 3D model side by side') : 'The 3D view is off while more than 2 structures are drawn'; });
+        if (!ok && layoutMode !== '2d') { autoLay = layoutMode; layoutTo('2d'); }
+        else if (ok && autoLay) { const m = autoLay; autoLay = null; layoutTo(m); }
+    }
 
     // =====================================================================
     //  3D viewer: cartoon shading, ink outlines, lines between atoms
@@ -4304,10 +4572,21 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         M3.objects.forEach(o => { world.remove(o); if (o.material && o.material !== INK && o.material !== GLOW) o.material.dispose(); });
         M3 = null; idCount = 0;
     }
+    function structureCount() {      // separate connected structures in the 2D drawing
+        const nb = neighbors(mol), seen = new Uint8Array(mol.atoms.length); let n = 0;
+        for (let i = 0; i < mol.atoms.length; i++) { if (seen[i]) continue; n++; const st = [i]; seen[i] = 1;
+            while (st.length) { const k = st.pop(); nb[k].forEach(x => { if (!seen[x.j]) { seen[x.j] = 1; st.push(x.j); } }); } }
+        return n;
+    }
     function rebuild3D(fit) {
         const firstBuild = !M3;
         if (typeof endBondSel === 'function') { if (NV) sideView(true); endBondSel(); if (mm.running) mmStop(''); $('mm-out').textContent = ''; }
         disposeM3();
+        { const nS = structureCount(), off = nS > 2; let ov = $('v3-off');
+          if (off && !ov) { ov = document.createElement('div'); ov.id = 'v3-off'; vwrap.appendChild(ov); }
+          if (ov) { ov.hidden = !off; if (off) ov.innerHTML = `<b>3D view paused</b><span>${nS} structures are drawn — the 3D viewer shows up to 2.<br>Delete structures until 2 or fewer remain and it comes back.</span>`; }
+          set3DAvailable(!off);
+          if (off) { if (typeof bgBuild === 'function') bgBuild(); return; } }
         if (!mol.atoms.length) return;
         let g;
         try { g = embed3D(mol, { seed: 4242 }); } catch (err) { showMsg('3D: ' + err.message); return; }
@@ -4353,6 +4632,11 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     }
     // smooth camera moves: the viewing direction swings on a sphere about the target, distance and target ease across
     let CAM = null;
+    function zoom3D(f) {          // move the camera toward / away from the model, smoothly, within the usual zoom limits
+        if (!M3) return; const base = CAM ? CAM.p1.clone() : camera.position.clone(), tgt = CAM ? CAM.t1.clone() : controls.target.clone(), up = CAM ? CAM.u1.clone() : camera.up.clone();
+        const off = base.sub(tgt), d = off.length(), d2 = clamp(d / f, controls.minDistance || 0.1, controls.maxDistance || 1e4);
+        off.multiplyScalar(d2 / (d || 1)); animCam(tgt.clone().add(off), tgt, up, 0.22);
+    }
     function animCam(pos, target, up, dur = 0.75, done = null) {
         CAM = { p0: camera.position.clone(), t0: controls.target.clone(), u0: camera.up.clone(), p1: pos.clone(), t1: target.clone(), u1: up.clone(), k: 0, dur, done };
     }
