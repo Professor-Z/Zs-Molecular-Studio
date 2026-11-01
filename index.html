@@ -112,6 +112,12 @@
     #party-cols button.active { border-color: #fff; }
     #b-party.active { background: #111; color: var(--neon, #39ff14); border-color: var(--neon, #39ff14); text-shadow: 0 0 6px var(--neon, #39ff14); box-shadow: 0 0 10px var(--neon, #39ff14); }
     body.party #sketch-wrap { background: #000; transition: background 0.4s; }
+    @property --neon { syntax: '<color>'; inherits: true; initial-value: #1fb6ff; }
+    body.party #sketch { color: var(--neon); }                                   /* the glow (filter flood) */
+    body.party #view { color: color-mix(in srgb, var(--neon) 65%, #ffffff); }      /* the lines: a whiter core, like a lit tube */
+    body.party.rainbow #sketch, body.party.rainbow #b-party { animation: neon-cycle 42s linear infinite; }
+    @keyframes neon-cycle { 0% { --neon: #1fb6ff; } 16.7% { --neon: #39ff14; } 33.3% { --neon: #fff01f; } 50% { --neon: #ff9f1c; } 66.7% { --neon: #ff3131; } 83.3% { --neon: #bc13fe; } 100% { --neon: #1fb6ff; } }
+    #party-cols button.rainbow { background: conic-gradient(#1fb6ff, #39ff14, #fff01f, #ff9f1c, #ff3131, #bc13fe, #1fb6ff) !important; }
     #sketch { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; user-select: none; }
     #sketch.move { cursor: grab; }
     #sketch-hint { position: absolute; left: 10px; right: 10px; bottom: 8px; font-size: 0.72rem; color: #64748b; pointer-events: none; }
@@ -136,6 +142,11 @@
     #style { width: min(600px, calc(100vw - 60px)); max-height: 100%; padding: 0.9rem 1rem 0.6rem; overflow: auto; border-radius: 12px 0 0 12px;
         display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.2rem 1.2rem; align-content: start; }
     #style .el-colors { grid-column: 1 / -1; }
+    .style-head { grid-column: 1 / -1; position: sticky; top: -0.9rem; z-index: 2; display: flex; align-items: center; justify-content: space-between; margin: -0.9rem -1rem 0.3rem; padding: 0.5rem 0.7rem 0.4rem 1rem;
+        background: inherit; font: 800 11px system-ui; letter-spacing: 0.2em; color: #94a3b8; border-radius: 12px 12px 0 0; }
+    #style-x { padding: 0.25rem 0.6rem; min-width: 0; }
+    #style.over2d { position: fixed; z-index: 70; max-height: none; border-radius: 12px; background: rgba(30,41,59,0.97); box-shadow: 0 24px 60px rgba(0,0,0,0.55); transform-origin: center; }
+    #stylebar.open .tab-btn .chev { transform: rotate(90deg); }
     .cartoon-only.off { opacity: 0.35; pointer-events: none; }
     .sw-any { position: relative; overflow: hidden; background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red); display: inline-block; }
     .sw-any input { position: absolute; inset: -6px; opacity: 0; cursor: pointer; width: 40px; height: 40px; }
@@ -144,7 +155,7 @@
     .tab-btn .chev { display: inline-block; margin-top: 8px; transition: transform 0.3s; transform: rotate(90deg); }
     #stylebar.collapsed .tab-btn .chev { transform: rotate(-90deg); }
     #cartoon3d.classic { background: #475569; }
-    #bondpanel { position: absolute; left: 12px; bottom: 12px; z-index: 6; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; max-width: calc(100% - 70px);
+    #bondpanel { position: absolute; left: 12px; bottom: 36px; z-index: 6; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; max-width: calc(100% - 70px);
         padding: 8px 10px; border-radius: 12px; background: rgba(15,23,42,0.92); border: 1px solid rgba(250,204,21,0.6); font-size: 0.78rem; color: #e2e8f0; }
     #bondpanel[hidden] { display: none; }
     #bondpanel input[type=range] { width: 150px; accent-color: #facc15; }
@@ -227,9 +238,9 @@
     #pct { font-size: 0.75rem; color: #cbd5e1; display: inline-flex; gap: 8px; flex-wrap: wrap; } #pct b { color: #fff; }
     #b-pct { padding: 0.3rem 0.5rem; font-size: 0.68rem; }
     #pause3d { white-space: nowrap; padding-left: 0.3rem; padding-right: 0.3rem; } #pause3d.active { background: #2563eb; color: #fff; }
-    #center3d { position: absolute; left: 50%; transform: translateX(-50%); bottom: 12px; z-index: 6; border-radius: 999px; padding: 0.45rem 0.9rem; background: rgba(30,41,59,0.9); border: 1px solid rgba(255,255,255,0.15); }
+    #center3d { position: absolute; left: 50%; transform: translateX(-50%); top: 10px; z-index: 6; border-radius: 999px; padding: 0.45rem 0.9rem; background: rgba(30,41,59,0.9); border: 1px solid rgba(255,255,255,0.15); }
     #main.anim { transition: grid-template-columns 0.45s ease; }
-    #hint3d { position: absolute; left: 12px; top: 10px; font-size: 0.7rem; color: rgba(226,232,240,0.7); pointer-events: none; }
+    #hint3d { position: absolute; left: 50%; transform: translateX(-50%); bottom: 10px; max-width: calc(100% - 90px); text-align: center; font-size: 0.7rem; color: rgba(226,232,240,0.7); pointer-events: none; z-index: 5; }
 </style>
 </head>
 <body>
@@ -237,7 +248,7 @@
     <div id="topbar">
         <div class="tb-left"><h1>Z's Molecular Studio</h1><button class="btn" id="b-file" title="New, open, save, examples, export SVG / JPEG / PNG / MOL" aria-haspopup="true">FILE ▾</button><span id="msg" role="status"></span></div>
         <div class="seg" role="group" aria-label="Panels">
-            <button class="btn" id="v-2d" title="Show only the 2D editor">2D</button><button class="btn active" id="v-both" title="Show both">BOTH</button><button class="btn" id="v-3d" title="Show only the 3D model">3D</button>
+            <button class="btn" id="v-2d" title="Show only the 2D editor">2D</button><button class="btn active" id="v-both" title="Show the 2D editor and the 3D model side by side">COMBO</button><button class="btn" id="v-3d" title="Show only the 3D model">3D</button>
         </div>
         <div class="tb-right"><span id="props" hidden><span id="formula"></span><span id="pct"></span></span>
             <button class="btn" id="b-props" title="Show the formula, molar mass and percent composition">PROPERTIES</button>
@@ -252,7 +263,7 @@
                 <svg id="sketch" aria-label="2D structure editor"><defs><filter id="neon-glow" filterUnits="userSpaceOnUse" x="-2000" y="-2000" width="4000" height="4000" color-interpolation-filters="sRGB">
                     <feGaussianBlur in="SourceAlpha" stdDeviation="0.06" result="b1"/><feGaussianBlur in="SourceAlpha" stdDeviation="0.18" result="b2"/><feGaussianBlur in="SourceAlpha" stdDeviation="0.45" result="b3"/>
                     <feMerge result="bm"><feMergeNode in="b3"/><feMergeNode in="b2"/><feMergeNode in="b1"/></feMerge>
-                    <feFlood id="neon-flood" flood-color="#1fb6ff" flood-opacity="0.85" result="fl"/><feComposite in="fl" in2="bm" operator="in" result="glow"/>
+                    <feFlood id="neon-flood" flood-color="currentColor" flood-opacity="0.85" result="fl"/><feComposite in="fl" in2="bm" operator="in" result="glow"/>
                     <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><defs id="fdefs"></defs><g id="view"><g id="g-fills"></g><g id="g-bonds" stroke="#1e293b" stroke-width="0.065" stroke-linecap="round" fill="none"></g><g id="g-atoms"></g><g id="g-arrows" stroke="#1e293b" stroke-linecap="round" stroke-linejoin="round" fill="none"></g><g id="g-over"></g></g></svg>
                 <div id="sketch-hint"></div>
                 <button id="restore-bars" class="restore" hidden title="Show the hidden toolbars">☰ TOOLBARS</button>
@@ -269,6 +280,7 @@
         <div id="viewer">
             <div id="stylebar" class="collapsed">
                 <div id="style" class="glass-panel">
+                    <div class="style-head"><span>STYLE</span><button class="btn" id="style-x" title="Close (or click anywhere else)" aria-label="Close the style window">✕</button></div>
                     <div>
                         <div class="sec">STYLING</div>
                         <div class="cartoon-only">
@@ -1799,7 +1811,27 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         snap.atoms.forEach(o => { const a = mol.atoms[o.i]; a.x = o.x + dx; a.y = o.y + dy; });
         snap.arrows.forEach(o => { const ar = mol.arrows[o.k]; ar.x1 = o.x1 + dx; ar.y1 = o.y1 + dy; if (o.x2 != null) { ar.x2 = o.x2 + dx; ar.y2 = o.y2 + dy; } });
     }
-    // objects for alignment: each connected piece of the selected atoms, and each selected arrow
+    // ---- groups: atoms and arrows (lines, text, shapes, symbols) sharing a .grp id select, move and align as one
+    const newGroupId = () => 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    function groupItems(t) {      // every item belonging to the groups of the given items
+        const gs = new Set(); t.atoms.forEach(i => { const g = mol.atoms[i] && mol.atoms[i].grp; if (g != null) gs.add(g); }); t.arrows.forEach(k => { const g = mol.arrows[k] && mol.arrows[k].grp; if (g != null) gs.add(g); });
+        if (!gs.size) return t;
+        const atoms = new Set(t.atoms), arrows = new Set(t.arrows);
+        mol.atoms.forEach((a, i) => { if (gs.has(a.grp)) atoms.add(i); }); mol.arrows.forEach((ar, k) => { if (gs.has(ar.grp)) arrows.add(k); });
+        return { atoms: [...atoms], arrows: [...arrows] };
+    }
+    function expandGroups() { const t = groupItems(selItems()); t.atoms.forEach(i => sel.atoms.add(i)); t.arrows.forEach(k => sel.arrows.add(k)); }
+    function selGroupIds() { const gs = new Set(); let loose = false;
+        sel.atoms.forEach(i => { const g = mol.atoms[i].grp; if (g == null) loose = true; else gs.add(g); }); sel.arrows.forEach(k => { const g = mol.arrows[k] && mol.arrows[k].grp; if (g == null) loose = true; else gs.add(g); });
+        return { gs, loose }; }
+    function toggleGroup() {
+        if (!hasSel()) { showMsg('Select the structures, arrows, text or shapes to group'); return; }
+        const { gs, loose } = selGroupIds(); commit();
+        if (gs.size === 1 && !loose) { const g = [...gs][0]; mol.atoms.forEach(a => { if (a.grp === g) delete a.grp; }); mol.arrows.forEach(ar => { if (ar.grp === g) delete ar.grp; }); showMsg('Ungrouped'); }
+        else { const g = newGroupId(); sel.atoms.forEach(i => { mol.atoms[i].grp = g; }); sel.arrows.forEach(k => { if (mol.arrows[k]) mol.arrows[k].grp = g; }); showMsg('Grouped — they now move and align as one'); }
+        changed();
+    }
+    // objects for alignment: each connected piece of the selected atoms, and each selected arrow (a group counts as one object)
     function selObjects() {
         const objs = [], seen = new Set(), nb = neighbors(mol);
         sel.atoms.forEach(i => {
@@ -1809,7 +1841,12 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             objs.push({ atoms: comp, arrows: [] });
         });
         sel.arrows.forEach(k => objs.push({ atoms: [], arrows: [k] }));
-        return objs.map(o => ({ ...o, box: itemsBox(o) }));
+        // merge objects that share a group
+        const gOf = (o) => { const s2 = new Set(); o.atoms.forEach(i => { if (mol.atoms[i].grp != null) s2.add(mol.atoms[i].grp); }); o.arrows.forEach(k => { if (mol.arrows[k].grp != null) s2.add(mol.arrows[k].grp); }); return s2; };
+        const merged = [];
+        objs.forEach(o => { const g = gOf(o); const into = g.size ? merged.find(m => [...g].some(x => m.g.has(x))) : null;
+            if (into) { into.atoms.push(...o.atoms); into.arrows.push(...o.arrows); g.forEach(x => into.g.add(x)); } else merged.push({ atoms: o.atoms.slice(), arrows: o.arrows.slice(), g }); });
+        return merged.map(o => ({ atoms: o.atoms, arrows: o.arrows, box: itemsBox(o) }));
     }
     function align(mode) {
         const objs = selObjects(); if (objs.length < 2) return;
@@ -1922,7 +1959,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             const left = hInLabel && meanX > 0.2 && dg > 0;
             return { show, h, q: a.charge || 0, angs, hInLabel, left, f: fi, elW: measureW(a.el, S) * fi, hW: measureW('H', S) * fi, nW: h > 1 ? measureW('' + h, S) * fi * 0.7 : 0 };
         });
-        let bH = '', aH = '';
+        let bH = '', aH = '', bSplit = -1;
         const spDot = (i) => !L[i].show && nb[i].length === 2 && nb[i].every(x => x.o === 2);      // allene / ketene centre: drawn as a dot, bonds stop short of it
         const gap = (i) => mol.atoms[i].nmBack ? NMR * (mol.atoms[i].fs || 1) : L[i].show ? L[i].f * 0.34 + S.margin : spDot(i) ? S.lw * 3.4 * (mol.atoms[i].fs || 1) : 0;
         // Newman back carbons: a circle, drawn first so front bonds cross over it
@@ -1951,10 +1988,11 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             const A = mol.atoms[b.a], B = mol.atoms[b.b];
             if (Math.hypot(B.x - A.x, B.y - A.y) < 0.05) return;           // front–back bond of a Newman projection: hidden
             const bs = ((A.fs || 1) + (B.fs || 1)) / 2, bc = b.color || null;
+            if (halo[k] && bSplit < 0) bSplit = bH.length;
             if (halo[k]) { const Lb = Math.hypot(B.x - A.x, B.y - A.y), ux = (B.x - A.x) / Lb, uy = (B.y - A.y) / Lb, hl = 0.17 * bs,
                     hw = S.lw * bs * 4.2 + (b.order >= 2 ? S.dbl * bs * 1.2 : 0) + (b.bold || b.wedge === 'wedge' ? S.lw * bs * 3.5 : 0);
                 halo[k].forEach(t => { const cx = A.x + (B.x - A.x) * t, cy = A.y + (B.y - A.y) * t;
-                    bH += `<line x1="${(cx - ux * hl).toFixed(3)}" y1="${(cy - uy * hl).toFixed(3)}" x2="${(cx + ux * hl).toFixed(3)}" y2="${(cy + uy * hl).toFixed(3)}" stroke="${paper}" stroke-width="${hw.toFixed(4)}" stroke-linecap="butt"/>`; }); }
+                    bH += `<line class="halo" x1="${(cx - ux * hl).toFixed(3)}" y1="${(cy - uy * hl).toFixed(3)}" x2="${(cx + ux * hl).toFixed(3)}" y2="${(cy + uy * hl).toFixed(3)}" stroke="${paper}" stroke-width="${hw.toFixed(4)}" stroke-linecap="butt"/>`; }); }
             const bh0 = bH.length;
             let dx = B.x - A.x, dy = B.y - A.y; const len = Math.hypot(dx, dy) || 1; dx /= len; dy /= len;
             const ga = gap(b.a), gb = gap(b.b);
@@ -2079,7 +2117,10 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             if (info.q) {        // formal charge in a circle, in the most open spot left (or where the user dragged it)
                 const rc = Math.max(f * 0.3, 0.19 * (a.fs || 1)) * (a.qScale || 1) * (disp.qSize || 1), qc = a.qColor || a.color || ink, qd = disp.qDist || 1;
                 let cx, cy;
-                if (a.qAng != null) { const rr = (info.show ? f * 0.62 : 0.24 * (a.fs || 1)) * qd + rc + (nP + nR ? 0.08 : 0); cx = a.x + Math.cos(a.qAng) * rr; cy = a.y + Math.sin(a.qAng) * rr; }
+                if (a.qAng != null && a.qOut) {      // just outside the lone pair, along the same direction
+                    const scL = (disp.lpScale || 1) * 0.8, fsA = a.fs || 1, RrL = (info.show ? f * 0.5 + 0.12 * fsA : 0.3 * fsA) * (disp.lpDist || 1) * (0.85 + 0.15 * scL), drL = Math.max(0.035, S.lw * 1.1) * scL * fsA;
+                    const rr = RrL + drL + S.lw * 1.3 + rc, qa = a.lpAng && a.lpAng[0] != null ? a.lpAng[0] : a.qAng; cx = a.x + Math.cos(qa) * rr; cy = a.y + Math.sin(qa) * rr; }      // follows the pair if it is moved
+                else if (a.qAng != null) { const rr = (info.show ? f * 0.62 : 0.24 * (a.fs || 1)) * qd + rc + (nP + nR ? 0.08 : 0); cx = a.x + Math.cos(a.qAng) * rr; cy = a.y + Math.sin(a.qAng) * rr; }
                 else if (info.show && info.hInLabel && !info.left) {
                     const wRight = info.elW / 2 + info.hW + info.nW;
                     cx = a.x + wRight + rc * 0.9; cy = a.y - f * 0.42;
@@ -2105,8 +2146,12 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
                     for (let k = 0; k < 48; k++) { const t = -Math.PI + k * Math.PI / 24; const md = occ.concat(a.lpAng || []).reduce((m, o) => o == null ? m : Math.min(m, Math.abs(wrapAng(t - o))), Math.PI);
                         const sc2 = Math.min(md, 2.2) - 0.08 * Math.abs(wrapAng(t + Math.PI / 4)); if (sc2 > bs) { bs = sc2; bt = t; } }
                     occ.push(bt); ang = bt; }
-                const rr = (info.show ? f * 0.55 : 0.16 * (a.fs || 1)) * (disp.qDist || 1) + fz * 0.45 + (nP + nR ? 0.05 : 0), cx = a.x + Math.cos(ang) * rr, cy = a.y + Math.sin(ang) * rr;
-                aH += `<text x="${cx.toFixed(3)}" y="${(cy + fz * 0.34).toFixed(3)}" text-anchor="middle" font-size="${fz.toFixed(3)}" font-family='${S.fam}' font-weight="${S.weight}" fill="${pc}" stroke="none">δ${a.pq > 0 ? '+' : '−'}</text>`;
+                const rr = (info.show ? f * 0.55 : 0.18 * (a.fs || 1)) * (disp.qDist || 1) + fz * 0.55 + (nP + nR ? 0.05 : 0), cx = a.x + Math.cos(ang) * rr, cy = a.y + Math.sin(ang) * rr;
+                // δ in the drawing font, the + / − drawn with lines exactly as thick as a formal charge's
+                const swq = S.lw * 0.8 * (a.fs || 1) * (a.pqScale || 1) * (disp.qSize || 1), arm = fz * 0.2, sx = cx + fz * 0.3, dx0 = cx - fz * 0.16;
+                aH += `<text x="${dx0.toFixed(3)}" y="${(cy + fz * 0.34).toFixed(3)}" text-anchor="middle" font-size="${fz.toFixed(3)}" font-family='${S.fam}' font-weight="400" fill="${pc}" stroke="${pc}" stroke-width="${(swq * 0.35).toFixed(4)}" stroke-linejoin="round">δ</text>` +
+                    `<line x1="${(sx - arm).toFixed(3)}" y1="${(cy - fz * 0.02).toFixed(3)}" x2="${(sx + arm).toFixed(3)}" y2="${(cy - fz * 0.02).toFixed(3)}" stroke="${pc}" stroke-width="${swq.toFixed(4)}" stroke-linecap="round"/>` +
+                    (a.pq > 0 ? `<line x1="${sx.toFixed(3)}" y1="${(cy - fz * 0.02 - arm).toFixed(3)}" x2="${sx.toFixed(3)}" y2="${(cy - fz * 0.02 + arm).toFixed(3)}" stroke="${pc}" stroke-width="${swq.toFixed(4)}" stroke-linecap="round"/>` : '');
                 if (record) pqCache[i] = { x: cx, y: cy, r: fz * 0.62 };
             }
             // allenes / ketenes: a dot marks the central sp carbon
@@ -2134,7 +2179,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         mol.atoms.forEach((a, i) => { if (a.hl && inA(i)) hH += `<circle cx="${a.x}" cy="${a.y}" r="0.3" fill="${a.hl}"/>`; });
         if (hH) fH += `<g opacity="${HL_A}">${hH}</g>`;
         const rH = mol.arrows.map((ar, k) => (!fr || fr(k)) ? arrowSVG(ar, S) : '').join('');
-        return { b: bH, a: aH, r: rH, f: fH, defs };
+        return { b: bH, a: aH, r: rH, f: fH, defs, bSplit };
     }
     function arrowSVG(ar, S) {
         if (ar.t === 'text' || ar.t === 'shape') return arrowSVG0(ar, S);
@@ -2222,14 +2267,17 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         gView.setAttribute('transform', `translate(${view.tx},${view.ty}) scale(${view.s})`);
         gB.setAttribute('stroke-width', S.lw); gR.setAttribute('stroke-width', S.lw * 1.15);
         const P = drawParts(S, null, null, '#f8fafc', true);
-        if (PARTY.on) {      // Party Mode: every colour becomes the neon colour, the paper becomes black (CSS adds the glow)
-            const core = hexMix(PARTY.col, '#ffffff', 0.35);      // a slightly whiter core, like a lit neon tube; the CSS glow is the pure colour
-            const nz = (str) => str.replace(/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/g, m => /^#(f8fafc|fff|ffffff)$/i.test(m) ? '#000000' : core);
+        if (PARTY.on) {      // Party Mode: every colour becomes the (CSS) neon colour; see-through where the paper was; gaps behind crossing bonds are cut with a mask
+            let halos = '';
+            if (P.bSplit >= 0) { const back = P.b.slice(0, P.bSplit); let front = P.b.slice(P.bSplit);
+                front = front.replace(/<line class="halo"[^>]*\/>/g, m => { halos += m.replace(/stroke="[^"]*"/, 'stroke="#000"'); return ''; });
+                P.b = `<g mask="url(#halo-mask)">${back}</g>${front}`; }
+            const nz = (str) => str.replace(/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/g, m => /^#(f8fafc|fff|ffffff)$/i.test(m) ? '#000000' : 'currentColor');
             ['b', 'a', 'r', 'f', 'defs'].forEach(k => { P[k] = nz(P[k].replace(/fill="#f8fafc"/gi, 'fill="none"')); });
+            P.defs += `<mask id="halo-mask" maskUnits="userSpaceOnUse" x="-2000" y="-2000" width="4000" height="4000"><rect x="-2000" y="-2000" width="4000" height="4000" fill="#fff"/>${halos}</mask>`;
         }
-        { const cc = PARTY.on ? hexMix(PARTY.col, '#ffffff', 0.35) : '#1e293b'; gB.setAttribute('stroke', cc); gR.setAttribute('stroke', cc); }
+        { const cc = PARTY.on ? 'currentColor' : '#1e293b'; gB.setAttribute('stroke', cc); gR.setAttribute('stroke', cc); }
         // a steady neon aura around every line, label and arrow (an SVG glow filter on the drawing)
-        if (PARTY.on) $('neon-flood').setAttribute('flood-color', PARTY.col);
         ['g-fills', 'g-bonds', 'g-atoms', 'g-arrows'].forEach(id => { const g = $(id); if (PARTY.on) g.setAttribute('filter', 'url(#neon-glow)'); else g.removeAttribute('filter'); });
         gB.innerHTML = P.b; gA.innerHTML = P.a; gR.innerHTML = P.r; $('g-fills').innerHTML = P.f; $('fdefs').innerHTML = P.defs;
         gA.setAttribute('font-family', S.fam); gA.setAttribute('font-size', S.font); gA.setAttribute('font-weight', S.weight);
@@ -2484,6 +2532,11 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     }
     function curvedFrom(p0, p1, sideHint, type) {
         const a = snapCurve(p0), b = snapCurve(p1, true);
+        // bond → one of its own atoms (C=O π pair onto O), or atom → its own bond: slide the bond end along the bond, away from that atom,
+        // so the arrow has room to curve and its head isn't cramped
+        const slide = (q, ai) => { if (!q.bond || ai == null) return; const bd = mol.bonds[q.bk]; if (!bd || (bd.a !== ai && bd.b !== ai)) return;
+            const T = mol.atoms[ai], O = mol.atoms[bd.a === ai ? bd.b : bd.a]; q.x = O.x + (T.x - O.x) * 0.36; q.y = O.y + (T.y - O.y) * 0.36; };
+        slide(a, b.atom ? b.ai : null); slide(b, a.atom ? a.ai : null);
         if (Math.hypot(b.x - a.x, b.y - a.y) < 0.35) { b.x = a.x + 1.4; b.y = a.y; b.atom = false; }
         const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
         let side0 = sideHint || 0;
@@ -2520,7 +2573,8 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
                 for (let q = q0; q <= q1; q++) { const t = clamp(((pts[q].x - P.x) * ex2 + (pts[q].y - P.y) * ey2) / l2, 0, 1);
                     const dd = Math.hypot(P.x + t * ex2 - pts[q].x, P.y + t * ey2 - pts[q].y) - wide - (q >= 28 ? hwH : 0); near = Math.min(near, dd + 0.12); } });
             mol.atoms.forEach((o, oi) => { if ((a.atom && oi === a.ai) || (b.atom && oi === b.ai)) return; for (let q = 4; q <= 28; q++) near = Math.min(near, Math.hypot(o.x - pts[q].x, o.y - pts[q].y) - (labelShown(o, neighbors(mol)[oi].length, implicitH(mol, oi)) ? S.font * 0.35 : 0)); });
-            const sc = cross * 100 + Math.max(0, 0.2 - near) * 120 + Math.abs(chm - chm0) * 3 + (side !== side0 ? 4 : 0);
+            const hlA = Math.max(0.14, S.lw * 3.2) * (tool.arrowSize || 1), arcLen = arc.r * arc.sweep;      // too short an arc crams the head
+            const sc = cross * 100 + Math.max(0, 0.2 - near) * 120 + Math.max(0, 4.2 * hlA - arcLen) * 10 + Math.abs(chm - chm0) * 3 + (side !== side0 ? 4 : 0);
             if (!best || sc < best.sc) best = { sc, C, A2, B2 };
         }
         const { C, A2, B2 } = best;
@@ -2591,21 +2645,21 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         Object.assign(drag, { ai, bk, ar });
         if ((tool.kind === 'charge' || tool.kind === 'pcharge') && ai >= 0) {      // press on an atom: the charge appears (most open spot); keep holding and drag to swing it round
             commit(); const a = mol.atoms[ai];
-            if (tool.kind === 'charge') { a.charge = clamp((a.charge || 0) + tool.q, -3, 3); a.hx = null; delete a.qAng; drag.qkind = 'q'; }
+            if (tool.kind === 'charge') { a.charge = clamp((a.charge || 0) + tool.q, -3, 3); a.hx = null; delete a.qAng; delete a.qOut; drag.qkind = 'q'; }
             else { if (a.pq === tool.pq) { delete a.pq; delete a.pqAng; } else { a.pq = tool.pq; delete a.pqAng; } drag.qkind = 'pq'; }
             drag.qdrag = ai; drag.qnew = true; render(); return;
         }
         if (isSelKind()) {
             const onSel = (ai >= 0 && sel.atoms.has(ai)) || (bk >= 0 && sel.atoms.has(mol.bonds[bk].a) && sel.atoms.has(mol.bonds[bk].b)) || (ar >= 0 && sel.arrows.has(ar));
             if (onSel) drag.moveSnap = snapshotItems(selItems());
-            else if (ai >= 0) drag.moveSnap = snapshotItems({ atoms: [ai], arrows: [] });
-            else if (bk >= 0) drag.moveSnap = snapshotItems({ atoms: [mol.bonds[bk].a, mol.bonds[bk].b], arrows: [] });
-            else if (ar >= 0) drag.moveSnap = snapshotItems({ atoms: [], arrows: [ar] });
+            else if (ai >= 0) drag.moveSnap = snapshotItems(groupItems({ atoms: [ai], arrows: [] }));
+            else if (bk >= 0) drag.moveSnap = snapshotItems(groupItems({ atoms: [mol.bonds[bk].a, mol.bonds[bk].b], arrows: [] }));
+            else if (ar >= 0) drag.moveSnap = snapshotItems(groupItems({ atoms: [], arrows: [ar] }));
             else if (tool.kind === 'lasso') { drag.lasso = true; lassoPts = [p]; }
             else drag.rubber = true;
             if (drag.moveSnap) commit();
             // an atom (or group) hanging off the rest by one bond swings around its attachment, keeping the bond length (arrow keys still nudge freely)
-            if (drag.moveSnap && !e.altKey) { const tt = onSel ? selItems() : ai >= 0 ? { atoms: [ai], arrows: [] } : null;
+            if (drag.moveSnap && !e.altKey && !(ai >= 0 && mol.atoms[ai].grp != null)) { const tt = onSel ? selItems() : ai >= 0 ? { atoms: [ai], arrows: [] } : null;
                 if (tt && !tt.arrows.length && tt.atoms.length) { const pv = pivotOf(tt); if (pv.att >= 0) drag.orbit = { att: pv.att, cx: pv.x, cy: pv.y, a0: Math.atan2(p.y - pv.y, p.x - pv.x) }; } }
         } else if (tool.kind === 'lp' || tool.kind === 'radical') startLP(p, tool.kind === 'radical');
     });
@@ -2619,9 +2673,17 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     function deleteQ(q) {          // remove a single charge, lone pair or radical dot; H counts and lone pairs follow
         const a = mol.atoms[q.i]; if (!a) return;
         if (q.k === 'pq') { delete a.pq; delete a.pqAng; delete a.pqScale; delete a.pqColor; }
-        else if (q.k === 'q') { a.charge = 0; a.hx = null; delete a.qAng; delete a.lpAng; if (a.el === 'C' && a.lp && lpCount(q.i, neighbors(mol), implicitH(mol, q.i)).n === 0) delete a.lp; }
+        else if (q.k === 'q') { a.charge = 0; a.hx = null; delete a.qAng; delete a.qOut; delete a.lpAng; if (a.el === 'C' && a.lp && lpCount(q.i, neighbors(mol), implicitH(mol, q.i)).n === 0) delete a.lp; }
         else if (q.k === 'r') { a.rad = Math.max(0, (a.rad || 1) - 1); if (!a.rad) { delete a.rad; delete a.radAng; } else if (a.radAng && q.idx != null) a.radAng.splice(q.idx, 1); a.hx = null; }
         else { a.lpHide = (a.lpHide || 0) + 1; if (a.lpAng && q.idx != null) a.lpAng.splice(q.idx, 1); }
+    }
+    // put an atom's formal charge just beside its lone pair (a small gap from it), on whichever side has more room
+    function placeChargeBy(i, lpA) {
+        // beside the pair if there's a wide-open side; otherwise straight out past it (same direction, small gap) — never over a bond
+        const a = mol.atoms[i], nb = neighbors(mol)[i], occ = nb.map(x => Math.atan2(mol.atoms[x.j].y - a.y, mol.atoms[x.j].x - a.x)).concat((a.lpAng || []).slice(1));
+        const room = (t) => occ.reduce((m, o) => Math.min(m, Math.abs(wrapAng(t - o))), Math.PI);
+        const off = 0.85, c1 = lpA + off, c2 = lpA - off, best = room(c1) >= room(c2) ? c1 : c2;
+        if (room(best) > 0.75) { a.qAng = best; delete a.qOut; } else { a.qAng = lpA; a.qOut = true; }
     }
     function startLP(p, radMode) {
         // press on an atom (or on one of its dots): show its lone pairs / radical and let the pointer swing one around
@@ -2632,12 +2694,14 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         const a = mol.atoms[ai];
         if (radMode) { drag.lp = { i: ai, rad: true, hit, was: !!a.rad }; return; }
         const was = lpShown(ai);
-        if (!was && a.el === 'C' && !a.pseudo && !(a.charge || 0) && lpCount(ai, neighbors(mol), implicitH(mol, ai)).n === 0) { a.charge = -1; a.hx = null; }   // a lone pair on carbon = carbanion
+        let madeAnion = false;
+        if (!was && a.el === 'C' && !a.pseudo && !(a.charge || 0) && lpCount(ai, neighbors(mol), implicitH(mol, ai)).n === 0) { a.charge = -1; a.hx = null; delete a.qAng; madeAnion = true; }   // a lone pair on carbon = carbanion
         if (!was) { a.lp = true; render(); }
         const c = (lpCache[ai] || []).filter(q => q.t === 'p');
         if (!c.length) { undoStack.pop(); if (!was) delete a.lp; render();
             showMsg(a.el === 'C' ? 'This carbon has no lone pairs — give it a negative charge (carbanion) first' : 'This atom has no lone pairs'); return; }
         a.lpAng = c.map(q => q.ang);                 // freeze where they are, then the dragged one follows the pointer
+        if (madeAnion) placeChargeBy(ai, a.lpAng[0]);
         drag.lp = { i: ai, was, k: hit && hit.t === 'p' ? hit.k : null };
     }
     svg.addEventListener('pointermove', (e) => {
@@ -2670,7 +2734,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             render(); return;
         }
         if (drag.qdrag != null) { const a = mol.atoms[drag.qdrag], an = Math.atan2(p.y - a.y, p.x - a.x); if (drag.qnew && (!drag.moved || Math.hypot(p.x - a.x, p.y - a.y) < 0.15)) return;
-            if (drag.qkind === 'pq') { if (a.pq) a.pqAng = an; } else if (a.charge) a.qAng = an; render(); return; }
+            if (drag.qkind === 'pq') { if (a.pq) a.pqAng = an; } else if (a.charge) { a.qAng = an; delete a.qOut; } render(); return; }
         if (drag.shapeNew) {
             let x2 = p.x, y2 = p.y; if (e.shiftKey && tool.shape !== 'line') { const s2 = Math.max(Math.abs(x2 - drag.p0.x), Math.abs(y2 - drag.p0.y)); x2 = drag.p0.x + Math.sign(x2 - drag.p0.x || 1) * s2; y2 = drag.p0.y + Math.sign(y2 - drag.p0.y || 1) * s2; }
             drag.shapeEnd = { x: x2, y: y2 };
@@ -3233,6 +3297,8 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     mkBtn(smilesBar, 'v-copy', ico('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>'),
         'Copy the SMILES of the drawing (or of the selection)', () => { const m = hasSel() && sel.atoms.size ? subMol(sel.atoms) : mol; copyText(toSMILES(m), 'SMILES'); }, 'tool');
     $('b-file').addEventListener('click', (e) => toggleMenu('file-menu', e.currentTarget));
+    mkBtn(viewBar, 'v-group', ico('<rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/><path d="M15 3h6v6M9 21H3v-6" stroke-dasharray="2 2"/>'),
+        'Group the selected structures, arrows, text and shapes so they move and align as one · with a single group selected, ungroup it (Ctrl+G)', () => toggleGroup(), 'tool');
     mkBtn(viewBar, 'b-display', 'DISPLAY ▾', 'Drawing style, colors, implied atoms, lone pairs, toolbars', (e) => toggleMenu('display-menu', e.currentTarget));
 
     // ---- pop-up menus (positioned next to their button, wherever its bar is docked)
@@ -3427,6 +3493,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         changed();
     }
     function updateSelBar() {
+        if (hasSel()) expandGroups();      // selecting any member selects its whole group
         const showFill = tool.kind === 'fill', showSel = hasSel(), selArrows = [...sel.arrows].some(k => isArrowT(mol.arrows[k]));
         const showArrow = (tool.kind === 'arrow' && tool.arrow !== 'plus') || selArrows;
         typeColRow.hidden = !(tool.kind === 'arrow' && tool.arrow !== 'plus');
@@ -3450,12 +3517,12 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     }
 
     // ---- dockable bars, re-orderable icons, hide / show
-    const LAYOUT_KEY = 'molstudio-layout-v5';
+    const LAYOUT_KEY = 'molstudio-layout-v6';
     // starting layout: elements down the far left, drawing tools beside them, file / edit / view along the top
     const BARS = { els: { el: elBar, name: 'Elements', side: 'left' }, tools: { el: toolsBar, name: 'Drawing tools', side: 'left' },
                    view: { el: viewBar, name: 'View & file', side: 'top' }, ctx: { el: ctxBar, name: 'Selection & options', side: 'top' } };
     const DEFAULT_ORDER = { tools: TOOL_ORDER.filter(id => !id.startsWith('act-') || id === 'act-clean'),
-        view: ['v-open', 'v-save', 'v-smiles', 'act-clear', 'act-undo', 'act-redo', 'z-out', 'z-in', 'z-fit', 'r-ccw', 'r-cw', 'f-h', 'f-v', 'b-display'] };
+        view: ['v-open', 'v-save', 'v-smiles', 'act-clear', 'act-undo', 'act-redo', 'z-out', 'z-in', 'z-fit', 'r-ccw', 'r-cw', 'f-h', 'f-v', 'v-group', 'b-display'] };
     const layout = Object.assign({ order: JSON.parse(JSON.stringify(DEFAULT_ORDER)), hidden: {} }, store.get(LAYOUT_KEY) || {});
     Object.keys(BARS).forEach(k => { if (!layout[k]) layout[k] = BARS[k].side; });
     const saveLayout = () => store.set(LAYOUT_KEY, layout);
@@ -3569,6 +3636,8 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         d.atoms.forEach(a => mol.atoms.push({ ...JSON.parse(JSON.stringify(a)), x: a.x + dx, y: a.y + dy }));
         d.bonds.forEach(b => mol.bonds.push({ ...b, a: b.a + n0, b: b.b + n0 }));
         d.arrows.forEach(ar => { const c = { ...ar, x1: ar.x1 + dx, y1: ar.y1 + dy }; if (ar.x2 != null) { c.x2 = ar.x2 + dx; c.y2 = ar.y2 + dy; } mol.arrows.push(c); });
+        { const remap = new Map(); const fix = (o) => { if (o.grp == null) return; if (!remap.has(o.grp)) remap.set(o.grp, newGroupId()); o.grp = remap.get(o.grp); };      // pasted copies form their own groups
+          mol.atoms.slice(n0).forEach(fix); mol.arrows.slice(a0).forEach(fix); }
         mol.fills = mol.fills || []; d.fills.forEach(f => mol.fills.push({ ...f, ring: f.ring.map(i => i + n0) }));
         clearSel();
         d.atoms.forEach((_, k) => sel.atoms.add(n0 + k)); d.arrows.forEach((_, k) => sel.arrows.add(a0 + k));
@@ -3767,6 +3836,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         if (keyEl) { pickElement(keyEl); return; }
         if (e.key === '1') setTool('b1'); else if (e.key === '2') setTool('b2'); else if (e.key === '3') setTool('b3');
         else if (e.key === '+' || e.key === '=') zoomBy(1.25); else if (e.key === '-') zoomBy(0.8);
+        else if ((e.key === 'g' || e.key === 'G') && (e.ctrlKey || e.metaKey)) { e.preventDefault(); toggleGroup(); }
         else if (e.key === 'Delete' || e.key === 'Backspace') {
             if (selQ) { commit(); deleteQ(selQ); selQ = null; changed(); }
             else if (hasSel()) { if (deleteSelection()) changed(); }
@@ -3906,7 +3976,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         ['2d', 'both', '3d'].forEach(k => $('v-' + k).classList.toggle('active', k === m));
         requestAnimationFrame(() => { render(); if (m !== '3d') fitView(); });
     }
-    ['2d', 'both', '3d'].forEach(k => $('v-' + k).addEventListener('click', () => { if (typeof styleFold !== 'undefined') styleFold = null; setLayout(k); }));
+    ['2d', 'both', '3d'].forEach(k => $('v-' + k).addEventListener('click', () => { if (typeof styleMode !== 'undefined' && styleMode) closeStyle(); setLayout(k); }));
 
     // =====================================================================
     //  3D viewer: cartoon shading, ink outlines, lines between atoms
@@ -4223,7 +4293,6 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     // =====================================================================
     //  Style controls
     // =====================================================================
-    $('tab').addEventListener('click', () => { const c = $('stylebar').classList.toggle('collapsed'); $('tab').setAttribute('aria-expanded', String(!c)); });
     const bindSlider = (id, fmt, fn) => { const el = $(id), out = $('v' + id.slice(1)); const f = () => { out.textContent = fmt(+el.value); fn(+el.value); }; el.addEventListener('input', f); f(); };
     bindSlider('s-outline', v => v.toFixed(1) + ' px', v => { st.outline = v; TOON.world.value = 0.35 * Math.max(1, v / 6); if (!st.classic) TOON.px.value = v * DPR; });
     bindSlider('s-thin', v => v.toFixed(1) + ' px', v => { EDGE.w = v; });
@@ -4274,12 +4343,6 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         e.currentTarget.textContent = st.classic ? 'CLASSIC MODE' : 'CARTOON MODE'; e.currentTarget.classList.toggle('classic', st.classic);
         document.querySelector('.cartoon-only').classList.toggle('off', st.classic);      // outlines don't apply to classic shading
     });
-    // the STYLE panel tucks itself away 2 s after the pointer leaves it
-    let styleTimer = null;
-    $('stylebar').addEventListener('pointerenter', () => clearTimeout(styleTimer));
-    $('stylebar').addEventListener('pointerleave', () => { clearTimeout(styleTimer); styleTimer = setTimeout(() => {
-        const ae = document.activeElement; if (ae && ae.type === 'color' && $('stylebar').contains(ae)) return;
-        if (!$('stylebar').classList.contains('collapsed')) { $('stylebar').classList.add('collapsed'); $('tab').setAttribute('aria-expanded', 'false'); } }, 2000); });
     vwrap.addEventListener('pointerenter', () => { over3D = true; });
     vwrap.addEventListener('pointerleave', () => { over3D = false; });
     const panR = V(0, 0, 0), panU = V(0, 0, 0);
@@ -4314,30 +4377,46 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
       renderer.domElement.addEventListener('pointerdown', (e) => { if (e.button !== 2) return; rd = { x: e.clientX, y: e.clientY, ox: VOFF.x, oy: VOFF.y }; renderer.domElement.setPointerCapture(e.pointerId); });
       renderer.domElement.addEventListener('pointermove', (e) => { if (!rd) return; VOFF.x = rd.ox + e.clientX - rd.x; VOFF.y = rd.oy + e.clientY - rd.y; });
       renderer.domElement.addEventListener('pointerup', () => { rd = null; }); }
-    // opening STYLE: fold the 2D editor away (if it was showing) and slide the model left of the panel; closing puts both back
-    let styleFold = null;
-    function animSplit(from, to, done) {
-        const main = $('main'), t0 = performance.now(), D = 1000;
-        const step = (now) => { const k = Math.min(1, (now - t0) / D), e = k * k * (3 - 2 * k); main.style.setProperty('--split', (from + (to - from) * e) + '%');
-            if (k < 1) requestAnimationFrame(step); else if (done) done(); };
-        requestAnimationFrame(step);
+    // ---- the STYLE window: zooms out of the STYLE tab (and back into it, like a Mac window and the Dock).
+    //      COMBO view: it covers the 2D editor; 3D-only view: it sits on the right and the model slides left to stay in view.
+    //      Close with its ✕, the STYLE tab, or a click anywhere else.
+    let styleMode = null, styleFold = null;      // styleMode: null (closed) | 'over' | 'right' | 'busy'
+    const styleEl = $('style'), barEl = $('stylebar'), tabEl = $('tab');
+    function zoomStyle(open, done) {
+        const r = styleEl.getBoundingClientRect(), t = tabEl.getBoundingClientRect();
+        const dx = (t.left + t.width / 2) - (r.left + r.width / 2), dy = (t.top + t.height / 2) - (r.top + r.height / 2);
+        const small = { transform: `translate(${dx}px, ${dy}px) scale(${Math.max(0.03, t.width / r.width)}, ${Math.max(0.06, t.height / r.height)})`, opacity: 0.15, borderRadius: '40px' };
+        const big = { transform: 'translate(0, 0) scale(1, 1)', opacity: 1 };
+        const an = styleEl.animate(open ? [small, big] : [big, small], { duration: open ? 460 : 380, easing: open ? 'cubic-bezier(.16,.9,.3,1)' : 'cubic-bezier(.55,0,.85,.35)', fill: 'forwards' });
+        an.onfinish = () => { if (done) done(); an.cancel(); };
     }
-    function onStyleToggle(open) {
-        const panelW = Math.max(0, $('stylebar').offsetWidth - 34);
-        if (open) {
-            if (layoutMode === 'both' && innerWidth > 900) {
-                const sp = disp.split || 50; styleFold = { split: sp };
-                animSplit(sp, 0, () => { if (styleFold) { setLayout('3d'); $('main').style.setProperty('--split', sp + '%'); requestAnimationFrame(() => { VOFF.sxT = -Math.min(panelW, vwrap.clientWidth * 0.6) / 2; }); } });
-            } else { styleFold = null; VOFF.sxT = -Math.min(panelW, vwrap.clientWidth * 0.6) / 2; }
-        } else {
-            VOFF.sxT = 0;
-            if (styleFold && layoutMode === '3d') { const sp = styleFold.split; styleFold = null; $('main').style.setProperty('--split', '0%'); setLayout('both'); animSplit(0, sp, () => { fitView(); }); }
-            styleFold = null;
-        }
+    function placeOver() { const r = $('editor').getBoundingClientRect(); Object.assign(styleEl.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' }); }
+    function openStyle() {
+        if (styleMode) return;
+        barEl.style.transition = 'none';
+        if (layoutMode === 'both' && innerWidth > 900) { styleMode = 'over'; document.body.appendChild(styleEl); styleEl.classList.add('over2d'); placeOver(); }
+        else { styleMode = 'right'; barEl.classList.remove('collapsed'); requestAnimationFrame(() => { VOFF.sxT = -Math.min(Math.max(0, barEl.offsetWidth - 34), vwrap.clientWidth * 0.6) / 2; }); }
+        tabEl.setAttribute('aria-expanded', 'true'); barEl.classList.add('open');
+        zoomStyle(true);
     }
-    new MutationObserver(() => { const open = !$('stylebar').classList.contains('collapsed'); if (open !== onStyleToggle.last) { onStyleToggle.last = open; onStyleToggle(open); } })
-        .observe($('stylebar'), { attributes: true, attributeFilter: ['class'] });
-    onStyleToggle.last = !$('stylebar').classList.contains('collapsed');
+    function closeStyle() {
+        if (!styleMode || styleMode === 'busy') return; const m = styleMode; styleMode = 'busy';
+        if (m === 'right') VOFF.sxT = 0;
+        tabEl.setAttribute('aria-expanded', 'false'); barEl.classList.remove('open');
+        zoomStyle(false, () => {
+            if (m === 'over') { styleEl.classList.remove('over2d'); styleEl.removeAttribute('style'); barEl.insertBefore(styleEl, barEl.firstChild); }
+            else barEl.classList.add('collapsed');
+            styleEl.style.visibility = ''; styleMode = null;
+        });
+    }
+    tabEl.addEventListener('click', (e) => { e.stopPropagation(); if (styleMode) closeStyle(); else openStyle(); });
+    $('style-x').addEventListener('click', (e) => { e.stopPropagation(); closeStyle(); });
+    document.addEventListener('pointerdown', (e) => {      // a click anywhere else closes it (menus and dialogs it opens don't count)
+        if (!styleMode || styleMode === 'busy') return;
+        if (styleEl.contains(e.target) || tabEl.contains(e.target) || e.target.closest('.menu, .modal, #flyout')) return;
+        closeStyle();
+    }, true);
+    addEventListener('resize', () => { if (styleMode === 'over') placeOver(); });
 
     // ---- molecular mechanics: a small force field (bond stretch, angle bend, torsions, sp2 planarity, van der Waals)
     const mm = { running: false };
@@ -4546,10 +4625,16 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     $('bg-any').addEventListener('input', (e) => { const c = e.target.value; bgCols = [hexMix(c, '#ffffff', 0.18), c, hexMix(c, '#000000', 0.55)]; applyBG(); });
     bindSlider('s-vig', v => Math.round(v * 100) + '%', v => { st.vignette = v; applyBG(); });
     // ---- Party Mode (dark mode only): neon structures and arrows on black with a faint glow; the 3D view goes black and glows the same colour
-    const NEON = [['Neon green', '#39ff14'], ['Neon blue', '#1fb6ff'], ['Neon yellow', '#fff01f'], ['Neon orange', '#ff9f1c'], ['Neon red', '#ff3131']];
+    const NEON = [['Neon green', '#39ff14'], ['Neon blue', '#1fb6ff'], ['Neon yellow', '#fff01f'], ['Neon orange', '#ff9f1c'], ['Neon red', '#ff3131'], ['Neon purple', '#bc13fe'], ['Rainbow (slowly cycles)', 'rainbow']];
+    const RAINBOW = ['#1fb6ff', '#39ff14', '#fff01f', '#ff9f1c', '#ff3131', '#bc13fe'], RB_T = 42;
+    let rbT0 = 0;
+    function rainbowAt(t) { const x = ((t / RB_T) % 1 + 1) % 1 * RAINBOW.length, k = Math.floor(x), f = x - k; return hexMix(RAINBOW[k], RAINBOW[(k + 1) % RAINBOW.length], f); }
     function setParty(on, col) {
         if (col) PARTY.col = col;
-        document.body.style.setProperty('--neon', PARTY.col);
+        const rb = PARTY.col === 'rainbow';
+        if (rb && !document.body.classList.contains('rainbow')) rbT0 = performance.now();
+        document.body.classList.toggle('rainbow', rb && (on || PARTY.on));
+        if (!rb) document.body.style.setProperty('--neon', PARTY.col);
         if (on && !PARTY.on) {
             PARTY.saved = { bgCols, vig: st.vignette, glow: st.glow, gcol: '#' + GLOWU.col.value.getHexString(), r: GLOWU.r.value };
             PARTY.on = true; bgCols = ['#000000', '#000000', '#000000']; applyBG();
@@ -4561,13 +4646,14 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             GLOWU.col.value.set(sv.gcol || '#7dd3fc'); $('glow-col').value = sv.gcol || '#7dd3fc'; GLOWU.r.value = sv.r || 0.9;
             if (st.glow !== !!sv.glow) $('b-glow').click();
         }
-        if (PARTY.on) { GLOWU.col.value.set(PARTY.col); $('glow-col').value = PARTY.col; }
+        if (PARTY.on && !rb) { GLOWU.col.value.set(PARTY.col); $('glow-col').value = PARTY.col; }
+        if (!PARTY.on) document.body.classList.remove('rainbow');
         document.body.classList.toggle('party', PARTY.on);
         $('b-party').classList.toggle('active', PARTY.on); $('party-cols').hidden = !PARTY.on;
         $('party-cols').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.c === PARTY.col));
         render();
     }
-    NEON.forEach(([nm, c]) => { const b = document.createElement('button'); b.dataset.c = c; b.style.background = c; b.style.color = c; b.title = nm; b.setAttribute('aria-label', nm);
+    NEON.forEach(([nm, c]) => { const b = document.createElement('button'); b.dataset.c = c; if (c === 'rainbow') b.className = 'rainbow'; else { b.style.background = c; b.style.color = c; } b.title = nm; b.setAttribute('aria-label', nm);
         b.addEventListener('click', () => setParty(true, c)); $('party-cols').appendChild(b); });
     $('b-party').addEventListener('click', () => setParty(!PARTY.on));
     function paintBG(ctx, W, H) {        // the same background on a 2D canvas (for GIF frames)
@@ -4953,6 +5039,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         if (M3 && prevA !== st.sfA) place3D();
         if (!camAnimStep(dt)) controls.update();
         if (BG.n && M3) { if (!st.paused) bgStep(dt); bgFill(); }
+        if (PARTY.on && PARTY.col === 'rainbow') GLOWU.col.value.set(rainbowAt((now - rbT0) / 1000));
         if (st.glow) { glowT += dt * st.glowSpeed * 2 * Math.PI; GLOWU.amp.value = st.glowSpeed ? glowPulse(glowT) : 1; }
         applyOffset(dt);
         draw3D(TOON.res.value.x, TOON.res.value.y);
