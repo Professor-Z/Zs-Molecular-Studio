@@ -7429,7 +7429,7 @@ function autoMapAtoms(m, R, P) {
         ctxLab.hidden = !ks.some(k => LABEL_ARROWS.has((mol.arrows[k] || {}).t));
         ctxTbl.hidden = !ks.some(k => (mol.arrows[k] || {}).t === 'rtable');
         const ex = $('c-expand'); if (ex && showSel) ex.style.display = [...sel.atoms].some(i => mol.atoms[i] && mol.atoms[i].pseudo && ABBR.known(mol.atoms[i].el)) ? '' : 'none';
-        ctxBar.classList.toggle('empty-ctx', [...ctxBar.children].every(c => c.hidden));
+        ctxBar.classList.toggle('empty-ctx', [...ctxBar.querySelectorAll(':scope > .ctx-sec')].every(c => c.hidden));
     }
 
     // ---------------------------------------------------------------- DISPLAY menu: labels
