@@ -46,7 +46,7 @@
     .seg { display: inline-flex; } .seg .btn { border-radius: 0; } .seg .btn:first-child { border-radius: 0.375rem 0 0 0.375rem; } .seg .btn:last-child { border-radius: 0 0.375rem 0.375rem 0; }
     .tool.grp { position: relative; } .tool.grp::after { content: ""; position: absolute; right: 3px; bottom: 3px; border: 4px solid transparent; border-right-color: currentColor; border-bottom-color: currentColor; opacity: 0.7; }
     #flyout { position: fixed; z-index: 50; display: flex; gap: 4px; padding: 6px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    #flyout[hidden], #display-menu[hidden] { display: none; }
+    #flyout[hidden], #display-menu[hidden], .ctx-typecol[hidden] { display: none !important; }
     .menu { position: fixed; z-index: 70; width: 260px; padding: 10px 12px; background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; box-shadow: 0 10px 30px rgba(15,23,42,0.3); font-size: 0.8rem; }
     .menu[hidden] { display: none; }
     .mi { display: flex; justify-content: space-between; width: 100%; text-align: left; font: inherit; font-weight: 600; padding: 6px 8px; border: none; border-radius: 6px; background: none; color: #1e293b; cursor: pointer; }
@@ -106,6 +106,12 @@
     .tool svg { width: 24px; height: 24px; }
     .tsep { background: rgba(255,255,255,0.12); flex: none; } .bar.vert > .tsep { height: 1px; width: 32px; margin: 3px 0; } .bar.horiz > .tsep { width: 1px; height: 28px; margin: 0 3px; }
     #sketch-wrap { grid-area: c; position: relative; min-height: 0; min-width: 0; margin: 8px; border-radius: 10px; overflow: hidden; background: #f8fafc; }
+    #party-box { display: inline-flex; align-items: center; gap: 6px; } body.light #party-box { display: none; }
+    #party-cols { display: inline-flex; gap: 5px; } #party-cols[hidden] { display: none; }
+    #party-cols button { width: 20px; height: 20px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); padding: 0; cursor: pointer; box-shadow: 0 0 8px currentColor; }
+    #party-cols button.active { border-color: #fff; }
+    #b-party.active { background: #111; color: var(--neon, #39ff14); border-color: var(--neon, #39ff14); text-shadow: 0 0 6px var(--neon, #39ff14); box-shadow: 0 0 10px var(--neon, #39ff14); }
+    body.party #sketch-wrap { background: #000; transition: background 0.4s; }
     #sketch { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; user-select: none; }
     #sketch.move { cursor: grab; }
     #sketch-hint { position: absolute; left: 10px; right: 10px; bottom: 8px; font-size: 0.72rem; color: #64748b; pointer-events: none; }
@@ -221,7 +227,7 @@
     #pct { font-size: 0.75rem; color: #cbd5e1; display: inline-flex; gap: 8px; flex-wrap: wrap; } #pct b { color: #fff; }
     #b-pct { padding: 0.3rem 0.5rem; font-size: 0.68rem; }
     #pause3d { white-space: nowrap; padding-left: 0.3rem; padding-right: 0.3rem; } #pause3d.active { background: #2563eb; color: #fff; }
-    #center3d { position: absolute; right: 52px; bottom: 12px; z-index: 6; border-radius: 999px; padding: 0.45rem 0.9rem; background: rgba(30,41,59,0.9); border: 1px solid rgba(255,255,255,0.15); }
+    #center3d { position: absolute; left: 50%; transform: translateX(-50%); bottom: 12px; z-index: 6; border-radius: 999px; padding: 0.45rem 0.9rem; background: rgba(30,41,59,0.9); border: 1px solid rgba(255,255,255,0.15); }
     #main.anim { transition: grid-template-columns 0.45s ease; }
     #hint3d { position: absolute; left: 12px; top: 10px; font-size: 0.7rem; color: rgba(226,232,240,0.7); pointer-events: none; }
 </style>
@@ -235,6 +241,7 @@
         </div>
         <div class="tb-right"><span id="props" hidden><span id="formula"></span><span id="pct"></span></span>
             <button class="btn" id="b-props" title="Show the formula, molar mass and percent composition">PROPERTIES</button>
+            <span id="party-box"><button class="btn tg" id="b-party" title="Party Mode: neon structures on black, with a glow (dark mode only)">PARTY MODE</button><span id="party-cols" hidden></span></span>
             <button class="btn" id="b-theme" title="Switch between dark and light mode" aria-label="Switch between dark and light mode">☀</button></div>
     </div>
     <div id="main">
@@ -242,7 +249,11 @@
             <div class="dock" id="dock-top" data-side="top"></div>
             <div class="dock" id="dock-left" data-side="left"></div>
             <div id="sketch-wrap">
-                <svg id="sketch" aria-label="2D structure editor"><defs id="fdefs"></defs><g id="view"><g id="g-fills"></g><g id="g-bonds" stroke="#1e293b" stroke-width="0.065" stroke-linecap="round" fill="none"></g><g id="g-atoms"></g><g id="g-arrows" stroke="#1e293b" stroke-linecap="round" stroke-linejoin="round" fill="none"></g><g id="g-over"></g></g></svg>
+                <svg id="sketch" aria-label="2D structure editor"><defs><filter id="neon-glow" filterUnits="userSpaceOnUse" x="-2000" y="-2000" width="4000" height="4000" color-interpolation-filters="sRGB">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="0.06" result="b1"/><feGaussianBlur in="SourceAlpha" stdDeviation="0.18" result="b2"/><feGaussianBlur in="SourceAlpha" stdDeviation="0.45" result="b3"/>
+                    <feMerge result="bm"><feMergeNode in="b3"/><feMergeNode in="b2"/><feMergeNode in="b1"/></feMerge>
+                    <feFlood id="neon-flood" flood-color="#39ff14" flood-opacity="0.85" result="fl"/><feComposite in="fl" in2="bm" operator="in" result="glow"/>
+                    <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><defs id="fdefs"></defs><g id="view"><g id="g-fills"></g><g id="g-bonds" stroke="#1e293b" stroke-width="0.065" stroke-linecap="round" fill="none"></g><g id="g-atoms"></g><g id="g-arrows" stroke="#1e293b" stroke-linecap="round" stroke-linejoin="round" fill="none"></g><g id="g-over"></g></g></svg>
                 <div id="sketch-hint"></div>
                 <button id="restore-bars" class="restore" hidden title="Show the hidden toolbars">☰ TOOLBARS</button>
             </div>
@@ -273,12 +284,12 @@
                         <div class="btn-row two"><button class="btn tg" id="b-glow" title="A soft pulsing glow around the molecule">GLOW: OFF</button>
                             <label class="lbl2 glow-col">Glow color <input type="color" id="glow-col" value="#7dd3fc"></label></div>
                         <div class="slider-row"><div class="lbl"><label for="s-glowr">Glow radius</label><span id="v-glowr"></span></div>
-                            <input id="s-glowr" type="range" min="0.2" max="10" step="0.1" value="0.9"></div>
+                            <input id="s-glowr" type="range" min="0.2" max="10" step="0.1" value="3"></div>
                         <div class="slider-row"><div class="lbl"><label for="s-glowb">Glow brightness</label><span id="v-glowb"></span></div>
-                            <input id="s-glowb" type="range" min="0.1" max="3" step="0.05" value="1"></div>
+                            <input id="s-glowb" type="range" min="0.1" max="3" step="0.05" value="2"></div>
                         <div class="glow-sw" id="glow-presets" role="group" aria-label="Glow color presets"></div>
                         <div class="slider-row"><div class="lbl"><label for="s-glowp">Glow pulse</label><span id="v-glowp"></span></div>
-                            <input id="s-glowp" type="range" min="0" max="3" step="0.1" value="1"></div>
+                            <input id="s-glowp" type="range" min="0" max="3" step="0.1" value="0.5"></div>
                     </div>
                     <div>
                         <div class="sec">MODEL</div>
@@ -367,7 +378,7 @@
         <canvas id="gif-prev" width="300" height="300"></canvas>
         <div class="gif-side">
             <div class="slider-row"><div class="lbl"><label for="s-gifpad">Space around the molecule</label><span id="v-gifpad"></span></div><input id="s-gifpad" type="range" min="0.7" max="2.5" step="0.05" value="1.25"></div>
-            <div class="sv-row"><label>Size <select class="btn" id="gif-size"><option value="320">320 px</option><option value="420" selected>420 px</option><option value="560">560 px</option><option value="720">720 px</option></select></label>
+            <div class="sv-row"><label>Size <select class="btn" id="gif-size"><option value="full" selected>Same as the 3D view</option><option value="half">Half size</option><option value="720">720 px square</option><option value="420">420 px square</option></select></label>
                 <label>Length <select class="btn" id="gif-dur"><option value="3">3 s</option><option value="4" selected>4 s</option><option value="6">6 s</option><option value="8">8 s</option></select></label></div>
             <div class="hint-sm" style="margin:8px 0">Turns about the auto-rotate axis chosen in CAMERA (Y if none). Single bonds swing and return, so the loop is seamless.</div>
             <div class="sv-row"><button class="btn primary" id="gif-go">CREATE GIF</button></div>
@@ -878,7 +889,105 @@ function layout2D(m, seed) {
     best.pos.forEach((p, i) => { m.atoms[i].x = p[0]; m.atoms[i].y = p[1]; delete m.atoms[i].dz; });
     m.bonds.forEach(b => { if (b.autoBold) { delete b.bold; delete b.autoBold; } });
     // bridged ring systems (norbornane, adamantane, morphine, cocaine…): draw them as the 3D shape seen from the clearest angle
-    if (isBridged(m) && m.atoms.length <= 90) { try { perspectiveLayout(m); } catch (err) { if (typeof process !== 'undefined' && process.env.LDBG) console.log('persp err', err.message); } }
+    if (isBridged(m) && m.atoms.length <= 90) { try { if (!coreBridgeLayout(m)) perspectiveLayout(m); } catch (err) { if (typeof process !== 'undefined' && process.env.LDBG) console.log('persp err', err.message); } }
+}
+// fused polycyclics with a bridge (morphine, codeine, ibogaine): the fused rings are drawn as regular polygons and the
+// bridge is laid across them in front (bold, tapering into the frame; crossing bonds behind it get gaps). Returns false
+// for compact cages (one ring plus a bridge: norbornane, adamantane, tropanes, camphor), which look better as a 3D projection.
+function coreBridgeLayout(m) {
+    const n = m.atoms.length, nb = neighbors(m), all = findRings(m, 8);
+    // drop envelope rings (the outline of two smaller rings fused on an edge)
+    const rings = all.filter(r => !all.some(a => a.length < r.length && all.some(b => b !== a && b.length < r.length && a.length + b.length - 2 === r.length &&
+        a.filter(v => b.includes(v)).length === 2 && r.every(v => a.includes(v) || b.includes(v)))));
+    const bondOrd = (u, v) => { const b = m.bonds.find(bb => (bb.a === u && bb.b === v) || (bb.a === v && bb.b === u)); return b ? b.order : 0; };
+    const arom = (r) => r.length === 6 && r.filter((v, k) => bondOrd(v, r[(k + 1) % 6]) === 2).length === 3;
+    const rank = (r) => (arom(r) ? 0 : 10) + ({ 6: 0, 5: 1, 7: 2, 8: 3, 4: 4, 3: 5 }[r.length] || 6);
+    const order0 = rings.map((r, i) => i).sort((a, b) => rank(rings[a]) - rank(rings[b]));
+    const dbl = (v) => nb[v].some(x => x.o >= 2);
+    // try each ring as the seed of the flat core; keep the split with the fewest bridge atoms (bridges without double bonds preferred)
+    // every way of choosing which rings are the bridge (few rings, so try them all): the rest must fuse edge-to-edge
+    const cands = [], NR = rings.length;
+    if (NR > 12) return false;
+    for (let mask = 1; mask < (1 << NR); mask++) {
+        const rej = new Set(), acc = new Set(), cov = new Set();
+        for (let i = 0; i < NR; i++) if (mask & (1 << i)) rej.add(i);
+        if (rej.size > 3) continue;
+        let ok = true; const todo = order0.filter(i => !rej.has(i));
+        while (todo.length && ok) {
+            let k = todo.findIndex(i => rings[i].some(v => cov.has(v))); if (k < 0) k = 0;
+            const r = rings[todo[k]], sh = r.filter(v => cov.has(v));
+            if (sh.length > 2) ok = false;
+            else if (sh.length === 2) { const a = r.indexOf(sh[0]), b = r.indexOf(sh[1]); if (!(Math.abs(a - b) === 1 || Math.abs(a - b) === r.length - 1)) ok = false; }
+            if (ok) { acc.add(todo[k]); r.forEach(v => cov.add(v)); todo.splice(k, 1); }
+        }
+        if (!ok) continue;
+        const Bt = new Set(); rings.forEach((r, i) => { if (rej.has(i)) r.forEach(v => { if (!cov.has(v)) Bt.add(v); }); });
+        if (!Bt.size) continue;
+        // the bridge must be a real bridge: every rejected ring needs atoms of its own
+        if ([...rej].some(i => rings[i].every(v => cov.has(v)) && rings[i].length <= 6)) continue;
+        const key = [...Bt].sort((a, b) => a - b).join(',');
+        if (cands.some(c => c.key === key)) continue;
+        cands.push({ key, acc, rej, cov, B: Bt, pre: Bt.size * 6 + [...Bt].filter(dbl).length * 4 + rej.size * 2 });
+    }
+    cands.sort((a, b) => a.pre - b.pre); cands.length = Math.min(cands.length, 5);
+    if (!cands.length) return false;
+    // lay out each candidate's flat core and keep the one that is cleanest (no overlapping rings) with the smallest bridge
+    let best = null;
+    for (const cd of cands) { const r = trySplit(cd); if (r && (!best || r.sc < best.sc)) best = r; }
+    if (!best) return false;
+    const { acc, rej, cov, B, S, P } = best;
+    return finishSplit(acc, rej, cov, B, S, P);
+    function trySplit({ acc, rej, cov, B, pre }) {
+    // accepted rings fused (sharing atoms, transitively) with the rejected ones: the bridged ring system's core
+    const sys = new Set(); rej.forEach(i => rings[i].forEach(v => sys.add(v)));
+    let grow = true; const inSys = new Set(); while (grow) { grow = false; acc.forEach(i => { if (inSys.has(i)) return; if (rings[i].some(v => sys.has(v))) { inSys.add(i); rings[i].forEach(v => sys.add(v)); grow = true; } }); }
+    if (inSys.size < 2) return null;
+    // S: everything still joined to the core without passing through the bridge; G: the bridge and whatever hangs off it
+    const S = new Set(), seen = new Set();
+    for (let s0 = 0; s0 < n; s0++) { if (B.has(s0) || seen.has(s0)) continue; const compA = [s0]; seen.add(s0); const st = [s0];
+        while (st.length) { const u = st.pop(); for (const { j } of nb[u]) if (!B.has(j) && !seen.has(j)) { seen.add(j); compA.push(j); st.push(j); } }
+        if (compA.some(v => cov.has(v))) compA.forEach(v => S.add(v)); }
+    const ids = [...S].sort((a, b) => a - b), map = new Map(ids.map((v, k) => [v, k]));
+    const sub = { atoms: ids.map(v => ({ ...m.atoms[v] })), bonds: m.bonds.filter(b => S.has(b.a) && S.has(b.b)).map(b => ({ ...b, a: map.get(b.a), b: map.get(b.b) })) };
+    if (isBridged(sub)) return null;
+    { let bp = null;      // fused cores can fold onto themselves; try many starts and keep the cleanest
+      for (const sd of [7, 11, 23, 41, 59, 83, 101, 131, 151, 173, 197, 223, 251, 277, 307, 331]) { const c = { atoms: sub.atoms.map(a => ({ ...a })), bonds: sub.bonds };
+          layout2D1(c, sd); const sc = layoutScore(c); if (!bp || sc < bp.sc - 1e-6) bp = { sc, pos: c.atoms.map(a => [a.x, a.y]) }; if (bp.sc < 0.5) break; }
+      bp.pos.forEach((p, k) => { sub.atoms[k].x = p[0]; sub.atoms[k].y = p[1]; }); }
+    const P = m.atoms.map(() => null); ids.forEach((v, k) => { P[v] = { x: sub.atoms[k].x, y: sub.atoms[k].y }; });
+    // first guess for the bridge: between its placed neighbours, nudged off the line
+    let left = n - ids.length, guard = 0;
+    while (left > 0 && guard++ < n * 3) for (let v = 0; v < n; v++) { if (P[v]) continue; const pn = nb[v].filter(x => P[x.j]).map(x => P[x.j]); if (!pn.length) continue;
+        const mx = pn.reduce((s2, p) => s2 + p.x, 0) / pn.length, my = pn.reduce((s2, p) => s2 + p.y, 0) / pn.length;
+        P[v] = pn.length > 1 ? { x: mx + 0.25 * Math.sin(v * 2.1), y: my + 0.25 * Math.cos(v * 2.1) } : { x: mx + 0.8 * Math.cos(v * 1.7), y: my + 0.8 * Math.sin(v * 1.7) }; left--; }
+    if (P.some(p => !p)) return null;
+    return { acc, rej, cov, B, S, P, sc: pre + layoutScore(sub) };
+    }
+    function finishSplit(acc, rej, cov, B, S, P) {
+    const G = new Set(); for (let v = 0; v < n; v++) if (!S.has(v)) G.add(v);
+    const cc = { atoms: m.atoms.map(a => ({ ...a })), bonds: m.bonds };
+    layout2D1(cc, 5, P, S, G);
+    cc.atoms.forEach((a, i) => { m.atoms[i].x = a.x; m.atoms[i].y = a.y; });
+    // a bridge that passes over the rings is in front (bold, gaps behind it); one that ends up beside them simply lies in the plane
+    const inPoly = (p, poly) => { let c = false; for (let k = 0, l = poly.length - 1; k < poly.length; l = k++) { const a = poly[k], b = poly[l];
+        if ((a.y > p.y) !== (b.y > p.y) && p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x) c = !c; } return c; };
+    const X = (p, q, r, t) => { const o = (a, b, c) => Math.sign((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)); return o(p, q, r) * o(p, q, t) < 0 && o(r, t, p) * o(r, t, q) < 0; };
+    const A2 = m.atoms, front = new Set(), seenB = new Set();
+    [...B].forEach(v0 => { if (seenB.has(v0)) return; const comp = [v0], st = [v0]; seenB.add(v0);
+        while (st.length) { const u = st.pop(); for (const { j } of nb[u]) if (B.has(j) && !seenB.has(j)) { seenB.add(j); comp.push(j); st.push(j); } }
+        const cset = new Set(comp), bb = m.bonds.filter(b => cset.has(b.a) || cset.has(b.b));
+        const over = comp.some(v => [...acc].some(i => inPoly(A2[v], rings[i].map(w => A2[w])))) ||
+            bb.some(b => m.bonds.some(c => !cset.has(c.a) && !cset.has(c.b) && c.a !== b.a && c.a !== b.b && c.b !== b.a && c.b !== b.b && X(A2[b.a], A2[b.b], A2[c.a], A2[c.b])));
+        if (over) comp.forEach(v => front.add(v)); });
+    // whatever hangs off a front bridge (N-methyl, …) comes forward with it
+    let more = true; while (more) { more = false; for (let v = 0; v < n; v++) if (G.has(v) && !front.has(v) && !B.has(v) && nb[v].some(x => front.has(x.j))) { front.add(v); more = true; } }
+    A2.forEach((a, i) => { a.dz = front.has(i) ? 1 : 0; });
+    // the front bridge's ring bonds are bold, tapering where they run back into the core
+    m.bonds.forEach(b => { if (b.order !== 1 || b.wedge) return; const ga = front.has(b.a) && B.has(b.a), gb = front.has(b.b) && B.has(b.b); if (!ga && !gb) return;
+        if (!rings.some((r, i) => rej.has(i) && r.includes(b.a) && r.includes(b.b))) return;
+        b.bold = [ga ? 1 : 0, gb ? 1 : 0]; b.autoBold = true; });
+    return true;
+    }
 }
 function isBridged(m) {
     const rs = findRings(m, 8);
@@ -943,6 +1052,16 @@ function perspectiveLayout(m) {
         Q.forEach((q, i) => { q[0] += F[i][0]; q[1] += F[i][1]; });
     }
     m.atoms.forEach((a, i) => { a.x = Q[i][0]; a.y = Q[i][1]; a.dz = +X[i][2].toFixed(3); });
+    // only the cage keeps its projected shape; substituents, chains and flat rings are laid out with normal 2D angles
+    // (a projected C=O or ester can be foreshortened into impossible angles)
+    { const rs0 = findRings(m, 8), br0 = new Set(), cage = new Set();
+      rs0.forEach((r, x) => rs0.forEach((q, y) => { if (x !== y && r.filter(v => q.includes(v)).length >= 3) br0.add(x); }));
+      rs0.forEach((r, x) => { if (br0.has(x)) r.forEach(v => cage.add(v)); });
+      if (cage.size && cage.size < n) {
+          const cc = { atoms: m.atoms.map(a => ({ ...a })), bonds: m.bonds };
+          layout2D1(cc, 5, Q.map(q => ({ x: q[0], y: q[1] })), cage);
+          cc.atoms.forEach((a, i) => { m.atoms[i].x = a.x; m.atoms[i].y = a.y; });
+      } }
     // bold the bridge nearest the viewer: ring bonds (not aromatic, not double) whose ends stand well in front of the middle
     const rs = findRings(m, 8), inRing = new Set(), aromAtom = new Set();
     rs.forEach(r => { r.forEach(v => inRing.add(v)); if (r.length === 6) { const ds = r.filter((v, k) => { const w = r[(k + 1) % 6]; const b = m.bonds.find(bb => (bb.a === v && bb.b === w) || (bb.a === w && bb.b === v)); return b && b.order === 2; }).length; if (ds === 3) r.forEach(v => aromAtom.add(v)); } });
@@ -959,7 +1078,7 @@ function perspectiveLayout(m) {
         b.bold = [fa ? 1 : 0, fb ? 1 : 0]; b.autoBold = true;
     });
 }
-function layout2D1(m, seed = 7, init = null) {
+function layout2D1(m, seed = 7, init = null, fixed = null, soft = null) {      // fixed: atoms that keep their init position; soft: atoms allowed to lie over the fixed ones
     const n = m.atoms.length; if (!n) return;
     let sd = seed; const rnd = () => { sd = (sd * 16807) % 2147483647; return sd / 2147483647; };
     const nb = neighbors(m), rings = findRings(m, 8);
@@ -1062,10 +1181,10 @@ function layout2D1(m, seed = 7, init = null) {
         const rep = it < iters * 0.6 ? 1.6 : 1.3;
         for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) { if (close.has(i + ',' + j)) continue;
             const dx = P[j].x - P[i].x, dy = P[j].y - P[i].y, d = Math.hypot(dx, dy) || 1e-3;
-            const lim = comp[i] !== comp[j] ? 3 : near14.has(i + ',' + j) ? 1.05 : rep;
+            const lim = comp[i] !== comp[j] ? 3 : (soft && fixed && ((soft.has(i) && fixed.has(j)) || (soft.has(j) && fixed.has(i)))) ? 0.55 : near14.has(i + ',' + j) ? 1.05 : rep;
             if (d < lim) { const f = -0.3 * (lim - d) / d; F[i].x += dx * f; F[i].y += dy * f; F[j].x -= dx * f; F[j].y -= dy * f; } }
         const step = it < 200 ? 0.35 : 0.2;
-        for (let i = 0; i < n; i++) { const l = Math.hypot(F[i].x, F[i].y); const s2 = l > 1 ? step / l : step; P[i].x += F[i].x * s2; P[i].y += F[i].y * s2; }
+        for (let i = 0; i < n; i++) { if (fixed && fixed.has(i)) continue; const l = Math.hypot(F[i].x, F[i].y); const s2 = l > 1 ? step / l : step; P[i].x += F[i].x * s2; P[i].y += F[i].y * s2; }
     }
     // tidy zig-zags: an open-chain atom with two neighbours bent more than ~140° is folded back to 120°
     // by turning its smaller side, if that doesn't bump into anything
@@ -1079,7 +1198,7 @@ function layout2D1(m, seed = 7, init = null) {
             let dA = a2 - a1; while (dA > Math.PI) dA -= 2 * Math.PI; while (dA < -Math.PI) dA += 2 * Math.PI;
             if (Math.abs(Math.abs(dA) - Math.PI) < 0.05) continue;
             const sq = sideOf(c, q), sp2 = sideOf(c, p); if (!sq || !sp2) continue;
-            const mv = sq.size <= sp2.size ? sq : sp2, th = (mv === sq ? 1 : -1) * (Math.sign(dA) * Math.PI - dA), co = Math.cos(th), si = Math.sin(th);
+            const mv = sq.size <= sp2.size ? sq : sp2; if (fixed && [...mv].some(v => fixed.has(v))) continue; const th = (mv === sq ? 1 : -1) * (Math.sign(dA) * Math.PI - dA), co = Math.cos(th), si = Math.sin(th);
             mv.forEach(v => { const dx = P[v].x - P[c].x, dy = P[v].y - P[c].y; P[v] = { x: P[c].x + dx * co - dy * si, y: P[c].y + dx * si + dy * co }; });
             continue;
         }
@@ -1088,7 +1207,7 @@ function layout2D1(m, seed = 7, init = null) {
         let ang = Math.abs(a2 - a1); if (ang > Math.PI) ang = 2 * Math.PI - ang;
         if (ang < 132 * Math.PI / 180) continue;
         const sp = sideOf(c, p), sq = sideOf(c, q); if (!sp || !sq) continue;
-        const mv = sp.size <= sq.size ? sp : sq, delta = ang - 2 * Math.PI / 3;
+        const mv = sp.size <= sq.size ? sp : sq, delta = ang - 2 * Math.PI / 3; if (fixed && [...mv].some(v => fixed.has(v))) continue;
         const save = [...mv].map(v => ({ v, x: P[v].x, y: P[v].y })), g0 = minGap();
         let best = null;
         for (const sgn of [1, -1]) {
@@ -1229,7 +1348,7 @@ function embed3D(m0, opts = {}) {
              bonds: m.bonds.map(b => ({ a: b.a, b: b.b, order: b.order })), chiral: chirN.length,
              chiralOK: chirN.filter(({ idx, sign }) => sign * chiralVolume(P[idx[0]], P[idx[1]], P[idx[2]], P[idx[3]]) > 0).length };
 }
-if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayout, layoutScore, layout2D1, stereoHint, PERIODIC, chiralVolume, drawnSign, assignWedges, ELEMENTS, newMol, cloneMol, neighbors, implicitH, formula, parseSMILES, toSMILES, findRings, layout2D, embed3D, bondLength };
+if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridged, perspectiveLayout, layoutScore, layout2D1, stereoHint, PERIODIC, chiralVolume, drawnSign, assignWedges, ELEMENTS, newMol, cloneMol, neighbors, implicitH, formula, parseSMILES, toSMILES, findRings, layout2D, embed3D, bondLength };
 
 </script>
 <script>
@@ -1308,7 +1427,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             let fx = P[1][0] > P[5][0] ? -1 : 1, fy = P[0][1] > P[3][1] ? -1 : 1;   // match the drawing: k1 on the left, k0 (front bridge) below
             const tv = (p) => { const v = toV(p); return [v[0] * fx, v[1] * fy, v[2]]; };
             P = ring.map(tv);
-            const D = 1.84, place = { 1: [0, 0], 2: [0.002, 0.002], 5: [D, 0], 4: [D + 0.002, 0.002], 0: [D / 2, 0.53], 3: [D / 2, -0.53] };
+            const D = 2.3, place = { 1: [0, 0], 2: [0.002, 0.002], 5: [D, 0], 4: [D + 0.002, 0.002], 0: [D / 2, 0.5], 3: [D / 2, -0.5] };      // wide enough that the back bridge shows as much bond as the other back bonds
             const free = { 1: [90, 210], 2: [150, 270], 5: [90, 330], 4: [30, 270] };
             const atoms = [], bonds = [];
             for (let k = 0; k < 6; k++) {
@@ -1348,8 +1467,9 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             const ring = n === 6
                 ? [[0.85, -0.6], [1.75, 0.05], [0.85, 0.7], [-0.85, 0.7], [-1.75, 0.05], [-0.85, -0.6]]
                 : [[0, -0.75], [1.35, -0.1], [0.85, 0.7], [-0.85, 0.7], [-1.35, -0.1]];
+            // front carbons: short up-bonds (so they don't reach the back of the ring); back carbons: short down-bonds
             ring.forEach(([x, y]) => atoms.push(A('C', x, y, { p3: [x, 0, y], haworth: true,
-                slots: [{ d: [0, -1], d3: [0, 1, 0], len: 0.85 }, { d: [0, 1], d3: [0, -1, 0], len: 0.85 }] })));
+                slots: [{ d: [0, -1], d3: [0, 1, 0], len: y > 0.4 ? 0.42 : 0.85 }, { d: [0, 1], d3: [0, -1, 0], len: y < -0.3 ? 0.42 : 0.85 }] })));
             for (let k = 0; k < n; k++) {
                 const b = { a: k, b: (k + 1) % n, order: 1 };
                 if (k === 1) b.bold = [0, 1]; else if (k === 2) b.bold = [1, 1]; else if (k === 3) b.bold = [1, 0];      // [a-end thick?, b-end thick?]
@@ -1409,7 +1529,8 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     let mol = normMol(newMol());
     const undoStack = [], redoStack = [];
     const sel = { atoms: new Set(), arrows: new Set() };
-    const clearSel = () => { sel.atoms.clear(); sel.arrows.clear(); };
+    let selQ = null;
+    const clearSel = () => { sel.atoms.clear(); sel.arrows.clear(); selQ = null; };
     const hasSel = () => sel.atoms.size + sel.arrows.size > 0;
     const snapshot = () => JSON.stringify(mol);
     const restore = (s) => { mol = normMol(JSON.parse(s)); clearSel(); };
@@ -1420,6 +1541,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     const isSelKind = () => tool.kind === 'select' || tool.kind === 'lasso';
     const tool = { kind: 'bond', order: 1, el: 'C', pseudo: false, ring: 6, arom: true, wedge: 'wedge', arrow: 'rxn', q: 1 };
     const view = { s: 40, tx: 0, ty: 0 };
+    const PARTY = { on: false, col: '#39ff14', saved: null };
     const svg = $('sketch'), gView = $('view'), gB = $('g-bonds'), gA = $('g-atoms'), gO = $('g-over'), gR = $('g-arrows');
     const wrap = $('sketch-wrap');
 
@@ -1761,7 +1883,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         const b = mol.bonds[k], A = mol.atoms[b.a], B = mol.atoms[b.b];
         return Math.sign((rc.x - A.x) * -(B.y - A.y) + (rc.y - A.y) * (B.x - A.x)) || 1;
     }
-    let lpCache = [], qCache = [], slotCache = [];
+    let lpCache = [], qCache = [], pqCache = [], slotCache = [];
     const NMR = 0.6;      // Newman circle radius        // drawn lone-pair positions per atom: [{k, ang, x, y}]
     function labelShown(a, dg, h) { return a.pseudo || a.lab || a.el !== 'C' || dg === 0 || a.hx != null || disp.carbons || (hydMode() === 'condensed' && h > 0); }
     // Draw (part of) the molecule as SVG strings. fa / fr: which atoms / arrows to include (null = all).
@@ -1788,7 +1910,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     function drawParts(S, fa, fr, paper, record, idp = 'v') {
         const f0 = S.font, ink = '#1e293b', col = (a) => a.color ? a.color : (a.pseudo || a.hl) ? ink : disp.color ? (COLOR2D[a.el] || ink) : ink;
         const nb = neighbors(mol), R = rings(), inA = (i) => !fa || fa(i);
-        if (record) { lpCache = []; qCache = []; }
+        if (record) { lpCache = []; qCache = []; pqCache = []; }
         const filled = new Set(); (mol.fills || []).forEach(F => F.ring.forEach(i => filled.add(i)));
         const HM = hydMode();
         const L = mol.atoms.map((a, i) => {
@@ -1930,7 +2052,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
                 });
             }
             // lone pairs (when shown) and radicals (always): where the user put them, otherwise by VSEPR
-            const LC = lpCount(i, nb, info.h), showP = lpShown(i), nP = showP ? LC.n : 0, nR = LC.rad;
+            const LC = lpCount(i, nb, info.h), showP = lpShown(i), nP = showP ? Math.max(0, LC.n - (a.lpHide || 0)) : 0, nR = LC.rad;
             if (nP + nR) {
                 const sc = (disp.lpScale || 1) * 0.8, ds = disp.lpDist || 1;
                 const fsA = a.fs || 1, lpc = a.color || ink;
@@ -1955,19 +2077,19 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
                 if (record) lpCache[i] = rec;
             }
             if (info.q) {        // formal charge in a circle, in the most open spot left (or where the user dragged it)
-                const rc = Math.max(f * 0.3, 0.19 * (a.fs || 1)) * (a.qScale || 1), qc = a.qColor || a.color || ink;
+                const rc = Math.max(f * 0.3, 0.19 * (a.fs || 1)) * (a.qScale || 1) * (disp.qSize || 1), qc = a.qColor || a.color || ink, qd = disp.qDist || 1;
                 let cx, cy;
-                if (a.qAng != null) { const rr = (info.show ? f * 0.62 + rc : 0.24 * (a.fs || 1) + rc) + (nP + nR ? 0.08 : 0); cx = a.x + Math.cos(a.qAng) * rr; cy = a.y + Math.sin(a.qAng) * rr; }
+                if (a.qAng != null) { const rr = (info.show ? f * 0.62 : 0.24 * (a.fs || 1)) * qd + rc + (nP + nR ? 0.08 : 0); cx = a.x + Math.cos(a.qAng) * rr; cy = a.y + Math.sin(a.qAng) * rr; }
                 else if (info.show && info.hInLabel && !info.left) {
                     const wRight = info.elW / 2 + info.hW + info.nW;
                     cx = a.x + wRight + rc * 0.9; cy = a.y - f * 0.42;
                 } else {
                     let bt = -Math.PI / 4, bs = -1e9;
                     for (let k = 0; k < 48; k++) { const t = -Math.PI + k * Math.PI / 24;
-                        const md = occ.reduce((m, o) => Math.min(m, Math.abs(wrapAng(t - o))), Math.PI);
-                        const sc2 = Math.min(md, 1.2) - 0.25 * Math.abs(wrapAng(t + Math.PI / 4));
+                        const md = occ.concat(a.lpAng || []).reduce((m, o) => o == null ? m : Math.min(m, Math.abs(wrapAng(t - o))), Math.PI);
+                        const sc2 = Math.min(md, 2.2) - 0.08 * Math.abs(wrapAng(t + Math.PI / 4));      // the most open side (outside a ring), clear of lone pairs
                         if (sc2 > bs) { bs = sc2; bt = t; } }
-                    occ.push(bt); const rr = (info.show ? f * 0.62 + rc : 0.24 * (a.fs || 1) + rc) + (nP + nR ? 0.08 : 0); cx = a.x + Math.cos(bt) * rr; cy = a.y + Math.sin(bt) * rr;
+                    occ.push(bt); const rr = (info.show ? f * 0.62 : 0.24 * (a.fs || 1)) * qd + rc + (nP + nR ? 0.08 : 0); cx = a.x + Math.cos(bt) * rr; cy = a.y + Math.sin(bt) * rr;
                 }
                 const m = Math.abs(info.q) > 1 ? `<text x="${(cx - rc * 1.2).toFixed(3)}" y="${(cy + f * 0.25).toFixed(3)}" text-anchor="end" font-size="${(f * 0.7).toFixed(3)}" fill="${qc}">${Math.abs(info.q)}</text>` : '';
                 const arm = rc * 0.55, sw = (S.lw * 0.8 * (a.fs || 1) * (a.qScale || 1)).toFixed(4);      // a bit thinner than a bond
@@ -1975,6 +2097,17 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
                     `<line x1="${(cx - arm).toFixed(3)}" y1="${cy.toFixed(3)}" x2="${(cx + arm).toFixed(3)}" y2="${cy.toFixed(3)}" stroke="${qc}" stroke-width="${sw}" stroke-linecap="round"/>` +
                     (info.q > 0 ? `<line x1="${cx.toFixed(3)}" y1="${(cy - arm).toFixed(3)}" x2="${cx.toFixed(3)}" y2="${(cy + arm).toFixed(3)}" stroke="${qc}" stroke-width="${sw}" stroke-linecap="round"/>` : '');
                 if (record) qCache[i] = { x: cx, y: cy, r: rc };
+            }
+            if (a.pq) {          // partial charge: δ+ / δ−, no circle; moves, resizes and recolours like a formal charge
+                const fz = f * 1.0 * (a.pqScale || 1) * (disp.qSize || 1), pc = a.pqColor || a.color || ink;
+                let ang = a.pqAng;
+                if (ang == null) { let bt = Math.PI / 4, bs = -1e9;
+                    for (let k = 0; k < 48; k++) { const t = -Math.PI + k * Math.PI / 24; const md = occ.concat(a.lpAng || []).reduce((m, o) => o == null ? m : Math.min(m, Math.abs(wrapAng(t - o))), Math.PI);
+                        const sc2 = Math.min(md, 2.2) - 0.08 * Math.abs(wrapAng(t + Math.PI / 4)); if (sc2 > bs) { bs = sc2; bt = t; } }
+                    occ.push(bt); ang = bt; }
+                const rr = (info.show ? f * 0.62 : 0.2 * (a.fs || 1)) * (disp.qDist || 1) + fz * 0.62 + (nP + nR ? 0.06 : 0), cx = a.x + Math.cos(ang) * rr, cy = a.y + Math.sin(ang) * rr;
+                aH += `<text x="${cx.toFixed(3)}" y="${(cy + fz * 0.34).toFixed(3)}" text-anchor="middle" font-size="${fz.toFixed(3)}" font-family='${S.fam}' font-weight="${S.weight}" fill="${pc}" stroke="none">δ${a.pq > 0 ? '+' : '−'}</text>`;
+                if (record) pqCache[i] = { x: cx, y: cy, r: fz * 0.62 };
             }
             // allenes / ketenes: a dot marks the central sp carbon
             if (!info.show && nb[i].length === 2 && nb[i].every(x => x.o === 2)) aH += `<circle cx="${a.x}" cy="${a.y}" r="${(S.lw * 1.9 * (a.fs || 1)).toFixed(3)}" fill="${a.color || ink}"/>`;
@@ -2033,14 +2166,14 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
                     + `<g mask="url(#${id})">${geo(o, o, ` fill="${col}" stroke="${col}" stroke-width="${w.toFixed(4)}"`)}</g>`; }
             return sh + geo(0, 0, ` fill="${fill}" stroke="${col}" stroke-width="${w.toFixed(4)}"${dash}`);
         }
-        const z = ar.size || 1, ink = '#1e293b', red = disp.color ? '#dc2626' : ink, hl0 = Math.max(0.17, S.lw * 3.9) * z, hw0 = hl0 * 0.46, HS = ar.head || 'barb';
+        const z = ar.size || 1, ink = '#1e293b', red = disp.color ? '#dc2626' : ink, hl0 = Math.max(0.14, S.lw * 3.2) * z, hw0 = hl0 * 0.5, HS = ar.head || 'barb';
         let hl = hl0, hw = hw0;
         // arrowheads: barbed (default), triangle, or open (two lines); a half head for fishhooks / equilibrium
         const head = (tx, ty, ux, uy, half, color, side = 1) => {
             const bx = tx - ux * hl, by = ty - uy * hl, nx = -uy * hw, ny = ux * hw, back = HS === 'tri' ? 1 : 0.72;
             const cx = tx - ux * hl * back, cy = ty - uy * hl * back;
             if (HS === 'open') { const w = Math.max(S.lw * (isCurved(ar) ? 0.85 : 1.15), 0.03) * (ar.lw || 1);
-                return `<path d="M${bx + nx * side} ${by + ny * side} L${tx} ${ty}${half ? '' : ` L${bx - nx} ${by - ny}`}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>`; }
+                return `<path d="M${half ? bx + nx * side : bx + nx} ${half ? by + ny * side : by + ny} L${tx} ${ty}${half ? '' : ` L${bx - nx} ${by - ny}`}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>`; }
             if (half) return `<polygon fill="${color}" stroke="none" points="${tx},${ty} ${bx + nx * side},${by + ny * side} ${cx},${cy}"/>`;
             return `<polygon fill="${color}" stroke="none" points="${tx},${ty} ${bx + nx},${by + ny} ${cx},${cy} ${bx - nx},${by - ny}"/>`;
         };
@@ -2062,16 +2195,43 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         // straight along the axis, so it stays midway between the two prongs and can never lie on top of one
         let uq = 1, Q = arcPt(g, 1); for (let k = 1; k <= 160; k++) { const u2 = 1 - k / 160, q = arcPt(g, u2); if (Math.hypot(q.x - ar.x2, q.y - ar.y2) >= hl) { uq = u2; Q = q; break; } }
         let vx = ar.x2 - Q.x, vy = ar.y2 - Q.y; const tl = Math.hypot(vx, vy) || 1; vx /= tl; vy /= tl;
-        const endP = HS === 'open' ? { x: ar.x2 - vx * hl * 0.06, y: ar.y2 - vy * hl * 0.06 } : { x: ar.x2 - vx * hl * 0.72, y: ar.y2 - vy * hl * 0.72 };
+        // ending on an atom: aim the head straight at the atom (the corner of a skeletal structure, or the label), keeping the gap
+        let tipX = ar.x2, tipY = ar.y2;
+        if (ar.toAtom) { let ti = -1, td = 0.6; mol.atoms.forEach((o, i) => { const d = Math.hypot(o.x - ar.x2, o.y - ar.y2); if (d < td) { td = d; ti = i; } });
+            if (ti >= 0) { const o = mol.atoms[ti], nbs = neighbors(mol)[ti].length;
+                const gap = arrowGap({ atom: true, ai: ti }, S);
+                let wx = o.x - Q.x, wy = o.y - Q.y; const wl = Math.hypot(wx, wy);
+                if (wl > gap + hl * 0.5) { wx /= wl; wy /= wl; vx = wx; vy = wy; tipX = o.x - wx * gap; tipY = o.y - wy * gap; } } }
+        if (ar.toBond || ar.mid) {
+            let M = null, gperp = 0, nrm = null;
+            if (ar.mid && mol.atoms[ar.mid[0]] && mol.atoms[ar.mid[1]]) { const A0 = mol.atoms[ar.mid[0]], B0 = mol.atoms[ar.mid[1]]; M = { x: (A0.x + B0.x) / 2, y: (A0.y + B0.y) / 2 }; }
+            else if (ar.toBond) { let bk = -1, bd = 0.6; mol.bonds.forEach((b, k) => { const A0 = mol.atoms[b.a], B0 = mol.atoms[b.b], d = Math.hypot((A0.x + B0.x) / 2 - ar.x2, (A0.y + B0.y) / 2 - ar.y2); if (d < bd) { bd = d; bk = k; } });
+                if (bk >= 0) { const b = mol.bonds[bk], A0 = mol.atoms[b.a], B0 = mol.atoms[b.b]; M = { x: (A0.x + B0.x) / 2, y: (A0.y + B0.y) / 2 };
+                    nrm = { x: -(B0.y - A0.y), y: B0.x - A0.x }; const nl = Math.hypot(nrm.x, nrm.y) || 1; nrm.x /= nl; nrm.y /= nl;
+                    const sd = (Q.x - M.x) * nrm.x + (Q.y - M.y) * nrm.y >= 0 ? 1 : -1; gperp = arrowGap({ bond: true, bk }, S, sd); } }
+            if (M) { let wx = M.x - Q.x, wy = M.y - Q.y; const wl = Math.hypot(wx, wy);
+                if (wl > hl * 0.8) { wx /= wl; wy /= wl; const along = nrm ? gperp / Math.max(0.4, Math.abs(wx * nrm.x + wy * nrm.y)) : S.lw * 0.6;
+                    if (wl > along + hl * 0.5) { vx = wx; vy = wy; tipX = M.x - wx * along; tipY = M.y - wy * along; } } }
+        }
+        const endP = HS === 'open' ? { x: tipX - vx * hl * 0.06, y: tipY - vy * hl * 0.06 } : { x: tipX - vx * hl * 0.72, y: tipY - vy * hl * 0.72 };
         const M0 = curveApex(ar), side = Math.sign((M0.x - ar.x1) * -dy + (M0.y - ar.y1) * dx) || 1;
         const large = g.sweep * uq > Math.PI ? 1 : 0, flag = g.dir > 0 ? 1 : 0;
-        return `<path d="M${ar.x1.toFixed(3)} ${ar.y1.toFixed(3)} A${g.r.toFixed(3)} ${g.r.toFixed(3)} 0 ${large} ${flag} ${Q.x.toFixed(3)} ${Q.y.toFixed(3)} L${endP.x.toFixed(3)} ${endP.y.toFixed(3)}" fill="none" stroke="${red}" stroke-width="${lwC}" stroke-linejoin="round" stroke-linecap="round"/>` + head(ar.x2, ar.y2, vx, vy, ar.t === 'fish', red, side);
+        return `<path d="M${ar.x1.toFixed(3)} ${ar.y1.toFixed(3)} A${g.r.toFixed(3)} ${g.r.toFixed(3)} 0 ${large} ${flag} ${Q.x.toFixed(3)} ${Q.y.toFixed(3)} L${endP.x.toFixed(3)} ${endP.y.toFixed(3)}" fill="none" stroke="${red}" stroke-width="${lwC}" stroke-linejoin="round" stroke-linecap="round"/>` + head(tipX, tipY, vx, vy, ar.t === 'fish', red, side);
     }
     function render() {
         const S = STYLES[disp.style];
         gView.setAttribute('transform', `translate(${view.tx},${view.ty}) scale(${view.s})`);
         gB.setAttribute('stroke-width', S.lw); gR.setAttribute('stroke-width', S.lw * 1.15);
         const P = drawParts(S, null, null, '#f8fafc', true);
+        if (PARTY.on) {      // Party Mode: every colour becomes the neon colour, the paper becomes black (CSS adds the glow)
+            const core = hexMix(PARTY.col, '#ffffff', 0.35);      // a slightly whiter core, like a lit neon tube; the CSS glow is the pure colour
+            const nz = (str) => str.replace(/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/g, m => /^#(f8fafc|fff|ffffff)$/i.test(m) ? '#000000' : core);
+            ['b', 'a', 'r', 'f', 'defs'].forEach(k => { P[k] = nz(P[k]); });
+        }
+        { const cc = PARTY.on ? hexMix(PARTY.col, '#ffffff', 0.35) : '#1e293b'; gB.setAttribute('stroke', cc); gR.setAttribute('stroke', cc); }
+        // a steady neon aura around every line, label and arrow (an SVG glow filter on the drawing)
+        if (PARTY.on) $('neon-flood').setAttribute('flood-color', PARTY.col);
+        ['g-fills', 'g-bonds', 'g-atoms', 'g-arrows'].forEach(id => { const g = $(id); if (PARTY.on) g.setAttribute('filter', 'url(#neon-glow)'); else g.removeAttribute('filter'); });
         gB.innerHTML = P.b; gA.innerHTML = P.a; gR.innerHTML = P.r; $('g-fills').innerHTML = P.f; $('fdefs').innerHTML = P.defs;
         gA.setAttribute('font-family', S.fam); gA.setAttribute('font-size', S.font); gA.setAttribute('font-weight', S.weight);
         drawHover(); updateSelBar();
@@ -2168,9 +2328,15 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
                 if (q.atom) return `<circle cx="${q.x}" cy="${q.y}" r="0.34" fill="rgba(220,38,38,0.14)" stroke="#dc2626" stroke-width="${1.3 * u}"/>`;
                 if (q.bond) { const bd = mol.bonds[q.bk], A2 = mol.atoms[bd.a], B2 = mol.atoms[bd.b]; return `<line x1="${A2.x}" y1="${A2.y}" x2="${B2.x}" y2="${B2.y}" stroke="rgba(220,38,38,0.3)" stroke-width="0.3" stroke-linecap="round"/>`; }
                 if (q.lp) return `<circle cx="${q.x}" cy="${q.y}" r="0.17" fill="rgba(220,38,38,0.18)" stroke="#dc2626" stroke-width="${1.3 * u}"/>`;
+                if (q.mid) { const A2 = mol.atoms[q.i], B2 = mol.atoms[q.j]; return `<line x1="${A2.x}" y1="${A2.y}" x2="${B2.x}" y2="${B2.y}" stroke="#dc2626" stroke-width="${1.3 * u}" stroke-dasharray="${4 * u} ${3 * u}"/><circle cx="${q.x}" cy="${q.y}" r="0.1" fill="#dc2626"/>`; }
                 return ''; };
-            if (drag && drag.p0) { s += mark(snapCurve(drag.p0)); if (drag.path && drag.path.length) s += mark(snapCurve(drag.path[drag.path.length - 1])); }
+            if (drag && drag.p0) { s += mark(snapCurve(drag.p0)); if (drag.path && drag.path.length) s += mark(snapCurve(drag.path[drag.path.length - 1], true)); }
             else if (pointerIn) s += mark(snapCurve(lastP));
+        }
+        if (selQ && mol.atoms[selQ.i]) {      // the selected charge / lone pair
+            let q = null; if (selQ.k === 'q') q = qCache[selQ.i]; else if (selQ.k === 'pq') q = pqCache[selQ.i];
+            else { const c = (lpCache[selQ.i] || []).filter(o => o.t === (selQ.k === 'r' ? 'r' : 'p')); q = c.find(o => o.k === selQ.idx) || c[0]; if (q) q = { ...q, r: 0.11 }; }
+            if (q) s += `<circle cx="${q.x}" cy="${q.y}" r="${(q.r || 0.15) + 0.07}" fill="rgba(37,99,235,0.12)" stroke="#2563eb" stroke-width="${1.4 * u}" stroke-dasharray="${3 * u} ${2 * u}"/>`;
         }
         if (preview) s += preview;
         gO.innerHTML = s;
@@ -2273,44 +2439,88 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         const u = from.i != null && mol.atoms[from.i] ? (mol.atoms[from.i].fs || U()) : U();
         return { x: from.x + Math.cos(ang) * u, y: from.y + Math.sin(ang) * u, hit: -1 };
     };
-    const snapCurve = (p) => {      // curved arrows start/end on lone pairs, atoms or bond middles
+    const bondMid = (p) => {      // a bond hit in its middle part (not near either atom)
+        let best = -1, bd = 0.2; mol.bonds.forEach((b, k) => { const A = mol.atoms[b.a], B = mol.atoms[b.b], ex = B.x - A.x, ey = B.y - A.y, l2 = ex * ex + ey * ey || 1, t = ((p.x - A.x) * ex + (p.y - A.y) * ey) / l2;
+            if (t < 0.22 || t > 0.78) return; const d = Math.hypot(A.x + t * ex - p.x, A.y + t * ey - p.y); if (d < bd) { bd = d; best = k; } }); return best; };
+    const snapCurve = (p, end) => {      // curved arrows start/end on lone pairs, atoms, bond middles — or (ends) between two atoms, where a new bond forms
         for (const c of lpCache) if (c) for (const q of c) if (Math.hypot(q.x - p.x, q.y - p.y) < 0.22) return { x: q.x, y: q.y, lp: true, ang: q.ang };
+        { const bm = bondMid(p); if (bm >= 0) { const b = mol.bonds[bm]; return { x: (mol.atoms[b.a].x + mol.atoms[b.b].x) / 2, y: (mol.atoms[b.a].y + mol.atoms[b.b].y) / 2, bond: true, bk: bm }; } }
         const ai = atomAt(p, 0.35); if (ai >= 0) return { x: mol.atoms[ai].x, y: mol.atoms[ai].y, atom: true, ai };
+        if (end) { let best = null; const nbm = neighbors(mol);
+            for (let i = 0; i < mol.atoms.length; i++) for (let j = i + 1; j < mol.atoms.length; j++) { const A = mol.atoms[i], B = mol.atoms[j], d = Math.hypot(A.x - B.x, A.y - B.y);
+                if (d < 1.1 || d > 3.6 || nbm[i].some(x => x.j === j)) continue; const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2, e = Math.hypot(mx - p.x, my - p.y);
+                if (e < 0.3 && (!best || e < best.e)) best = { e, x: mx, y: my, mid: true, i, j }; }
+            if (best) return best; }
         const bk = bondAt(p, 0.3); if (bk >= 0) { const b = mol.bonds[bk]; return { x: (mol.atoms[b.a].x + mol.atoms[b.b].x) / 2, y: (mol.atoms[b.a].y + mol.atoms[b.b].y) / 2, bond: true, bk }; }
         return { x: p.x, y: p.y };
     };
     // a curved arrow between two snapped points. Ends at an atom stop just short of its symbol and aim at its centre;
     // the bow goes to the side the pointer travelled on (sideHint: +1 / −1), else away from the nearby atoms.
+    // the gap left at each end of a curved arrow: about one bond-line width past the visible edge of whatever it touches
+    // which side of a→b a double bond's second line is drawn on (+1 / −1 along the normal (−dy, dx)), 0 = centred pair
+    function dblSide(k) { const b = mol.bonds[k], nbs = neighbors(mol);
+        if (b.side != null) return b.side;
+        const la = labelShown(mol.atoms[b.a], nbs[b.a].length, implicitH(mol, b.a)), lb = labelShown(mol.atoms[b.b], nbs[b.b].length, implicitH(mol, b.b));
+        return !la && !lb ? inwardSide(k, rings()) : 0; }
+    // extra room a bond takes up on one side of its centre line (sd = +1 / −1 along (−dy, dx); omitted = the wider side)
+    function bondHalf(k, S, sd) { const bd = mol.bonds[k], A0 = mol.atoms[bd.a], B0 = mol.atoms[bd.b], bs = ((A0.fs || 1) + (B0.fs || 1)) / 2;
+        if (bd.wedge === 'wedge' || bd.wedge === 'hash') return S.wedge * 0.68 * bs; if (bd.bold) return S.lw * 1.8 * bs;
+        if (bd.order === 3) return S.dbl * 0.85 * bs;
+        if (bd.order === 2) { const ds = dblSide(k); if (!ds) return S.dbl * 0.5 * bs; if (sd == null) return S.dbl * bs; return ds === sd ? S.dbl * bs : 0; }
+        return 0; }
+    function arrowGap(q, S, sd) {
+        const g0 = S.lw * 1.3;      // ≈ 0.85 of a bond line visible, after the arrow's own rounded line end
+        if (q.atom) { const o = mol.atoms[q.ai], nbs = neighbors(mol)[q.ai].length, fs = o.fs || 1;
+            return labelShown(o, nbs, implicitH(mol, q.ai)) ? S.font * fs * 0.42 + g0 : S.lw * 0.5 * fs + g0; }
+        if (q.lp) return Math.max(0.05, S.lw * 1.1) + g0;
+        if (q.bond && mol.bonds[q.bk]) { const bd = mol.bonds[q.bk], bs = ((mol.atoms[bd.a].fs || 1) + (mol.atoms[bd.b].fs || 1)) / 2;
+            return S.lw * 0.5 * bs + bondHalf(q.bk, S, sd) + g0; }
+        return 0;
+    }
     function curvedFrom(p0, p1, sideHint, type) {
-        const a = snapCurve(p0), b = snapCurve(p1);
+        const a = snapCurve(p0), b = snapCurve(p1, true);
         if (Math.hypot(b.x - a.x, b.y - a.y) < 0.35) { b.x = a.x + 1.4; b.y = a.y; b.atom = false; }
         const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-        let side = sideHint || 0;
-        if (!side) { let s = 0; mol.atoms.forEach(o => { const ox = o.x - mx, oy = o.y - my, d = Math.hypot(ox, oy); if (d < 2.2) s += (ox * -dy + oy * dx) / L / (0.3 + d); }); side = s > 0 ? -1 : 1; }
-        // apex height h = chm·L/2. Close ends (atom → its own bond) get a tall, more-than-semicircular arc so the whole curve and head read clearly
-        const hShort = L < 1.3 ? 0.36 * L + (1.3 - L) * 0.3 : 0;      // between the old shallow bow and a full semicircle
-        let chm = Math.max(0.62, 2 * hShort / L);
-        const clearOf = (cm) => {      // how close the middle of the curve comes to atoms and bonds
-            const Cc = { x: a.x + dx * 0.5 - dy * cm * side, y: a.y + dy * 0.5 + dx * cm * side }; let g = 9;
-            const arc = arcThrough(a, { x: (a.x + 2 * Cc.x + b.x) / 4, y: (a.y + 2 * Cc.y + b.y) / 4 }, b);
-            for (let k = 3; k <= 9; k++) { const s2 = k / 12, u = 1 - s2, q = arc ? arcPt(arc, s2) : { x: u * u * a.x + 2 * u * s2 * Cc.x + s2 * s2 * b.x, y: u * u * a.y + 2 * u * s2 * Cc.y + s2 * s2 * b.y };
-                mol.atoms.forEach(o => { g = Math.min(g, Math.hypot(o.x - q.x, o.y - q.y)); });
-                mol.bonds.forEach(bd => { const A2 = mol.atoms[bd.a], B2 = mol.atoms[bd.b], ex2 = B2.x - A2.x, ey2 = B2.y - A2.y, l2 = ex2 * ex2 + ey2 * ey2 || 1;
-                    const tt = clamp(((q.x - A2.x) * ex2 + (q.y - A2.y) * ey2) / l2, 0, 1); g = Math.min(g, Math.hypot(A2.x + tt * ex2 - q.x, A2.y + tt * ey2 - q.y)); }); }
-            return g; };
-        for (let it = 0; it < (hShort ? 4 : 14) && clearOf(chm) < 0.3; it++) chm += 0.1;      // swing wide of the framework when going around a bond
-        const ch = chm * side, C = { x: a.x + dx * 0.5 - dy * ch, y: a.y + dy * 0.5 + dx * ch };
+        let side0 = sideHint || 0;
+        if (!side0) { let s = 0; mol.atoms.forEach(o => { const ox = o.x - mx, oy = o.y - my, d = Math.hypot(ox, oy); if (d < 2.2) s += (ox * -dy + oy * dx) / L / (0.3 + d); }); side0 = s > 0 ? -1 : 1; }
         const S = STYLES[disp.style];
-        const clearance = (q) => {
-            if (q.atom) { const o = mol.atoms[q.ai], nbs = neighbors(mol)[q.ai].length; return labelShown(o, nbs, implicitH(mol, q.ai)) ? S.font * (o.fs || 1) * 0.6 + 0.12 : 0.16; }
-            if (q.bond) return 0.14; if (q.lp) return 0.13; return 0; };
-        // ends step clear of labels toward the bow; when the ends are close, mostly away from each other so the arc keeps its span
-        const pull = (q, o) => { const c = clearance(q); if (!c) return { x: q.x, y: q.y };
+        const hShort = L < 1.3 ? 0.36 * L + (1.3 - L) * 0.3 : 0;      // close ends: a taller bow (between a shallow bow and a semicircle)
+        const chm0 = Math.max(0.62, 2 * hShort / L);
+        // an end steps off by its gap: a bond end sideways toward the bow, an atom / lone-pair end toward the bow (and away from the other end when they're close)
+        const pull = (q, o, C) => {
+            if (q.bond && mol.bonds[q.bk]) { const bd = mol.bonds[q.bk], A0 = mol.atoms[bd.a], B0 = mol.atoms[bd.b];
+                let nx = -(B0.y - A0.y), ny = B0.x - A0.x; const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl; let sd = 1;
+                if ((C.x - q.x) * nx + (C.y - q.y) * ny < 0) { nx = -nx; ny = -ny; sd = -1; }
+                const g = arrowGap(q, S, sd); return { x: q.x + nx * g, y: q.y + ny * g }; }
+            const g = arrowGap(q, S); if (!g) return { x: q.x, y: q.y };
             let ux = C.x - q.x, uy = C.y - q.y; const l = Math.hypot(ux, uy) || 1; ux /= l; uy /= l;
-            if (hShort) { let wx = q.x - o.x, wy = q.y - o.y; const wl = Math.hypot(wx, wy) || 1; wx /= wl; wy /= wl; const k = Math.min(0.85, hShort * 1.1);
+            if (hShort) { let wx = q.x - o.x, wy = q.y - o.y; const wl = Math.hypot(wx, wy) || 1; wx /= wl; wy /= wl; const k = Math.min(0.7, hShort);
                 ux = ux * (1 - k) + wx * k; uy = uy * (1 - k) + wy * k; const l2 = Math.hypot(ux, uy) || 1; ux /= l2; uy /= l2; }
-            return { x: q.x + ux * c, y: q.y + uy * c }; };
-        const A2 = pull(a, b), B2 = pull(b, a), ar = { t: type || 'curve', x1: A2.x, y1: A2.y, x2: B2.x, y2: B2.y, head: tool.headC, size: tool.arrowSize, lw: tool.arrowLw };
+            return { x: q.x + ux * g, y: q.y + uy * g }; };
+        // try both sides and a range of bows; keep the one that never crosses or brushes a bond, closest to the natural shape
+        const segX = (p, q, r, t) => { const o = (A, B, C2) => (B.x - A.x) * (C2.y - A.y) - (B.y - A.y) * (C2.x - A.x); return o(p, q, r) * o(p, q, t) < 0 && o(r, t, p) * o(r, t, q) < 0; };
+        let best = null;
+        for (const side of sideHint ? [side0] : [side0, -side0]) for (let k = 0; k < 9; k++) {
+            const chm = chm0 + k * 0.12 - (k >= 7 ? 0.5 : 0), ch = chm * side; if (chm < 0.35) continue;
+            const C = { x: a.x + dx * 0.5 - dy * ch, y: a.y + dy * 0.5 + dx * ch };
+            const A2 = pull(a, b, C), B2 = pull(b, a, C), apex = { x: (A2.x + 2 * C.x + B2.x) / 4, y: (A2.y + 2 * C.y + B2.y) / 4 };
+            const arc = arcThrough(A2, apex, B2); if (!arc) continue;
+            const pts = []; for (let q = 0; q <= 32; q++) pts.push(arcPt(arc, q / 32));
+            let cross = 0, near = 9;
+            const own = (bd, bi) => (a.bond && bi === a.bk) || (b.bond && bi === b.bk) || (a.atom && (bd.a === a.ai || bd.b === a.ai)) || (b.atom && (bd.a === b.ai || bd.b === b.ai)) || (b.mid && [bd.a, bd.b].some(v => v === b.i || v === b.j));
+            const hwH = Math.max(0.14, S.lw * 3.2) * (tool.arrowSize || 1) * 0.5;      // half the head's width
+            mol.bonds.forEach((bd, bi) => { const P = mol.atoms[bd.a], Q = mol.atoms[bd.b], ex2 = Q.x - P.x, ey2 = Q.y - P.y, l2 = ex2 * ex2 + ey2 * ey2 || 1, wide = S.lw * 0.5 + bondHalf(bi, S);
+                for (let q = 0; q < 32; q++) if (segX(pts[q], pts[q + 1], P, Q)) cross++;
+                const q0 = own(bd, bi) ? 5 : 1, q1 = own(bd, bi) ? 27 : 32;
+                for (let q = q0; q <= q1; q++) { const t = clamp(((pts[q].x - P.x) * ex2 + (pts[q].y - P.y) * ey2) / l2, 0, 1);
+                    const dd = Math.hypot(P.x + t * ex2 - pts[q].x, P.y + t * ey2 - pts[q].y) - wide - (q >= 28 ? hwH : 0); near = Math.min(near, dd + 0.12); } });
+            mol.atoms.forEach((o, oi) => { if ((a.atom && oi === a.ai) || (b.atom && oi === b.ai)) return; for (let q = 4; q <= 28; q++) near = Math.min(near, Math.hypot(o.x - pts[q].x, o.y - pts[q].y) - (labelShown(o, neighbors(mol)[oi].length, implicitH(mol, oi)) ? S.font * 0.35 : 0)); });
+            const sc = cross * 100 + Math.max(0, 0.2 - near) * 120 + Math.abs(chm - chm0) * 3 + (side !== side0 ? 4 : 0);
+            if (!best || sc < best.sc) best = { sc, C, A2, B2 };
+        }
+        const { C, A2, B2 } = best;
+        const ar = { toAtom: !!b.atom, toBond: !!b.bond, ...(b.mid ? { mid: [b.i, b.j] } : {}), t: type || 'curve', x1: A2.x, y1: A2.y, x2: B2.x, y2: B2.y, head: tool.headC, size: tool.arrowSize, lw: tool.arrowLw };
+        if (tool.typeColor && tool.typeColor[ar.t]) ar.color = tool.typeColor[ar.t];
         // keep the control point where it was so the tip still aims at the atom's centre
         const ex = ar.x2 - ar.x1, ey = ar.y2 - ar.y1, L2 = ex * ex + ey * ey || 1, rx = C.x - ar.x1, ry = C.y - ar.y1;
         ar.ct = (rx * ex + ry * ey) / L2; ar.ch = (rx * -ey + ry * ex) / L2;
@@ -2355,14 +2565,31 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             drag.rotate = { t: hh.t, snap: snapshotItems(hh.t), cx: H.cx, cy: H.cy, a0: Math.atan2(p.y - H.cy, p.x - H.cx), th: 0 };
             rotHold = hh.t; return;
         }
-        // a formal charge can be dragged around its atom
-        if (isSelKind() || tool.kind === 'charge' || tool.kind === 'lp') {
-            const qi = qCache.findIndex(q => q && Math.hypot(q.x - p.x, q.y - p.y) < q.r + 0.06);
-            if (qi >= 0) { commit(); drag.qdrag = qi; return; }
+        // charges (formal or partial): the eraser removes one; the select / charge / lone-pair tools drag it around its atom
+        const qh = chargeAt(p);
+        if (qh && tool.kind === 'erase') { commit(); deleteQ(qh); drag = null; changed(); return; }
+        if (tool.kind === 'erase') {      // the eraser also removes a single lone pair or radical dot
+            let hit = null, hi = -1; lpCache.forEach((c, i) => { if (c) c.forEach(q => { const dd = Math.hypot(q.x - p.x, q.y - p.y); if (dd < 0.15 && (!hit || dd < hit.d)) { hit = { ...q, d: dd }; hi = i; } }); });
+            if (hit) { commit(); deleteQ({ i: hi, k: hit.t === 'r' ? 'r' : 'lp', idx: hit.k }); drag = null; changed(); return; }
         }
+        if (qh && tool.kind !== 'pan') { commit(); drag.qdrag = qh.i; drag.qkind = qh.k; return; }      // any tool: drag a charge round its atom
+        // with the select tool, a lone pair (or radical dot) can be grabbed and swung around its atom
+        if (isSelKind()) { let hit = null, hi = -1;
+            lpCache.forEach((c, i) => { if (c) c.forEach(q => { const d = Math.hypot(q.x - p.x, q.y - p.y); if (d < 0.17 && (!hit || d < hit.d)) { hit = { ...q, d }; hi = i; } }); });
+            if (hit) { commit(); const a = mol.atoms[hi];
+                if (hit.t === 'r') { a.radAng = (lpCache[hi] || []).filter(q => q.t === 'r').map(q => q.ang); drag.lp = { i: hi, rad: true, hit, was: true, sel: true, k: hit.k != null ? hit.k : null }; }
+                else { a.lpAng = (lpCache[hi] || []).filter(q => q.t === 'p').map(q => q.ang); drag.lp = { i: hi, was: true, sel: true, k: hit.k != null ? hit.k : null }; }
+                return; } }
         if (tool.kind === 'shape') { drag.shapeNew = true; return; }
-        const ai = atomAt(p), bk = ai < 0 ? bondAt(p) : -1, ar = (ai < 0 && bk < 0) ? arrowAt(p) : -1;
+        let ai = atomAt(p), bk = ai < 0 ? bondAt(p) : -1; const ar = (ai < 0 && bk < 0) ? arrowAt(p) : -1;
+        if (tool.kind === 'ring' || tool.kind === 'template') { const bm = bondMid(p); if (bm >= 0) { ai = -1; bk = bm; } }      // ring tool: a click on a bond's middle fuses the ring there
         Object.assign(drag, { ai, bk, ar });
+        if ((tool.kind === 'charge' || tool.kind === 'pcharge') && ai >= 0) {      // press on an atom: the charge appears (most open spot); keep holding and drag to swing it round
+            commit(); const a = mol.atoms[ai];
+            if (tool.kind === 'charge') { a.charge = clamp((a.charge || 0) + tool.q, -3, 3); a.hx = null; delete a.qAng; drag.qkind = 'q'; }
+            else { if (a.pq === tool.pq) { delete a.pq; delete a.pqAng; } else { a.pq = tool.pq; delete a.pqAng; } drag.qkind = 'pq'; }
+            drag.qdrag = ai; drag.qnew = true; render(); return;
+        }
         if (isSelKind()) {
             const onSel = (ai >= 0 && sel.atoms.has(ai)) || (bk >= 0 && sel.atoms.has(mol.bonds[bk].a) && sel.atoms.has(mol.bonds[bk].b)) || (ar >= 0 && sel.arrows.has(ar));
             if (onSel) drag.moveSnap = snapshotItems(selItems());
@@ -2377,6 +2604,20 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
                 if (tt && !tt.arrows.length && tt.atoms.length) { const pv = pivotOf(tt); if (pv.att >= 0) drag.orbit = { att: pv.att, cx: pv.x, cy: pv.y, a0: Math.atan2(p.y - pv.y, p.x - pv.x) }; } }
         } else if (tool.kind === 'lp' || tool.kind === 'radical') startLP(p, tool.kind === 'radical');
     });
+    function chargeAt(p) {
+        let best = null;
+        qCache.forEach((q, i) => { if (!q) return; const d = Math.hypot(q.x - p.x, q.y - p.y); if (d < q.r + 0.06 && (!best || d < best.d)) best = { i, k: 'q', d }; });
+        pqCache.forEach((q, i) => { if (!q) return; const d = Math.hypot(q.x - p.x, q.y - p.y); if (d < q.r + 0.06 && (!best || d < best.d)) best = { i, k: 'pq', d }; });
+        return best;
+    }
+    let lastQClick = { t: 0, i: -1, k: '' };      // selQ: a selected charge ('q' / 'pq'), lone pair ('lp', idx) or radical ('r', idx)
+    function deleteQ(q) {          // remove a single charge, lone pair or radical dot; H counts and lone pairs follow
+        const a = mol.atoms[q.i]; if (!a) return;
+        if (q.k === 'pq') { delete a.pq; delete a.pqAng; delete a.pqScale; delete a.pqColor; }
+        else if (q.k === 'q') { a.charge = 0; a.hx = null; delete a.qAng; delete a.lpAng; if (a.el === 'C' && a.lp && lpCount(q.i, neighbors(mol), implicitH(mol, q.i)).n === 0) delete a.lp; }
+        else if (q.k === 'r') { a.rad = Math.max(0, (a.rad || 1) - 1); if (!a.rad) { delete a.rad; delete a.radAng; } else if (a.radAng && q.idx != null) a.radAng.splice(q.idx, 1); a.hx = null; }
+        else { a.lpHide = (a.lpHide || 0) + 1; if (a.lpAng && q.idx != null) a.lpAng.splice(q.idx, 1); }
+    }
     function startLP(p, radMode) {
         // press on an atom (or on one of its dots): show its lone pairs / radical and let the pointer swing one around
         let ai = atomAt(p, 0.45), hit = null;
@@ -2417,13 +2658,14 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             const h = drag.ahandle, ar = mol.arrows[h.k];
             if (h.w === 'apex') setApex(ar, p);
             else {
-                const q = isCurved(ar) ? snapCurve(p) : p, keep = isCurved(ar) ? { ct: ar.ct, ch: ar.ch } : null;
+                const q = isCurved(ar) ? snapCurve(p, h.w === 2) : p, keep = isCurved(ar) ? { ct: ar.ct, ch: ar.ch } : null;
                 if (keep && keep.ch == null) { const c0 = curveCtrl(ar); setApex(ar, { x: (ar.x1 + 2 * c0.x + ar.x2) / 4, y: (ar.y1 + 2 * c0.y + ar.y2) / 4 }); }
-                if (h.w === 1) { ar.x1 = q.x; ar.y1 = q.y; } else { ar.x2 = q.x; ar.y2 = q.y; }
+                if (h.w === 1) { ar.x1 = q.x; ar.y1 = q.y; } else { ar.x2 = q.x; ar.y2 = q.y; if (isCurved(ar)) { ar.toAtom = !!q.atom; ar.toBond = !!q.bond; if (q.mid) ar.mid = [q.i, q.j]; else delete ar.mid; } }
             }
             render(); return;
         }
-        if (drag.qdrag != null) { const a = mol.atoms[drag.qdrag]; a.qAng = Math.atan2(p.y - a.y, p.x - a.x); render(); return; }
+        if (drag.qdrag != null) { const a = mol.atoms[drag.qdrag], an = Math.atan2(p.y - a.y, p.x - a.x); if (drag.qnew && (!drag.moved || Math.hypot(p.x - a.x, p.y - a.y) < 0.15)) return;
+            if (drag.qkind === 'pq') { if (a.pq) a.pqAng = an; } else if (a.charge) a.qAng = an; render(); return; }
         if (drag.shapeNew) {
             let x2 = p.x, y2 = p.y; if (e.shiftKey && tool.shape !== 'line') { const s2 = Math.max(Math.abs(x2 - drag.p0.x), Math.abs(y2 - drag.p0.y)); x2 = drag.p0.x + Math.sign(x2 - drag.p0.x || 1) * s2; y2 = drag.p0.y + Math.sign(y2 - drag.p0.y || 1) * s2; }
             drag.shapeEnd = { x: x2, y: y2 };
@@ -2456,6 +2698,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             if (Math.hypot(p.x - a.x, p.y - a.y) < 0.12 || !drag.moved) return;
             if (drag.lp.rad) {
                 if (!a.rad) return;
+                if (drag.lp.sel) { if (drag.lp.k == null) { let bd = 9; a.radAng.forEach((v, k) => { const d = Math.abs(wrapAng(v - ang)); if (d < bd) { bd = d; drag.lp.k = k; } }); } a.radAng[drag.lp.k] = ang; drag.lp.rot = true; render(); return; }
                 const c = (lpCache[drag.lp.i] || []).filter(q => q.t === 'r'); if (!c.length) return;
                 a.radAng = c.map(q => q.ang);
                 if (drag.lp.k == null) { let bd = 9; a.radAng.forEach((v, k) => { const d = Math.abs(wrapAng(v - ang)); if (d < bd) { bd = d; drag.lp.k = k; } }); }
@@ -2486,7 +2729,15 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         if (!drag) return;
         const d = drag; drag = null; preview = null; svg.classList.remove('panning');
         if (d.pan) { render(); return; }
-        if (d.qdrag != null) { if (!d.moved) undoStack.pop(); changed(); return; }
+        if (d.qdrag != null && d.qnew) { changed(); return; }
+        if (d.qdrag != null) {
+            const now = performance.now(), dbl = !d.moved && now - lastQClick.t < 380 && lastQClick.i === d.qdrag && lastQClick.k === d.qkind;
+            lastQClick = { t: dbl ? 0 : now, i: d.qdrag, k: d.qkind };
+            if (dbl) {      // double-click a charge: black ↔ its colour (red for negative, blue for positive)
+                const a = mol.atoms[d.qdrag], key = d.qkind === 'pq' ? 'pqColor' : 'qColor', sign = d.qkind === 'pq' ? a.pq : a.charge, col = sign < 0 ? '#dc2626' : '#2563eb';
+                a[key] = (a[key] || '').toLowerCase() === col ? '#1e293b' : col; changed(); return; }
+            if (!d.moved) { undoStack.pop(); if (isSelKind()) { clearSel(); selQ = { i: d.qdrag, k: d.qkind }; } }
+            changed(); return; }
         if (d.shapeNew) { if (d.moved && d.shapeEnd) { commit(); mol.arrows.push(newShape(d.p0, d.shapeEnd)); const k = mol.arrows.length - 1; setTool('sel'); sel.arrows.add(k); changed(); } return; }
         if (d.scale && d.moved && Math.abs(d.scale.s - 1) > 0.02) { changed(); askResizeAll(d.scale); return; }
         if (d.ahandle || d.rotate || d.scale) { if (!d.moved) undoStack.pop(); changed(); return; }
@@ -2508,6 +2759,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
                 }
                 changed(); return;
             }
+            if (d.lp.sel) { if (!d.moved) { undoStack.pop(); clearSel(); selQ = { i: d.lp.i, k: d.lp.rad ? 'r' : 'lp', idx: d.lp.k }; } changed(); return; }
             if (!d.moved && d.lp.was) a.lp = false;     // a plain click on an atom showing lone pairs hides them
             changed(); return;
         }
@@ -2548,6 +2800,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         commit();
         const K = tool.kind;
         if (K === 'erase') { if (d.ai >= 0) deleteAtom(d.ai); else if (d.bk >= 0) deleteBond(d.bk); else if (d.ar >= 0) { mol.arrows.splice(d.ar, 1); clearSel(); } else did = false; }
+        else if (K === 'pcharge') { if (d.ai >= 0) { const a = mol.atoms[d.ai]; if (a.pq === tool.pq) { delete a.pq; delete a.pqAng; } else a.pq = tool.pq; } else did = false; }
         else if (K === 'charge') { if (d.ai >= 0) { const a = mol.atoms[d.ai]; a.charge = clamp((a.charge || 0) + tool.q, -3, 3); a.hx = null; } else did = false; }
         else if (K === 'atom') {
             const setEl = (a) => { a.el = tool.el; a.hx = null; if (tool.pseudo) { a.pseudo = true; a.charge = 0; } else delete a.pseudo; };
@@ -2594,11 +2847,39 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             else if (d.ai >= 0) ringOnAtom(d.ai, n, ar);
             else placeRing(n, p.x, p.y, -90 * deg + (n % 2 ? 0 : Math.PI / n), ar);
         } else if (K === 'template') {
-            const T = TPL[tool.tpl](), n0 = mol.atoms.length;
+            const T = TPL[tool.tpl](), n0 = mol.atoms.length, ringT = !['newman', 'doubleNewman', 'fischer'].includes(tool.tpl);
             let cx = 0, cy = 0; T.atoms.forEach(o => { cx += o.x; cy += o.y; }); cx /= T.atoms.length; cy /= T.atoms.length;
-            const u = U(); T.atoms.forEach(o => { const a = { ...o, x: (o.x - cx) * u + p.x, y: (o.y - cy) * u + p.y }; if (u !== 1) a.fs = u; mol.atoms.push(a); });
-            T.bonds.forEach(b => mol.bonds.push({ ...b, a: b.a + n0, b: b.b + n0 }));
-            clearSel(); T.atoms.forEach((_, k) => sel.atoms.add(n0 + k));
+            const u = U();
+            // place a template atom through a similarity transform (scale s, optional mirror, turn th, then shift) — 3D hints follow
+            const xform = (o, s0, mir, th, ox, oy, x0, y0) => { const c = Math.cos(th), sn = Math.sin(th), my = mir ? -1 : 1;
+                const X = (o.x - x0) * s0, Y = (o.y - y0) * s0 * my, a = { ...o, x: ox + X * c - Y * sn, y: oy + X * sn + Y * c };
+                const r2 = (v) => [v[0] * c - v[1] * my * sn, v[0] * sn + v[1] * my * c], c3 = Math.cos(-th), s3 = Math.sin(-th), r3 = (w) => { const y3 = w[1] * my; return [w[0] * c3 - y3 * s3, w[0] * s3 + y3 * c3, w[2]]; };
+                if (o.p3) a.p3 = r3(o.p3); if (o.chair) a.chair = { ax: r2(o.chair.ax), eq: r2(o.chair.eq), ax3: r3(o.chair.ax3), eq3: r3(o.chair.eq3) };
+                if (o.slots) a.slots = o.slots.map(sl => ({ ...sl, d: r2(sl.d), d3: r3(sl.d3) })); if (Math.abs(s0 - 1) > 0.01) a.fs = s0; else delete a.fs; return a; };
+            if (ringT && d.bk >= 0) {        // fuse: the template's first ring bond lands on the clicked bond, on the emptier side
+                const bd = mol.bonds[d.bk], A0 = mol.atoms[bd.a], B0 = mol.atoms[bd.b], tb = T.bonds[0], ta = T.atoms[tb.a], tt = T.atoms[tb.b];
+                const s0 = Math.hypot(B0.x - A0.x, B0.y - A0.y) / (Math.hypot(tt.x - ta.x, tt.y - ta.y) || 1), th0 = Math.atan2(B0.y - A0.y, B0.x - A0.x);
+                let best = null;
+                for (const mir of [false, true]) { const tth = Math.atan2((tt.y - ta.y) * (mir ? -1 : 1), tt.x - ta.x), th = th0 - tth;
+                    const P = T.atoms.map(o => xform(o, s0, mir, th, A0.x, A0.y, ta.x, ta.y)); let crowd = 0;
+                    P.forEach((q, k) => { if (k === tb.a || k === tb.b) return; mol.atoms.forEach(o => { const dd = Math.hypot(o.x - q.x, o.y - q.y); if (dd < 1.2 * s0) crowd += 1.2 * s0 - dd; }); });
+                    if (!best || crowd < best.crowd) best = { crowd, P }; }
+                const map = new Map([[tb.a, bd.a], [tb.b, bd.b]]);
+                best.P.forEach((a, k) => { if (map.has(k)) return; map.set(k, mol.atoms.length); mol.atoms.push(a); });
+                T.bonds.forEach((b, k) => { if (k === 0) return; mol.bonds.push({ ...b, a: map.get(b.a), b: map.get(b.b) }); });
+                clearSel(); map.forEach(v => sel.atoms.add(v));
+            } else if (ringT && d.ai >= 0) {     // attach through a new single bond, pointing away from the rest of the structure
+                const a0 = mol.atoms[d.ai], t = freeAngle(d.ai), t0 = T.atoms[0], hx = a0.x + Math.cos(t) * u, hy = a0.y + Math.sin(t) * u;
+                const th = t - Math.atan2(cy - t0.y, cx - t0.x);
+                T.atoms.forEach(o => mol.atoms.push(xform(o, u, false, th, hx, hy, t0.x, t0.y)));
+                T.bonds.forEach(b => mol.bonds.push({ ...b, a: b.a + n0, b: b.b + n0 }));
+                mol.bonds.push({ a: d.ai, b: n0, order: 1 });
+                clearSel(); T.atoms.forEach((_, k) => sel.atoms.add(n0 + k));
+            } else {
+                T.atoms.forEach(o => { const a = { ...o, x: (o.x - cx) * u + p.x, y: (o.y - cy) * u + p.y }; if (u !== 1) a.fs = u; mol.atoms.push(a); });
+                T.bonds.forEach(b => mol.bonds.push({ ...b, a: b.a + n0, b: b.b + n0 }));
+                clearSel(); T.atoms.forEach((_, k) => sel.atoms.add(n0 + k));
+            }
             placedTemplate = true;
         } else if (K === 'fill') {
             // the smallest ring around the click gets the current fill; clicking the same fill again removes it
@@ -2624,8 +2905,8 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
                     mol.arrows.push(curvedFrom(d.p0, { x: s0.x + Math.cos(ang) * 1.6, y: s0.y + Math.sin(ang) * 1.6 }, 0, t));
                 }
                 aHold = mol.arrows.length - 1; }
-            else if (d.moved && Math.hypot(p.x - d.p0.x, p.y - d.p0.y) > 0.4) mol.arrows.push({ t, x1: d.p0.x, y1: d.p0.y, x2: p.x, y2: p.y, head: tool.head, size: tool.arrowSize, lw: tool.arrowLw });
-            else mol.arrows.push({ t, x1: d.p0.x - 0.9, y1: d.p0.y, x2: d.p0.x + 0.9, y2: d.p0.y, head: tool.head, size: tool.arrowSize, lw: tool.arrowLw });
+            else if (d.moved && Math.hypot(p.x - d.p0.x, p.y - d.p0.y) > 0.4) mol.arrows.push({ t, x1: d.p0.x, y1: d.p0.y, x2: p.x, y2: p.y, head: tool.head, size: tool.arrowSize, lw: tool.arrowLw, ...(tool.typeColor[t] ? { color: tool.typeColor[t] } : {}) });
+            else mol.arrows.push({ t, x1: d.p0.x - 0.9, y1: d.p0.y, x2: d.p0.x + 0.9, y2: d.p0.y, head: tool.head, size: tool.arrowSize, lw: tool.arrowLw, ...(tool.typeColor[t] ? { color: tool.typeColor[t] } : {}) });
         } else did = false;
         if (!did) { undoStack.pop(); render(); return; }
         if (placedTemplate) { placedTemplate = false; const keep = new Set(sel.atoms); setTool('sel'); keep.forEach(i => sel.atoms.add(i)); }
@@ -2681,6 +2962,8 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         chain: `<path d="M2 16l5-6 5 6 5-6 5 6" ${stroke}/>`,
         plus: `<circle cx="12" cy="12" r="8" ${stroke}/><path d="M12 8v8M8 12h8" ${stroke}/>`,
         minus: `<circle cx="12" cy="12" r="8" ${stroke}/><path d="M8 12h8" ${stroke}/>`,
+        dplus: '<text x="12" y="17" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" font-family="Georgia, serif">δ+</text>',
+        dminus: '<text x="12" y="17" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" font-family="Georgia, serif">δ−</text>',
         lp: '<text x="12" y="19" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" font-family="Arial">O</text><circle cx="8.5" cy="5.5" r="1.6" fill="currentColor"/><circle cx="15.5" cy="5.5" r="1.6" fill="currentColor"/>',
         lasso: `<path d="M12 4c5 0 8.5 2.3 8.5 5.5S17 15 12 15c-1.3 0-2.5-.15-3.6-.45" ${stroke} stroke-dasharray="2.4 2"/><path d="M8.4 14.55C5.4 13.7 3.5 11.8 3.5 9.5 3.5 6.3 7 4 12 4" ${stroke} stroke-dasharray="2.4 2"/><path d="M7.5 15.5c-1 1.2-1 2.8.4 3.6 1.2.7 2.6.1 2.9-1.2" ${stroke}/>`,
         rad: '<text x="12" y="19" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" font-family="Arial">C</text><circle cx="12" cy="4.6" r="2" fill="currentColor"/>',
@@ -2736,7 +3019,9 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             { id: 'r8', icon: ringIcon(8), tip: 'Cyclooctane', set: { kind: 'ring', ring: 8, arom: false } }] },
         { id: 'g-charge', items: [
             { id: 'qp', icon: I.plus, tip: 'Add a positive formal charge', set: { kind: 'charge', q: 1 } },
-            { id: 'qm', icon: I.minus, tip: 'Add a negative formal charge', set: { kind: 'charge', q: -1 } }] },
+            { id: 'qm', icon: I.minus, tip: 'Add a negative formal charge', set: { kind: 'charge', q: -1 } },
+            { id: 'qdp', icon: I.dplus, tip: 'Partial positive charge (δ+): click an atom (again to remove) · drag it around the atom · double-click to colour it', set: { kind: 'pcharge', pq: 1 } },
+            { id: 'qdm', icon: I.dminus, tip: 'Partial negative charge (δ−): click an atom (again to remove) · drag it around the atom · double-click to colour it', set: { kind: 'pcharge', pq: -1 } }] },
         { id: 'g-lp', items: [
             { id: 'lp', icon: I.lp, tip: 'Lone pairs: click an atom to show/hide its lone pairs (placed by VSEPR) · press and drag around the atom to move a pair', set: { kind: 'lp' } },
             { id: 'rad', icon: I.rad, tip: 'Radical: click an atom to add an unpaired electron (it loses an H); click again for two, a third time clears · drag to move the dot', set: { kind: 'radical' } }] },
@@ -2834,7 +3119,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         bond: 'Click empty space, an atom or a bond · drag from an atom · hover a structure and drag its round handle to rotate it',
         wedge: 'Click a bond to make it a stereo bond (again to flip) · click or drag from an atom to add one',
         chain: 'Drag from an atom or empty space to draw a carbon chain', ring: 'Click empty space, an atom (attach) or a bond (fuse) · hover a structure to rotate it',
-        charge: 'Click an atom to change its formal charge',
+        charge: 'Click an atom to change its formal charge · drag a charge around its atom · double-click a charge to colour it · erase removes it', pcharge: 'Click an atom to add (or remove) a partial charge · drag it around the atom · double-click to colour it',
         lp: 'Click an atom to show or hide its lone pairs (placed by VSEPR) · press and drag around the atom to move a pair (Shift snaps) · dot size: DISPLAY ▾',
         radical: 'Click an atom to add a radical (it loses an H) · click again for a diradical, again to clear · drag the dot to move it',
         fill: 'Pick a color and style in the options bar, then click inside a ring · same fill again removes it',
@@ -2978,7 +3263,14 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     const ctxShape = document.createElement('div'); ctxShape.className = 'ctx-sec'; ctxShape.dataset.id = 'ctx-shape';
     const ctxText = document.createElement('div'); ctxText.className = 'ctx-sec'; ctxText.dataset.id = 'ctx-text';
     const ctxQ = document.createElement('div'); ctxQ.className = 'ctx-sec'; ctxQ.dataset.id = 'ctx-q';
-    ctxBar.append(ctxFill, ctxArrow, ctxShape, ctxText, ctxQ, ctxSel);
+    const ctxQd = document.createElement('div'); ctxQd.className = 'ctx-sec'; ctxQd.dataset.id = 'ctx-qd';
+    { const l0 = document.createElement('span'); l0.className = 'ctx-lbl'; l0.textContent = 'ALL CHARGES'; ctxQd.appendChild(l0);
+      [['SIZE', 'qSize', 0.5, 2.2, 'Size of every charge (full and partial)'], ['DISTANCE', 'qDist', 0.6, 2.2, 'How far charges sit from the atom']].forEach(([lab, key, mn, mx, tip]) => {
+        const w = document.createElement('label'); w.className = 'ctx-slider'; w.title = tip;
+        const sl = document.createElement('input'); sl.type = 'range'; sl.min = mn; sl.max = mx; sl.step = '0.05'; sl.value = disp[key] || 1; sl.setAttribute('aria-label', tip);
+        sl.addEventListener('input', () => { disp[key] = +sl.value; saveDisp(); render(); });
+        w.append(lab + ' ', sl); ctxQd.appendChild(w); }); }
+    ctxBar.append(ctxFill, ctxArrow, ctxShape, ctxText, ctxQ, ctxQd, ctxSel);
     const selShapes = () => [...sel.arrows].filter(k => mol.arrows[k] && mol.arrows[k].t === 'shape');
     const selTexts = () => [...sel.arrows].filter(k => mol.arrows[k] && mol.arrows[k].t === 'text');
     function setShapeProp(prop, v, live) {      // the options apply to the selected shapes and to the next ones drawn
@@ -3012,7 +3304,8 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
       ctxQ.appendChild(lab('CHARGE'));
       const qw = document.createElement('label'); qw.className = 'ctx-slider'; qw.title = 'Size of the formal-charge circles (drag a charge to move it around its atom)';
       const qs = document.createElement('input'); qs.type = 'range'; qs.min = '0.5'; qs.max = '2.5'; qs.step = '0.05'; qs.value = '1'; qs.id = 'q-size'; qs.setAttribute('aria-label', 'Charge size');
-      let qc = false; qs.addEventListener('input', () => { const is = [...sel.atoms].filter(i => mol.atoms[i].charge); if (!is.length) return; if (!qc) { commit(); qc = true; } is.forEach(i => { mol.atoms[i].qScale = +qs.value; }); render(); });
+      let qc = false; qs.addEventListener('input', () => { const is = [...sel.atoms].filter(i => mol.atoms[i].charge || mol.atoms[i].pq); if (!is.length) return; if (!qc) { commit(); qc = true; }
+          is.forEach(i => { const a = mol.atoms[i]; if (a.charge) a.qScale = +qs.value; if (a.pq) a.pqScale = +qs.value; }); render(); });
       qs.addEventListener('change', () => { qc = false; changed(); });
       qw.append('SIZE ', qs); ctxQ.appendChild(qw); }
     { const box = $('fill-swatches');
@@ -3043,6 +3336,21 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             if (ks.length) { if (!committed) { commit(); committed = true; } ks.forEach(k => { mol.arrows[k][prop] = +s.value; }); render(); } });
         s.addEventListener('change', () => { committed = false; });
         w.append(lab + ' ', s); ctxArrow.appendChild(w); }); }
+    // colour every arrow of the current type (curved, fishhook, reaction…); new ones of that type follow. COLOR ▾ still colours single arrows.
+    tool.typeColor = {};
+    const typeColRow = document.createElement('span'); typeColRow.className = 'ctx-typecol'; typeColRow.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:0 4px';
+    { const lab = document.createElement('span'); lab.className = 'ctx-lbl'; lab.textContent = 'ALL OF THIS TYPE'; typeColRow.appendChild(lab);
+      [['auto', null], ['#1e293b', '#1e293b'], ['#dc2626', '#dc2626'], ['#2563eb', '#2563eb'], ['#16a34a', '#16a34a'], ['#9333ea', '#9333ea'], ['#ea580c', '#ea580c'], ['#db2777', '#db2777'], ['#0891b2', '#0891b2']].forEach(([k, c]) => {
+        const b = document.createElement('button'); b.className = 'tool sym'; b.style.cssText = 'width:22px;height:22px;min-width:0;padding:0;border-radius:50%;' + (c ? `background:${c};` : 'background:conic-gradient(#dc2626 0 50%,#1e293b 0);');
+        b.title = c ? 'Make every arrow of this type ' + c : 'Default colours for this type'; b.setAttribute('aria-label', b.title);
+        b.addEventListener('click', () => {
+            const t = tool.kind === 'arrow' ? tool.arrow : null; if (!t) return;
+            const same = (ar) => ar.t === t;
+            if (c) tool.typeColor[t] = c; else delete tool.typeColor[t];
+            if (mol.arrows.some(same)) { commit(); mol.arrows.forEach(ar => { if (same(ar)) { if (c) ar.color = c; else delete ar.color; } }); changed(); }
+        });
+        typeColRow.appendChild(b); }); }
+    ctxArrow.appendChild(typeColRow);
     tool.fillColor = PALETTE[5]; tool.fillStyle = 'glow';
     function swatchRow(box, cur, onPick, withNone) {
         PALETTE.forEach(c => { const b = document.createElement('button'); b.className = 'csw' + (c === cur ? ' active' : ''); b.style.background = c; b.title = c; b.setAttribute('aria-label', 'Color ' + c);
@@ -3089,7 +3397,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     }
     function colorSel(c) {
         if (!hasSel()) return; commit();
-        sel.atoms.forEach(i => { const a = mol.atoms[i]; if (c) a.color = c; else { delete a.color; delete a.qColor; } });
+        sel.atoms.forEach(i => { const a = mol.atoms[i]; if (c) { a.color = c; delete a.qColor; delete a.pqColor; } else { delete a.color; delete a.qColor; delete a.pqColor; } });
         mol.bonds.forEach(b => { if (sel.atoms.has(b.a) && sel.atoms.has(b.b)) { if (c) b.color = c; else delete b.color; } });
         sel.arrows.forEach(k => { const ar = mol.arrows[k]; if (!ar) return; if (c) ar.color = c; else delete ar.color; });
         changed();
@@ -3108,16 +3416,17 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     function updateSelBar() {
         const showFill = tool.kind === 'fill', showSel = hasSel(), selArrows = [...sel.arrows].some(k => isArrowT(mol.arrows[k]));
         const showArrow = (tool.kind === 'arrow' && tool.arrow !== 'plus') || selArrows;
+        typeColRow.hidden = !(tool.kind === 'arrow' && tool.arrow !== 'plus');
         ctxFill.hidden = !showFill; ctxSel.hidden = !showSel; ctxArrow.hidden = !showArrow;
-        const shK = selShapes(), txK = selTexts(), qA = [...sel.atoms].filter(i => mol.atoms[i] && mol.atoms[i].charge);
-        ctxShape.hidden = !(tool.kind === 'shape' || shK.length); ctxText.hidden = !(tool.kind === 'text' || txK.length); ctxQ.hidden = !qA.length;
+        const shK = selShapes(), txK = selTexts(), qA = [...sel.atoms].filter(i => mol.atoms[i] && (mol.atoms[i].charge || mol.atoms[i].pq));
+        ctxShape.hidden = !(tool.kind === 'shape' || shK.length); ctxText.hidden = !(tool.kind === 'text' || txK.length); ctxQ.hidden = !qA.length; ctxQd.hidden = !(tool.kind === 'charge' || tool.kind === 'pcharge');
         if (shK.length) { const A0 = mol.arrows[shK[0]]; $('sh-lw').value = A0.lw || 1; $('sh-dash').value = A0.dash || 'solid'; $('sh-round').classList.toggle('active', !!A0.round); $('sh-shadow').classList.toggle('active', !!A0.shadow); }
         if (txK.length) { const A0 = mol.arrows[txK[0]]; $('tx-size').value = A0.size || 1; $('tx-fmt').classList.toggle('active', A0.fmt !== false); }
-        if (qA.length) $('q-size').value = mol.atoms[qA[0]].qScale || 1;
+        if (qA.length) $('q-size').value = (mol.atoms[qA[0]].charge ? mol.atoms[qA[0]].qScale : mol.atoms[qA[0]].pqScale) || 1;
         if (selArrows) { const k = [...sel.arrows].find(k2 => isArrowT(mol.arrows[k2])), A0 = mol.arrows[k], h = A0.head || 'barb'; ctxArrow.querySelectorAll('.head-btn').forEach(x => x.classList.toggle('active', x.dataset.head === h));
             ctxArrow.querySelectorAll('.ctx-slider input').forEach(s => { s.value = A0[s.dataset.prop] || 1; }); }
         else if (showArrow) { const h = tool[headKey()]; ctxArrow.querySelectorAll('.head-btn').forEach(x => x.classList.toggle('active', x.dataset.head === h)); }
-        ctxBar.classList.toggle('empty-ctx', !showFill && !showSel && !showArrow && ctxShape.hidden && ctxText.hidden);
+        ctxBar.classList.toggle('empty-ctx', !showFill && !showSel && !showArrow && ctxShape.hidden && ctxText.hidden && ctxQ.hidden && ctxQd.hidden);
         if (showSel) {
             const n = selObjects().length;
             ['al-l', 'al-ch', 'al-r', 'al-t', 'al-cv', 'al-b'].forEach(id => { $(id).disabled = n < 2; });
@@ -3446,7 +3755,8 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         if (e.key === '1') setTool('b1'); else if (e.key === '2') setTool('b2'); else if (e.key === '3') setTool('b3');
         else if (e.key === '+' || e.key === '=') zoomBy(1.25); else if (e.key === '-') zoomBy(0.8);
         else if (e.key === 'Delete' || e.key === 'Backspace') {
-            if (hasSel()) { if (deleteSelection()) changed(); }
+            if (selQ) { commit(); deleteQ(selQ); selQ = null; changed(); }
+            else if (hasSel()) { if (deleteSelection()) changed(); }
             else if (hover.atom >= 0) { commit(); deleteAtom(hover.atom); hover.atom = -1; changed(); }
             else if (hover.bond >= 0) { commit(); deleteBond(hover.bond); hover.bond = -1; changed(); }
             else if (hover.arrow >= 0) { commit(); mol.arrows.splice(hover.arrow, 1); hover.arrow = -1; changed(); }
@@ -3551,7 +3861,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     function setProps(on) { disp.props = on; $('props').hidden = !on; $('b-props').classList.toggle('active', on); saveDisp(); }
     $('b-props').addEventListener('click', () => setProps(!disp.props));
     // light / dark mode
-    function setTheme(light) { disp.light = light; document.body.classList.toggle('light', light); $('b-theme').textContent = light ? '☾' : '☀'; saveDisp(); }
+    function setTheme(light) { if (light && PARTY.on && typeof setParty === 'function') setParty(false); disp.light = light; document.body.classList.toggle('light', light); $('b-theme').textContent = light ? '☾' : '☀'; saveDisp(); }
     $('b-theme').addEventListener('click', () => setTheme(!disp.light));
     // drag the divider between the 2D and 3D windows
     { const dv = $('divider'), main = $('main');
@@ -3713,7 +4023,9 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         renderer.getDrawingBufferSize(TOON.res.value); idRT.setSize(TOON.res.value.x, TOON.res.value.y); peelRT.setSize(TOON.res.value.x, TOON.res.value.y);
         if (typeof bgResize === 'function') try { bgResize(); } catch (err) {}
     }
-    new ResizeObserver(() => { resize3D(); fitView0(); }).observe(vwrap);
+    let lastVW = 0, lastVH = 0;
+    new ResizeObserver(() => { resize3D(); fitView0(); const w = vwrap.clientWidth, h = vwrap.clientHeight;
+        if (w && h && (Math.abs(w - lastVW) > 2 || Math.abs(h - lastVH) > 2)) { lastVW = w; lastVH = h; if (typeof animFit === 'function' && M3) animFit(0.5); } }).observe(vwrap);      // the model grows / shrinks smoothly with the window
     let fitted2D = false;
     function fitView0() { if (!fitted2D) { fitView(); fitted2D = true; } }
     // when a toolbar appears or wraps and the canvas shifts on screen, move the view the other way so the drawing stays put
@@ -3754,7 +4066,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     }
     function rebuild3D(fit) {
         const firstBuild = !M3;
-        if (typeof endBondSel === 'function') { if (NV) sideView(); endBondSel(); if (mm.running) mmStop(''); $('mm-out').textContent = ''; }
+        if (typeof endBondSel === 'function') { if (NV) sideView(true); endBondSel(); if (mm.running) mmStop(''); $('mm-out').textContent = ''; }
         disposeM3();
         if (!mol.atoms.length) return;
         let g;
@@ -3780,18 +4092,46 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         M3.th = new Float32Array(M3.rot.length); M3.om = new Float32Array(M3.rot.length); M3.th0 = new Float32Array(M3.rot.length);
         const R = Math.max(3, ...base.map(v => v.length())) + 2;
         M3.radius = R;
-        if (fit || firstBuild) fitCamera();
+        if (firstBuild) fitCamera(); else animFit();
         M3.fitDist = M3.fitDist || M3.radius / Math.sin(camera.fov * deg / 2) * 1.05;
         place3D();
         if (typeof bgBuild === 'function') bgBuild();
         buildChips();
     }
+    // camera distance at which the model fills about 70% of the window (the narrower direction)
+    function fitDistance() {
+        const r = Math.max(1.5, ...M3.base.map(v => v.length())) + 1.6, tv = Math.tan(camera.fov * deg / 2), t = Math.min(tv, tv * camera.aspect);
+        return r / (0.8 * t);
+    }
     function fitCamera() {
         if (!M3) return;
-        world.quaternion.identity(); world.position.set(0, 0, 0);
-        const d = M3.radius / Math.sin(camera.fov * deg / 2) * (camera.aspect < 1 ? 1.25 / camera.aspect : 1.05);
+        CAM = null; world.quaternion.identity(); world.position.set(0, 0, 0);
+        const d = fitDistance();
         controls.target.set(0, 0, 0); camera.position.set(0, 0, d); camera.up.set(0, 1, 0); camera.lookAt(0, 0, 0);
         controls.minDistance = M3.radius * 0.6; controls.maxDistance = d * 4;
+    }
+    // smooth camera moves: the viewing direction swings on a sphere about the target, distance and target ease across
+    let CAM = null;
+    function animCam(pos, target, up, dur = 0.75, done = null) {
+        CAM = { p0: camera.position.clone(), t0: controls.target.clone(), u0: camera.up.clone(), p1: pos.clone(), t1: target.clone(), u1: up.clone(), k: 0, dur, done };
+    }
+    function camAnimStep(dt) {
+        if (!CAM) return false;
+        const C = CAM; C.k = Math.min(1, C.k + dt / C.dur); const e = C.k * C.k * (3 - 2 * C.k);
+        const tgt = C.t0.clone().lerp(C.t1, e), o0 = C.p0.clone().sub(C.t0), o1 = C.p1.clone().sub(C.t1), l0 = o0.length(), l1 = o1.length();
+        const qd = new THREE.Quaternion().setFromUnitVectors(o0.clone().normalize(), o1.clone().normalize()), qi = new THREE.Quaternion().slerp(qd, e);
+        const dir = o0.clone().normalize().applyQuaternion(qi);
+        const qu = new THREE.Quaternion().setFromUnitVectors(C.u0.clone().normalize(), C.u1.clone().normalize()), qui = new THREE.Quaternion().slerp(qu, e);
+        controls.target.copy(tgt); camera.position.copy(tgt).addScaledVector(dir, l0 + (l1 - l0) * e); camera.up.copy(C.u0).applyQuaternion(qui).normalize(); camera.lookAt(tgt);
+        if (C.k >= 1) { camera.position.copy(C.p1); controls.target.copy(C.t1); camera.up.copy(C.u1); camera.lookAt(C.t1); CAM = null; if (C.done) C.done(); }
+        return true;
+    }
+    function animFit(dur = 0.6) {      // after every rebuild or window resize: ease the zoom so the model takes up ~80% of the window
+        if (!M3 || (typeof NV !== 'undefined' && NV) || (typeof GIFS !== 'undefined' && GIFS.open)) return;
+        world.updateMatrixWorld(); const tgt = V(0, 0, 0).applyMatrix4(world.matrixWorld);     // the centre of mass, wherever the model has been moved
+        const d = fitDistance(), dir = camera.position.clone().sub(controls.target).normalize();
+        controls.minDistance = M3.radius * 0.6; controls.maxDistance = d * 4;
+        animCam(tgt.clone().addScaledVector(dir, d), tgt, camera.up, dur);
     }
     // ---- single-bond rotation (free twisting, undone when parts of the molecule would collide)
     function findRotors3(g) {
@@ -3938,7 +4278,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     }
     const VOFF = { x: 0, y: 0, sx: 0, sxT: 0 };      // user shift (px) and the slide that makes room for the STYLE panel
     function applyOffset(dt) {
-        VOFF.sx += (VOFF.sxT - VOFF.sx) * Math.min(1, dt * 7); if (Math.abs(VOFF.sxT - VOFF.sx) < 0.3) VOFF.sx = VOFF.sxT;
+        VOFF.sx += (VOFF.sxT - VOFF.sx) * Math.min(1, dt * 2.6); if (Math.abs(VOFF.sxT - VOFF.sx) < 0.3) VOFF.sx = VOFF.sxT;
         const w = vwrap.clientWidth, h = vwrap.clientHeight, ox = VOFF.x + VOFF.sx, oy = VOFF.y;
         if (Math.abs(ox) < 0.05 && Math.abs(oy) < 0.05) { if (camera.view && camera.view.enabled) camera.clearViewOffset(); }
         else if (w && h) camera.setViewOffset(w, h, -ox, -oy, w, h);
@@ -3964,7 +4304,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     // opening STYLE: fold the 2D editor away (if it was showing) and slide the model left of the panel; closing puts both back
     let styleFold = null;
     function animSplit(from, to, done) {
-        const main = $('main'), t0 = performance.now(), D = 420;
+        const main = $('main'), t0 = performance.now(), D = 1000;
         const step = (now) => { const k = Math.min(1, (now - t0) / D), e = k * k * (3 - 2 * k); main.style.setProperty('--split', (from + (to - from) * e) + '%');
             if (k < 1) requestAnimationFrame(step); else if (done) done(); };
         requestAnimationFrame(step);
@@ -4192,6 +4532,31 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     bgBtns.forEach((b, i) => b.addEventListener('click', () => { bgCols = BGS[i].g; applyBG(); }));
     $('bg-any').addEventListener('input', (e) => { const c = e.target.value; bgCols = [hexMix(c, '#ffffff', 0.18), c, hexMix(c, '#000000', 0.55)]; applyBG(); });
     bindSlider('s-vig', v => Math.round(v * 100) + '%', v => { st.vignette = v; applyBG(); });
+    // ---- Party Mode (dark mode only): neon structures and arrows on black with a faint glow; the 3D view goes black and glows the same colour
+    const NEON = [['Neon green', '#39ff14'], ['Neon blue', '#1fb6ff'], ['Neon yellow', '#fff01f'], ['Neon orange', '#ff9f1c'], ['Neon red', '#ff3131']];
+    function setParty(on, col) {
+        if (col) PARTY.col = col;
+        document.body.style.setProperty('--neon', PARTY.col);
+        if (on && !PARTY.on) {
+            PARTY.saved = { bgCols, vig: st.vignette, glow: st.glow, gcol: '#' + GLOWU.col.value.getHexString(), r: GLOWU.r.value };
+            PARTY.on = true; bgCols = ['#000000', '#000000', '#000000']; applyBG();
+            if (!st.glow) $('b-glow').click();
+            if (GLOWU.r.value < 1.2) { GLOWU.r.value = 1.2; }
+        } else if (!on && PARTY.on) {
+            PARTY.on = false; const sv = PARTY.saved || {};
+            if (sv.bgCols) bgCols = sv.bgCols; applyBG();
+            GLOWU.col.value.set(sv.gcol || '#7dd3fc'); $('glow-col').value = sv.gcol || '#7dd3fc'; GLOWU.r.value = sv.r || 0.9;
+            if (st.glow !== !!sv.glow) $('b-glow').click();
+        }
+        if (PARTY.on) { GLOWU.col.value.set(PARTY.col); $('glow-col').value = PARTY.col; }
+        document.body.classList.toggle('party', PARTY.on);
+        $('b-party').classList.toggle('active', PARTY.on); $('party-cols').hidden = !PARTY.on;
+        $('party-cols').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.c === PARTY.col));
+        render();
+    }
+    NEON.forEach(([nm, c]) => { const b = document.createElement('button'); b.dataset.c = c; b.style.background = c; b.style.color = c; b.title = nm; b.setAttribute('aria-label', nm);
+        b.addEventListener('click', () => setParty(true, c)); $('party-cols').appendChild(b); });
+    $('b-party').addEventListener('click', () => setParty(!PARTY.on));
     function paintBG(ctx, W, H) {        // the same background on a 2D canvas (for GIF frames)
         const v = st.vignette, g = bgCols, outer = hexMix(g[2], '#000000', v * 0.65), size = (150 - 55 * v) / 100;
         ctx.save(); ctx.fillStyle = outer; ctx.fillRect(0, 0, W, H);
@@ -4237,7 +4602,11 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     const BGL = 3, bgLayers = [0, 1, 2].map(() => { const g = new THREE.Group(); bgScene.add(g); return g; });
     const BG = { n: 0, blur: 0.35, mols: [], parts: [], R: 1, D: 30 };
     const mkRT2 = () => new THREE.WebGLRenderTarget(1, 1, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: true });
-    const bgRT = mkRT2(), bgRT2 = mkRT2();
+    // the copies are drawn into a multisampled target (smooth edges), then blurred at reduced resolution in several gentle passes (smooth blur)
+    const bgRT = (THREE.WebGLMultisampleRenderTarget && renderer.capabilities && renderer.capabilities.isWebGL2)
+        ? Object.assign(new THREE.WebGLMultisampleRenderTarget(1, 1, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: true }), { samples: 4 }) : mkRT2();
+    const bgRT2 = mkRT2(), bgSmall = { 1: [mkRT2(), mkRT2()], 2: [mkRT2(), mkRT2()], 4: [mkRT2(), mkRT2()], 8: [mkRT2(), mkRT2()] };
+    const BGSC = 0.5;      // background copies start at half the model's size (nearest) and shrink with distance
     const quadScene = new THREE.Scene(), quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), null); quad.frustumCulled = false; quadScene.add(quad);
     const blurMat = new THREE.ShaderMaterial({ uniforms: { tSrc: { value: null }, uDir: { value: new THREE.Vector2(1, 0) } }, depthTest: false, depthWrite: false,
         vertexShader: 'varying vec2 vUv; void main() { vUv = position.xy * 0.5 + 0.5; gl_Position = vec4(position.xy, 0.0, 1.0); }',
@@ -4245,10 +4614,18 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             void main() { const float W[5] = float[5](0.227, 0.194, 0.121, 0.054, 0.016); vec4 acc = vec4(0.0);
                 for (int i = -4; i <= 4; i++) { vec4 c = texture2D(tSrc, vUv + uDir * float(i)); float w = W[i < 0 ? -i : i]; acc += vec4(c.rgb * c.a, c.a) * w; }
                 gl_FragColor = acc.a > 1e-4 ? vec4(acc.rgb / acc.a, acc.a) : vec4(0.0); }` });
+    const copyMat = new THREE.ShaderMaterial({ uniforms: { tSrc: { value: null }, uTex: { value: new THREE.Vector2(1, 1) } }, depthTest: false, depthWrite: false,
+        vertexShader: 'varying vec2 vUv; void main() { vUv = position.xy * 0.5 + 0.5; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+        // 4-tap box downsample (premultiplied so transparent edges don't darken)
+        fragmentShader: `uniform sampler2D tSrc; uniform vec2 uTex; varying vec2 vUv;
+            vec4 pm(vec4 c) { return vec4(c.rgb * c.a, c.a); }
+            void main() { vec4 a = pm(texture2D(tSrc, vUv + uTex * vec2(-0.5, -0.5))) + pm(texture2D(tSrc, vUv + uTex * vec2(0.5, -0.5))) + pm(texture2D(tSrc, vUv + uTex * vec2(-0.5, 0.5))) + pm(texture2D(tSrc, vUv + uTex * vec2(0.5, 0.5)));
+                a *= 0.25; gl_FragColor = a.a > 1e-4 ? vec4(a.rgb / a.a, a.a) : vec4(0.0); }` });
     const compMat = new THREE.ShaderMaterial({ uniforms: { tSrc: { value: null } }, transparent: true, depthTest: false, depthWrite: false,
         vertexShader: 'varying vec2 vUv; void main() { vUv = position.xy * 0.5 + 0.5; gl_Position = vec4(position.xy, 0.0, 1.0); }',
         fragmentShader: 'uniform sampler2D tSrc; varying vec2 vUv; void main() { gl_FragColor = texture2D(tSrc, vUv); }' });
-    function bgResize() { const v = TOON.res.value; bgRT.setSize(v.x, v.y); bgRT2.setSize(v.x, v.y); }
+    function bgResize() { const v = TOON.res.value; bgRT.setSize(v.x, v.y); bgRT2.setSize(v.x, v.y);
+        Object.entries(bgSmall).forEach(([f, p]) => p.forEach(t => t.setSize(Math.max(1, Math.ceil(v.x / f)), Math.max(1, Math.ceil(v.y / f))))); }
     function bgDispose() { BG.parts.forEach(p => { p.meshes.forEach(m => { m.parent && m.parent.remove(m); m.material !== INK && m.material.dispose(); }); }); BG.parts = []; }
     function bgBuild() {        // instanced spheres for every copy, one set per blur layer
         bgDispose(); if (!M3 || !BG.n) return;
@@ -4262,13 +4639,13 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             });
             BG.parts.push({ el: p.el, idx: p.idx, meshes });
         });
-        BG.R = M3.radius; BG.D = M3.fitDist || 30;
+        BG.R = M3.radius * BGSC; BG.D = M3.fitDist || 30;
         while (BG.mols.length < n) BG.mols.push(newBgMol());
         BG.mols.length = n;
     }
     function bgBounds(z) { const t = Math.tan(bgCam.fov * deg / 2), hh = (BG.D - z) * t * 1.08; return { hw: hh * Math.max(bgCam.aspect, 0.3), hh }; }
     function newBgMol() {
-        const R = BG.R, z = -R * (1.6 + Math.random() * 7), b = bgBounds(z);
+        const R = BG.R, z = -R * (1.6 + Math.random() * 7), b = bgBounds(z);      // (R: the copies' own size)
         const q = new THREE.Quaternion(); q.setFromAxisAngle(V(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(), Math.random() * 6.28);
         const sp = R * (0.25 + Math.random() * 0.45), dir = V(Math.random() - 0.5, Math.random() - 0.5, (Math.random() - 0.5) * 0.4).normalize();
         return { p: V((Math.random() * 2 - 1) * b.hw, (Math.random() * 2 - 1) * b.hh, z), v: dir.multiplyScalar(sp), q, w: V(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(), ws: 0.2 + Math.random() * 0.5 };
@@ -4296,25 +4673,39 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
             const L = clamp(Math.floor((m.p.z - zMin) / (zMax - zMin) * BGL), 0, BGL - 1);       // 0 far … 2 near
             BG.parts.forEach((p, pi) => {
                 const rad = SF(p.el) * (p.el === 'H' && !st.showH ? 0 : 1), mesh = p.meshes[L * 2];
-                p.idx.forEach(i => { bp.copy(M3.base[i]).applyQuaternion(m.q).add(m.p); bs3.set(rad, rad, rad); bM.compose(bp, q0, bs3); mesh.setMatrixAt(counts[pi][L]++, bM); });
+                const far = clamp((zMax - m.p.z) / (zMax - zMin), 0, 1), sc = 1 - 0.55 * far, rs = rad * BGSC * sc; p.idx.forEach(i => { bp.copy(M3.base[i]).multiplyScalar(BGSC * sc).applyQuaternion(m.q).add(m.p); bs3.set(rs, rs, rs); bM.compose(bp, q0, bs3); mesh.setMatrixAt(counts[pi][L]++, bM); });
             });
         });
         BG.parts.forEach((p, pi) => [0, 1, 2].forEach(L => { const mesh = p.meshes[L * 2], ink = p.meshes[L * 2 + 1]; mesh.count = ink.count = counts[pi][L]; mesh.instanceMatrix.needsUpdate = true; }));
     }
     function bgRender(w, h) {     // far layer first; each layer blurred by depth, then laid over the background
         if (!BG.parts.length || !BG.mols.length) return;
+        // tight depth range around the copies: with a huge near/far span, overlapping atoms flicker and their seams look jagged
+        { const R = BG.R; bgCam.near = Math.max(0.05, BG.D - R * 1.4 + R * 0.2 - R * 2.2); bgCam.far = BG.D + R * 9 + R * 2.5; }
         bgCam.aspect = camera.aspect; bgCam.position.set(0, 0, BG.D); bgCam.lookAt(0, 0, 0); bgCam.updateProjectionMatrix();
-        const s = BG.blur, px = [16 * s, 16 * Math.max(0, s - 0.33) * 1.5, 16 * Math.max(0, s - 0.66) * 3];
+        const s = BG.blur, sig = [10 * s, 10 * Math.max(0, s - 0.33) * 1.6, 10 * Math.max(0, s - 0.66) * 3.4].map(v => v * DPR);     // blur radius (px) per depth layer
+        const quadTo = (rt, mat) => { quad.material = mat; renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(quadScene, edgeCam); };
         for (let L = 0; L < BGL; L++) {
             bgLayers.forEach((g, k) => { g.visible = k === L; });
             renderer.setRenderTarget(bgRT); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(bgScene, bgCam);
             let src = bgRT;
-            if (px[L] > 0.4) {
-                const step = px[L] * DPR / 4;
-                quad.material = blurMat; blurMat.uniforms.tSrc.value = bgRT.texture; blurMat.uniforms.uDir.value.set(step / w, 0);
-                renderer.setRenderTarget(bgRT2); renderer.clear(); renderer.render(quadScene, edgeCam);
-                blurMat.uniforms.tSrc.value = bgRT2.texture; blurMat.uniforms.uDir.value.set(0, step / h);
-                renderer.setRenderTarget(bgRT); renderer.clear(); renderer.render(quadScene, edgeCam);
+            if (sig[L] > 0.6) {
+                // work at 1/f resolution so the blur needs only a few short-step passes; each pass is a 9-tap Gaussian (σ ≈ 1.75 taps)
+                const f = sig[L] > 24 ? 8 : sig[L] > 10 ? 4 : sig[L] > 4 ? 2 : 1, [A, B] = bgSmall[f];
+                let cur = src, cw = w, ch = h;
+                for (let ff = 1; ff < f; ff *= 2) {      // halve step by step (box filter) down to 1/f
+                    const tgt = ff * 2 === f ? A : (ff === 1 ? bgSmall[2][0] : bgSmall[4][0]);
+                    copyMat.uniforms.tSrc.value = cur.texture; copyMat.uniforms.uTex.value.set(1 / cw, 1 / ch); quadTo(tgt, copyMat);
+                    cur = tgt; cw = Math.ceil(cw / 2); ch = Math.ceil(ch / 2);
+                }
+                if (f === 1) { copyMat.uniforms.tSrc.value = cur.texture; copyMat.uniforms.uTex.value.set(0, 0); quadTo(A, copyMat); cur = A; }
+                const sw = Math.ceil(w / f), sh = Math.ceil(h / f), sgs = sig[L] / f, stepT = Math.min(1.25, Math.max(0.5, sgs / 1.75));
+                const passes = Math.min(10, Math.max(1, Math.ceil(Math.pow(sgs / (1.75 * stepT), 2))));
+                for (let pI = 0; pI < passes; pI++) {
+                    blurMat.uniforms.tSrc.value = cur.texture; blurMat.uniforms.uDir.value.set(stepT / sw, 0); quadTo(cur === A ? B : A, blurMat); cur = cur === A ? B : A;
+                    blurMat.uniforms.tSrc.value = cur.texture; blurMat.uniforms.uDir.value.set(0, stepT / sh); quadTo(cur === A ? B : A, blurMat); cur = cur === A ? B : A;
+                }
+                src = cur;
             }
             renderer.setRenderTarget(null); quad.material = compMat; compMat.uniforms.tSrc.value = src.texture; renderer.render(quadScene, edgeCam);
         }
@@ -4363,18 +4754,19 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         const wF = wpos(front), wB = wpos(back), mid = wF.clone().add(wB).multiplyScalar(0.5), ax = wF.clone().sub(wB).normalize();
         const dist = Math.max(camera.position.distanceTo(controls.target), M3.radius * 2.6);
         let up = camera.up.clone().sub(ax.clone().multiplyScalar(camera.up.dot(ax))); if (up.lengthSq() < 1e-4) up = V(0, 0, 1).sub(ax.clone().multiplyScalar(ax.z)); up.normalize();
-        controls.target.copy(mid); camera.position.copy(mid).addScaledVector(ax, dist); camera.up.copy(up); camera.lookAt(mid);
+        animCam(mid.clone().addScaledVector(ax, dist), mid, up, 0.8);       // swing round smoothly to look down the bond
         controls.enabled = false; NV.front = front; NV.back = back; NV.sides = bondSides(k);
         $('bp-side').hidden = false; $('hint3d').textContent = 'Newman view: drag near the front or back group to turn it · NEWMAN PROJECTION again looks from the other end';
     }
-    function sideView() {
+    function sideView(now) {
         if (!NV) return;
-        camera.position.copy(NV.saved.pos); controls.target.copy(NV.saved.target); camera.up.copy(NV.saved.up); camera.lookAt(controls.target);
+        if (now === true) { CAM = null; camera.position.copy(NV.saved.pos); controls.target.copy(NV.saved.target); camera.up.copy(NV.saved.up); camera.lookAt(controls.target); }
+        else animCam(NV.saved.pos, NV.saved.target, NV.saved.up, 0.8);
         st.rot = NV.saved.rot; ['x', 'y', 'z'].forEach(a => $('b-r' + a).classList.toggle('active', !!st.rot[a]));
         controls.enabled = true; NV = null; $('bp-side').hidden = true; $('hint3d').textContent = 'drag to rotate · scroll to zoom · arrows move · click a bond';
     }
     $('bp-newman').addEventListener('click', newmanView);
-    $('bp-side').addEventListener('click', sideView);
+    $('bp-side').addEventListener('click', () => sideView());
     $('bp-x').addEventListener('click', () => sideView());
     // in the Newman view, drag around the centre to turn the front or the back carbon's group
     let nvDrag = null;
@@ -4401,7 +4793,18 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     // =====================================================================
     //  Animated GIF export: one full turn about the auto-rotate axis, looping seamlessly
     // =====================================================================
-    const GIFS = { pad: 1.25, size: 420, dur: 4, fps: 20, open: false, phase: 0 };
+    const GIFS = { pad: 1.25, size: 'full', dur: 4, fps: 20, open: false, phase: 0 };
+    // export size: by default exactly the 3D window's own pixel size (its drawing resolution), capped for very large screens
+    function gifDims() {
+        if (GIFS.size === 'full' || GIFS.size === 'half') {
+            let W = Math.round(GIFS.vw * GIFS.dpr), H = Math.round(GIFS.vh * GIFS.dpr); const cap = 1800 / Math.max(W, H); if (cap < 1) { W = Math.round(W * cap); H = Math.round(H * cap); }
+            if (GIFS.size === 'half') { W = Math.round(W / 2); H = Math.round(H / 2); }
+            return [Math.max(64, W), Math.max(64, H)];
+        }
+        return [+GIFS.size, +GIFS.size];
+    }
+    function sizePreview() { const [W, H] = gifDims(), k = 300 / Math.max(W, H), cv = $('gif-prev'); cv.width = Math.round(W * k); cv.height = Math.round(H * k);
+        const o = $('gif-size').options[0]; const f = (() => { const s0 = GIFS.size; GIFS.size = 'full'; const d = gifDims(); GIFS.size = s0; return d; })(); o.textContent = `Same as the 3D view (${f[0]}×${f[1]})`; }
     function gifAxis() { camera.updateMatrixWorld(); const col = st.rot.x ? 0 : st.rot.z ? 2 : 1; const a = V(0, 0, 0); a.setFromMatrixColumn(camera.matrixWorld, col); return a.normalize(); }
     function gifSnapshot() {
         return { q: world.quaternion.clone(), p: world.position.clone(), cam: camera.position.clone(), th: M3 ? Float32Array.from(M3.th) : null, base: M3 ? M3.base.map(v => v.clone()) : null,
@@ -4436,7 +4839,8 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     let gifPrevTimer = null, gifSnap = null;
     function openGif() {
         if (!M3) { showMsg('Draw or load a molecule first'); return; }
-        GIFS.open = true; gifSnap = gifSnapshot(); if (camera.view && camera.view.enabled) camera.clearViewOffset(); $('gifbox').hidden = false; $('gif-status').textContent = '';
+        GIFS.vw = vwrap.clientWidth; GIFS.vh = vwrap.clientHeight; GIFS.dpr = DPR; CAM = null;
+        GIFS.open = true; gifSnap = gifSnapshot(); sizePreview(); if (camera.view && camera.view.enabled) camera.clearViewOffset(); $('gifbox').hidden = false; $('gif-status').textContent = '';
         const cv = $('gif-prev'), ctx = cv.getContext('2d'); let t0 = performance.now();
         const tick = () => { if (!GIFS.open) return; const ph = ((performance.now() - t0) / 1000 / GIFS.dur) % 1; gifFrame(gifSnap, ph, cv.width, cv.height, ctx); gifPrevTimer = requestAnimationFrame(tick); };
         tick();
@@ -4445,23 +4849,24 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
     $('b-gif').addEventListener('click', openGif);
     $('gif-close').addEventListener('click', closeGif);
     bindSlider('s-gifpad', v => v.toFixed(2) + '×', v => { GIFS.pad = v; });
-    $('gif-size').addEventListener('change', (e) => { GIFS.size = +e.target.value; });
+    $('gif-size').addEventListener('change', (e) => { GIFS.size = e.target.value; sizePreview(); });
     $('gif-dur').addEventListener('change', (e) => { GIFS.dur = +e.target.value; });
     $('gif-go').addEventListener('click', async () => {
-        const W = GIFS.size, H = GIFS.size, N = Math.round(GIFS.dur * GIFS.fps), cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-        const ctx = cv.getContext('2d', { willReadFrequently: true }), frames = [];
+        const [W, H] = gifDims(), N = Math.round(GIFS.dur * GIFS.fps), cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+        const ctx = cv.getContext('2d', { willReadFrequently: true });
         $('gif-go').disabled = true;
-        for (let i = 0; i < N; i++) { gifFrame(gifSnap, i / N, W, H, ctx); frames.push(ctx.getImageData(0, 0, W, H).data.slice()); if (i % 4 === 0) { $('gif-status').textContent = `Rendering frame ${i + 1} of ${N}…`; await new Promise(r => setTimeout(r, 0)); } }
-        $('gif-status').textContent = 'Encoding…'; await new Promise(r => setTimeout(r, 0));
-        const bytes = await encodeGIF(frames, W, H, Math.round(100 / GIFS.fps), (p) => { $('gif-status').textContent = `Encoding… ${Math.round(p * 100)}%`; });
+        // frames are rendered and encoded one at a time, so even full-size GIFs don't need every frame in memory
+        const getFrame = (i) => { gifFrame(gifSnap, i / N, W, H, ctx); return ctx.getImageData(0, 0, W, H).data; };
+        const bytes = await encodeGIF(getFrame, N, W, H, Math.round(100 / GIFS.fps), (p, what) => { $('gif-status').textContent = `${what}… ${Math.round(p * 100)}%  (${W}×${H})`; });
         const blob = new Blob([bytes], { type: 'image/gif' }), a = document.createElement('a');
         a.href = URL.createObjectURL(blob); a.download = 'molecule.gif'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
         $('gif-status').textContent = `Saved molecule.gif (${(bytes.length / 1024 / 1024).toFixed(1)} MB, ${N} frames)`; $('gif-go').disabled = false;
     });
     // ---- a small GIF89a encoder: median-cut palette over all frames, LZW, looping
-    async function encodeGIF(frames, W, H, delay, progress) {
-        // palette: median cut on a sample of pixels from every frame
-        const sample = []; frames.forEach(f => { for (let i = 0; i < f.length; i += 4 * 53) sample.push([f[i], f[i + 1], f[i + 2]]); });
+    async function encodeGIF(getFrame, N, W, H, delay, progress) {
+        // palette: median cut on a sample of pixels from about a dozen frames spread over the turn
+        const sample = [], stride = 4 * Math.max(53, Math.floor(W * H / 9000) | 1), ev = Math.max(1, Math.round(N / 12));
+        for (let i = 0; i < N; i += ev) { const f = getFrame(i); for (let k = 0; k < f.length; k += stride) sample.push([f[k], f[k + 1], f[k + 2]]); progress(i / N, 'Choosing colors'); await new Promise(r => setTimeout(r, 0)); }
         let boxes = [sample];
         while (boxes.length < 255) {
             let bi = -1, br = -1, bc = 0;
@@ -4474,20 +4879,23 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         const cache = new Int16Array(32768).fill(-1);
         const nearest = (r, g, b) => { const key = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3); let v = cache[key]; if (v >= 0) return v;
             let bd = 1e9; for (let i = 0; i < pal.length; i++) { const p = pal[i], d = (p[0] - r) ** 2 * 2 + (p[1] - g) ** 2 * 4 + (p[2] - b) ** 2 * 3; if (d < bd) { bd = d; v = i; } } cache[key] = v; return v; };
-        const out = []; const w8 = (b) => out.push(b & 255), w16 = (v) => { w8(v); w8(v >> 8); }, wstr = (s) => [...s].forEach(c => w8(c.charCodeAt(0)));
+        // growable byte buffer
+        const out = { buf: new Uint8Array(1 << 20), n: 0, push(b) { if (this.n >= this.buf.length) { const nb = new Uint8Array(this.buf.length * 2); nb.set(this.buf); this.buf = nb; } this.buf[this.n++] = b; } };
+        const w8 = (b) => out.push(b & 255), w16 = (v) => { w8(v); w8(v >> 8); }, wstr = (s) => [...s].forEach(c => w8(c.charCodeAt(0)));
         wstr('GIF89a'); w16(W); w16(H); w8(0xF7); w8(0); w8(0);
         pal.forEach(p => { w8(p[0]); w8(p[1]); w8(p[2]); });
         w8(0x21); w8(0xFF); w8(11); wstr('NETSCAPE2.0'); w8(3); w8(1); w16(0); w8(0);
-        for (let fi = 0; fi < frames.length; fi++) {
-            const f = frames[fi], idx = new Uint8Array(W * H);
+        const idx = new Uint8Array(W * H);
+        for (let fi = 0; fi < N; fi++) {
+            const f = getFrame(fi);
             for (let i = 0, j = 0; i < idx.length; i++, j += 4) idx[i] = nearest(f[j], f[j + 1], f[j + 2]);
             w8(0x21); w8(0xF9); w8(4); w8(0); w16(delay); w8(0); w8(0);
             w8(0x2C); w16(0); w16(0); w16(W); w16(H); w8(0);
             lzw(idx, 8, out);
-            if (fi % 3 === 0) { progress((fi + 1) / frames.length); await new Promise(r => setTimeout(r, 0)); }
+            progress((fi + 1) / N, 'Rendering & encoding'); await new Promise(r => setTimeout(r, 0));
         }
         w8(0x3B);
-        return new Uint8Array(out);
+        return out.buf.slice(0, out.n);
     }
     function lzw(px, minCode, out) {
         out.push(minCode);
@@ -4530,7 +4938,7 @@ if (typeof module !== 'undefined') module.exports = { isBridged, perspectiveLayo
         if (mm.running && M3) { mmRun(40); place3D(); }
         if (bondSel) updateBondMarker();
         if (M3 && prevA !== st.sfA) place3D();
-        controls.update();
+        if (!camAnimStep(dt)) controls.update();
         if (BG.n && M3) { if (!st.paused) bgStep(dt); bgFill(); }
         if (st.glow) { glowT += dt * st.glowSpeed * 2 * Math.PI; GLOWU.amp.value = st.glowSpeed ? glowPulse(glowT) : 1; }
         applyOffset(dt);
