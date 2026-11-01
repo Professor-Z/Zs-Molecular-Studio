@@ -86,6 +86,8 @@
     #editor { display: grid; grid-template: "t t t" auto "l c r" minmax(0, 1fr) "b b b" auto / auto minmax(0, 1fr) auto; min-height: 0; min-width: 0; background: #0b1220; border-right: 1px solid rgba(255,255,255,0.08); }
     #dock-top { grid-area: t; display: flex; flex-direction: row; flex-wrap: wrap; align-items: stretch; } #dock-bottom { grid-area: b; display: flex; flex-direction: row; flex-wrap: wrap; align-items: stretch; }
     #dock-top > .bar, #dock-bottom > .bar { flex: 0 1 auto; } #dock-top > #ctxbar, #dock-bottom > #ctxbar { flex: 1 1 100%; }
+    #label-edit.ghost { opacity: 0; pointer-events: none; width: 2px !important; }
+    .text-caret { animation: caret-blink 1s steps(1) infinite; } @keyframes caret-blink { 50% { opacity: 0; } }
     #label-edit { position: absolute; z-index: 8; width: 100px; height: 32px; text-align: center; font: 700 16px system-ui, sans-serif; color: #1e293b; background: #fff; border: 2px solid #2563eb; border-radius: 8px; box-shadow: 0 4px 14px rgba(15,23,42,0.25); }
     #dock-left { grid-area: l; display: flex; flex-direction: row; min-height: 0; } #dock-right { grid-area: r; display: flex; flex-direction: row; min-height: 0; }
     #main > #editor > .bar { display: none; }
@@ -126,8 +128,11 @@
         background-size: 300% 100%; animation: party-flash 1.4s cubic-bezier(.3,.1,.3,1) forwards; }
     @keyframes party-flash { 0% { background-position: 100% 0; opacity: 0; } 12% { opacity: 1; } 80% { opacity: 1; } 100% { background-position: 0% 0; opacity: 0; } }
     #party-cols button.rainbow { background: conic-gradient(#1fb6ff, #39ff14, #fff01f, #ff9f1c, #ff3131, #bc13fe, #1fb6ff) !important; }
+    #sketch.pen-sel { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext x='1' y='26' font-size='26'%3E%E2%9C%8D%EF%B8%8F%3C/text%3E%3C/svg%3E") 3 27, crosshair !important; }
     #sketch { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; user-select: none; }
     #sketch.move { cursor: grab; }
+    #sketch.cur-lasso, #sketch.pen-sel.cur-lasso { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext x='1' y='26' font-size='26'%3E%E2%9C%8D%EF%B8%8F%3C/text%3E%3C/svg%3E") 3 27, crosshair; }
+    #sketch.cur-box, #sketch.pen-sel.cur-box { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext x='1' y='26' font-size='26'%3E%E2%9C%8D%EF%B8%8F%3C/text%3E%3C/svg%3E") 3 27, crosshair; }      /* same hand-with-pen as the lasso */
     #sketch-hint { position: absolute; left: 10px; right: 10px; bottom: 8px; font-size: 0.72rem; color: #64748b; pointer-events: none; }
     .el.pt { color: #e2e8f0; font-size: 11px; letter-spacing: 0.05em; }
     .el { min-width: 34px; height: 32px; padding: 0 6px; border: none; border-radius: 7px; background: #1f2937; font: 700 14px/1 system-ui, sans-serif; cursor: pointer; }
@@ -296,7 +301,7 @@
         <div id="viewer">
             <div id="stylebar" class="collapsed">
                 <div id="style" class="glass-panel">
-                    <div class="style-head"><span>STYLE</span><button class="btn" id="style-x" title="Close (or click anywhere else)" aria-label="Close the style window">✕</button></div>
+                    <div class="style-head"><span>STYLE PREFERENCES, MOTION &amp; GEOMETRY SETTINGS</span><button class="btn" id="style-x" title="Close (or click anywhere else)" aria-label="Close the style window">✕</button></div>
                     <div>
                         <div class="sec">STYLING</div>
                         <div class="cartoon-only">
@@ -326,8 +331,8 @@
                             <button class="btn" id="b-bs">BALL &amp; STICK</button>
                         </div>
                         <div class="btn-row two">
-                            <button class="btn" id="b-h" title="Show or hide the hydrogen atoms">HIDE HYDROGENS</button>
-                            <button class="btn tg active" id="cartoon3d" title="Switch between the cartoon look (bold outlines, flat shading) and classic smooth shading">CARTOON MODE</button>
+                            <button class="btn tg active" id="cartoon3d" title="Cartoon look: bold outlines, flat shading">CARTOON MODE</button>
+                            <button class="btn tg" id="classic3d" title="Classic look: smooth, realistic shading">CLASSIC MODE</button>
                         </div>
                         <div class="lbl2">Background</div>
                         <div class="slider-row"><div class="lbl"><label for="s-vig">Vignette</label><span id="v-vig"></span></div>
@@ -473,6 +478,8 @@
 <div id="hl-menu" class="menu" hidden>
     <div class="dm-head">Highlight color</div>
     <div id="hl-swatches" class="swrow"></div>
+    <div class="dm-row" style="gap:10px"><button class="tool txt" id="hl-glow" style="min-width:92px;white-space:nowrap;padding:0 10px" title="Make the highlighted selection glow, like a neon sign">GLOW: OFF</button>
+        <label class="ctx-slider" title="How far the glow spreads">RADIUS <input type="range" id="hl-glowr" min="0.08" max="0.8" step="0.02" value="0.3" aria-label="Glow radius"></label></div>
     <button class="mi" id="hl-none">Remove highlight</button>
 </div>
 <input type="file" id="file-input" accept=".mstudio,.json,.mol,.sdf,.smi,.txt" hidden>
@@ -1623,16 +1630,19 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
                 let j = i; while (j < s.length && /\d/.test(s[j])) j++;
                 if (/[+\-−]/.test(s[j] || '') && bnd(s[j + 1])) { push(s.slice(i, j) + (s[j] === '-' ? '−' : s[j]), 'sup'); i = j; continue; }
                 push(s.slice(i, j), 'sub'); i = j - 1; continue; }
+            if (auto && /[+\-−]/.test(c) && prev && /[A-Za-z)\]]/.test(prev) && /\d/.test(s[i + 1] || '')) {      // Fe+3, Cu+2, O-2 → superscript charge
+                let j = i + 1; while (j < s.length && /\d/.test(s[j])) j++; if (bnd(s[j])) { push((c === '-' ? '−' : c) + s.slice(i + 1, j), 'sup'); i = j - 1; continue; } }
             if (auto && /[+\-−]/.test(c) && prev && /[A-Za-z0-9)\]]/.test(prev) && bnd(s[i + 1])) { push(c === '-' ? '−' : c, 'sup'); continue; }
             push(c, 'n');
         }
         return out;
     }
     const textSize = (ar) => STYLES[disp.style].font * 0.95 * (ar.size || 1);
-    function textBox(ar) {
-        const S = STYLES[disp.style], f = textSize(ar), runs = formulaRuns(ar.text || ' ', ar.fmt !== false);
-        const w = Math.max(f * 0.6, runs.reduce((s, r) => s + measureW(r.t, S) * f * (r.m === 'n' ? 1 : 0.7), 0));
-        return { x0: ar.x1 - w / 2 - 0.08, x1: ar.x1 + w / 2 + 0.08, y0: ar.y1 - f * 0.62, y1: ar.y1 + f * 0.42, w, f, runs };
+    function textBox(ar) {      // one or more lines (Enter starts a new one), centred under each other
+        const S = STYLES[disp.style], f = textSize(ar), lh = f * 1.3;
+        const lines = (ar.text || ' ').split('\n').map(t => { const runs = formulaRuns(t || ' ', ar.fmt !== false); return { runs, w: runs.reduce((s, r) => s + measureW(r.t, S) * f * (r.m === 'n' ? 1 : 0.7), 0) }; });
+        const w = Math.max(f * 0.6, ...lines.map(l => l.w));
+        return { x0: ar.x1 - w / 2 - 0.08, x1: ar.x1 + w / 2 + 0.08, y0: ar.y1 - f * 0.62, y1: ar.y1 + f * 0.42 + (lines.length - 1) * lh, w, f, lh, lines, runs: lines[0].runs };
     }
     function curveCtrl(ar) {      // quadratic control point, stored relative to the chord (ct along, ch across) so it survives moves/rotation
         const dx = ar.x2 - ar.x1, dy = ar.y2 - ar.y1, L = Math.hypot(dx, dy) || 1;
@@ -1799,6 +1809,14 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         return { atoms: t.atoms.map(i => { const a = mol.atoms[i]; return { i, x: a.x, y: a.y, fs: a.fs || 1, p3: a.p3 ? a.p3.slice() : null, chair: a.chair ? JSON.parse(JSON.stringify(a.chair)) : null, lpAng: a.lpAng ? a.lpAng.slice() : null, radAng: a.radAng ? a.radAng.slice() : null }; }),
                  arrows: t.arrows.map(k => ({ k, ...mol.arrows[k] })) };
     }
+    // rotation snaps to multiples of 60° and 90° when within a few degrees; anywhere else it turns smoothly
+    function placeTemplateFree(p) {
+        const T = TPL[tool.tpl](), n0 = mol.atoms.length, u = U(); let cx = 0, cy = 0; T.atoms.forEach(o => { cx += o.x; cy += o.y; }); cx /= T.atoms.length; cy /= T.atoms.length;
+        T.atoms.forEach(o => { const a = { ...o, x: (o.x - cx) * u + p.x, y: (o.y - cy) * u + p.y }; if (u !== 1) a.fs = u; mol.atoms.push(a); });
+        T.bonds.forEach(b => mol.bonds.push({ ...b, a: b.a + n0, b: b.b + n0 }));
+        clearSel(); T.atoms.forEach((_, k) => sel.atoms.add(n0 + k));
+    }
+    function snapRot(th) { for (let d = -330; d <= 330; d += 30) { if (Math.abs(wrapAng(th - d * deg)) < 5 * deg) return d * deg; } return th; }      // snaps at every 30° (so 60° and 90° too)
     function rotateFrom(snap, cx, cy, th) {      // rotate the saved positions by th about (cx,cy)
         const c = Math.cos(th), s = Math.sin(th), R = (x, y) => ({ x: cx + (x - cx) * c - (y - cy) * s, y: cy + (x - cx) * s + (y - cy) * c });
         snap.atoms.forEach(o => { const a = mol.atoms[o.i], r = R(o.x, o.y); a.x = r.x; a.y = r.y;
@@ -2023,11 +2041,11 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
                 const segL = Math.hypot(x2 - x1, y2 - y1), n = Math.max(4, Math.round(segL / (S.hash * bs)));
                 for (let q = 1; q <= n; q++) { const t = (q - 0.15) / (n - 0.15), w = (S.wedge * 0.68 * t + S.lw * 0.15) * bs, px = x1 + (x2 - x1) * t, py = y1 + (y2 - y1) * t; bH += line(px + nx * w, py + ny * w, px - nx * w, py - ny * w); }
             } else if (b.wedge === 'wavy') {
-                const segL = Math.hypot(x2 - x1, y2 - y1), n = Math.max(4, Math.round(segL / 0.13)), amp = 0.075;
+                const segL = Math.hypot(x2 - x1, y2 - y1), n = Math.max(6, Math.round(segL / 0.11)), amp = 0.095;
                 let d = `M${x1} ${y1}`;
                 for (let q = 0; q < n; q++) { const t0 = (q + 0.5) / n, t1 = (q + 1) / n, sg = q % 2 ? -1 : 1;
                     d += ` Q${x1 + (x2 - x1) * t0 + nx * amp * sg} ${y1 + (y2 - y1) * t0 + ny * amp * sg} ${x1 + (x2 - x1) * t1} ${y1 + (y2 - y1) * t1}`; }
-                bH += `<path d="${d}"/>`;
+                bH += `<path d="${d}" stroke-width="${(S.lw * 0.78 * bs).toFixed(4)}"/>`;      // a little lighter than a plain bond
             } else if (b.order === 1 && b.bold) {     // Haworth front edge: thick, tapering into the side carbons
                 const bw = Array.isArray(b.bold) ? b.bold : [1, 1], thk = b.autoBold ? 1.8 : 2.4, wa = (bw[0] ? S.lw * thk : S.lw * 0.5) * bs, wb = (bw[1] ? S.lw * thk : S.lw * 0.5) * bs;
                 const ex = dx * S.lw * 0.6, ey = dy * S.lw * 0.6;
@@ -2113,7 +2131,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             if (nP + nR) {
                 const sc = (disp.lpScale || 1) * 0.8, ds = disp.lpDist || 1;
                 const fsA = a.fs || 1, lpc = a.color || ink;
-                const Rr = (info.show ? f * 0.5 + 0.12 * fsA : 0.3 * fsA) * ds * (0.85 + 0.15 * sc), dr = Math.max(0.035, S.lw * 1.1) * sc * fsA, sp = Math.max(0.085, f * 0.15) * (0.55 + 0.45 * sc);
+                const Rr = (info.show ? f * 0.5 + 0.08 * fsA : 0.24 * fsA) * ds * (0.85 + 0.15 * sc), dr = Math.max(0.035, S.lw * 1.1) * sc * fsA, sp = Math.max(0.085, f * 0.15) * (0.55 + 0.45 * sc);
                 const fixP = a.lpAng || [], fixR = a.radAng || [], angP = [], angR = [], occ2 = occ.slice();
                 for (let k = 0; k < nP; k++) if (fixP[k] != null) { angP[k] = fixP[k]; occ2.push(fixP[k]); }
                 for (let k = 0; k < nR; k++) if (fixR[k] != null) { angR[k] = fixR[k]; occ2.push(fixR[k]); }
@@ -2137,7 +2155,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
                 const rc = Math.max(f * 0.3, 0.19 * (a.fs || 1)) * (a.qScale || 1) * (disp.qSize || 1), qc = a.qColor || a.color || ink, qd = disp.qDist || 1;
                 let cx, cy;
                 if (a.qAng != null && a.qOut) {      // just outside the lone pair, along the same direction
-                    const scL = (disp.lpScale || 1) * 0.8, fsA = a.fs || 1, RrL = (info.show ? f * 0.5 + 0.12 * fsA : 0.3 * fsA) * (disp.lpDist || 1) * (0.85 + 0.15 * scL), drL = Math.max(0.035, S.lw * 1.1) * scL * fsA;
+                    const scL = (disp.lpScale || 1) * 0.8, fsA = a.fs || 1, RrL = (info.show ? f * 0.5 + 0.08 * fsA : 0.24 * fsA) * (disp.lpDist || 1) * (0.85 + 0.15 * scL), drL = Math.max(0.035, S.lw * 1.1) * scL * fsA;
                     const rr = RrL + drL + S.lw * 1.3 + rc, qa = a.lpAng && a.lpAng[0] != null ? a.lpAng[0] : a.qAng; cx = a.x + Math.cos(qa) * rr; cy = a.y + Math.sin(qa) * rr; }      // follows the pair if it is moved
                 else if (a.qAng != null) { const rr = (info.show ? f * 0.62 : 0.24 * (a.fs || 1)) * qd + rc + (nP + nR ? 0.08 : 0); cx = a.x + Math.cos(a.qAng) * rr; cy = a.y + Math.sin(a.qAng) * rr; }
                 else if (info.show && info.hInLabel && !info.left) {
@@ -2192,10 +2210,15 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
                 fH += `<circle cx="${cx}" cy="${cy}" r="${Rb}" fill="url(#${id})"/><polygon points="${pts}" fill="${c}" fill-opacity="0.25"/>`;
             }
         });
-        let hH = '';
+        let hH = ''; const glowSets = new Map();      // colour|radius → solid shapes, blurred together as one
+        const gAdd = (c, r, el) => { const key = c + '|' + Math.round(r * 100); if (!glowSets.has(key)) glowSets.set(key, ''); glowSets.set(key, glowSets.get(key) + el); };
         mol.bonds.forEach(b => { if (b.hl && inA(b.a) && inA(b.b)) { const A = mol.atoms[b.a], B = mol.atoms[b.b];
-            hH += `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="${b.hl}" stroke-width="0.42" stroke-linecap="round"/>`; } });
-        mol.atoms.forEach((a, i) => { if (a.hl && inA(i)) hH += `<circle cx="${a.x}" cy="${a.y}" r="0.3" fill="${a.hl}"/>`; });
+            if (b.hlGlow) gAdd(b.hl, b.hlGlow, `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="${b.hl}" stroke-width="0.26" stroke-linecap="round"/>`);
+            else hH += `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="${b.hl}" stroke-width="0.42" stroke-linecap="round"/>`; } });
+        mol.atoms.forEach((a, i) => { if (a.hl && inA(i)) { if (a.hlGlow) gAdd(a.hl, a.hlGlow, `<circle cx="${a.x}" cy="${a.y}" r="0.16" fill="${a.hl}"/>`); else hH += `<circle cx="${a.x}" cy="${a.y}" r="0.3" fill="${a.hl}"/>`; } });
+        const glowK = new Set();
+        glowSets.forEach((el, key) => { const k = +key.split('|')[1]; glowK.add(k); fH += `<g filter="url(#hlg${k})" opacity="0.95">${el}</g>`; });
+        glowK.forEach(k => { const r = k / 100; defs += `<filter id="hlg${k}" filterUnits="userSpaceOnUse" x="-2000" y="-2000" width="4000" height="4000" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="${(r * 0.45).toFixed(3)}" result="a"/><feGaussianBlur in="SourceGraphic" stdDeviation="${r.toFixed(3)}" result="b"/><feComponentTransfer in="b" result="b2"><feFuncA type="linear" slope="1.6"/></feComponentTransfer><feMerge><feMergeNode in="b2"/><feMergeNode in="a"/></feMerge></filter>`; });
         if (hH) fH += `<g opacity="${HL_A}">${hH}</g>`;
         const rH = mol.arrows.map((ar, k) => (!fr || fr(k)) ? arrowSVG(ar, S) : '').join('');
         return { b: bH, a: aH, r: rH, f: fH, defs, bSplit };
@@ -2211,10 +2234,11 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     function arrowSVG0(ar, S) {
         const esc2 = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
         if (ar.t === 'text') {      // reagent / condition text, with chemical sub- and superscripts
-            const b = textBox(ar), f = b.f; let html = '', cur = 0;
-            b.runs.forEach(r => { const want = r.m === 'sub' ? f * 0.24 : r.m === 'sup' ? -f * 0.38 : 0, dy = want - cur; cur = want;
-                html += `<tspan dy="${dy.toFixed(3)}"${r.m !== 'n' ? ` font-size="${(f * 0.7).toFixed(3)}"` : ''}>${esc2(r.t)}</tspan>`; });
-            return `<text x="${ar.x1.toFixed(3)}" y="${(ar.y1 + f * 0.33).toFixed(3)}" text-anchor="middle" font-size="${f.toFixed(3)}" font-family='${S.fam}' font-weight="${S.weight}" fill="${ar.color || '#1e293b'}" stroke="none">${html}</text>`;
+            const b = textBox(ar), f = b.f;
+            return b.lines.map((ln, li) => { let html = '', cur = 0;
+                ln.runs.forEach(r => { const want = r.m === 'sub' ? f * 0.24 : r.m === 'sup' ? -f * 0.38 : 0, dy = want - cur; cur = want;
+                    html += `<tspan dy="${dy.toFixed(3)}"${r.m !== 'n' ? ` font-size="${(f * 0.7).toFixed(3)}"` : ''}>${esc2(r.t)}</tspan>`; });
+                return `<text x="${ar.x1.toFixed(3)}" y="${(ar.y1 + f * 0.33 + li * b.lh).toFixed(3)}" text-anchor="middle" font-size="${f.toFixed(3)}" font-family='${S.fam}' font-weight="${S.weight}" fill="${ar.color || '#1e293b'}" stroke="none">${html}</text>`; }).join('');
         }
         if (ar.t === 'shape') {     // rectangles, rounded rectangles, ellipses, lines: border colour / width / dash, fill, shadow
             const w = S.lw * 1.15 * (ar.lw || 1), col = ar.color || '#1e293b', fill = ar.fill || 'none';
@@ -2350,7 +2374,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         sel.atoms.forEach(i => { const a = mol.atoms[i]; if (a) s += `<circle cx="${a.x}" cy="${a.y}" r="0.28" fill="rgba(37,99,235,0.16)" stroke="#2563eb" stroke-width="${1.2 * u}"/>`; });
         mol.bonds.forEach(b => { if (sel.atoms.has(b.a) && sel.atoms.has(b.b)) { const A = mol.atoms[b.a], B = mol.atoms[b.b];
             s += `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="rgba(37,99,235,0.22)" stroke-width="0.26" stroke-linecap="round"/>`; } });
-        sel.arrows.forEach(k => { const ar = mol.arrows[k]; if (!ar) return; const pts = arrowPts(ar);
+        sel.arrows.forEach(k => { const ar = mol.arrows[k]; if (!ar || (textEdit && k === textEdit.k)) return; const pts = arrowPts(ar);      // (the text being typed has its own frame)
             s += pts.length === 1 ? `<circle cx="${pts[0].x}" cy="${pts[0].y}" r="0.34" fill="rgba(37,99,235,0.16)" stroke="#2563eb" stroke-width="${1.2 * u}"/>`
                 : `<polyline points="${pts.map(p => p.x + ',' + p.y).join(' ')}" fill="none" stroke="rgba(37,99,235,0.25)" stroke-width="0.26" stroke-linecap="round" stroke-linejoin="round"/>`; });
         // hover
@@ -2358,7 +2382,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             if (hover.atom >= 0) { const a = mol.atoms[hover.atom]; s += `<circle cx="${a.x}" cy="${a.y}" r="0.3" fill="rgba(59,130,246,0.18)" stroke="#3b82f6" stroke-width="0.04"/>`; }
             else if (hover.bond >= 0) { const b = mol.bonds[hover.bond], A = mol.atoms[b.a], B = mol.atoms[b.b];
                 s += `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="rgba(59,130,246,0.35)" stroke-width="0.3" stroke-linecap="round"/>`; }
-            else if (hover.arrow >= 0 && mol.arrows[hover.arrow]) { const pts = arrowPts(mol.arrows[hover.arrow]);
+            else if (hover.arrow >= 0 && mol.arrows[hover.arrow] && !(textEdit && hover.arrow === textEdit.k)) { const pts = arrowPts(mol.arrows[hover.arrow]);
                 s += pts.length === 1 ? `<circle cx="${pts[0].x}" cy="${pts[0].y}" r="0.3" fill="rgba(59,130,246,0.18)"/>`
                     : `<polyline points="${pts.map(p => p.x + ',' + p.y).join(' ')}" fill="none" stroke="rgba(59,130,246,0.35)" stroke-width="0.25" stroke-linecap="round"/>`; }
         }
@@ -2405,6 +2429,12 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             else { let hit = null; lpCache.forEach(c => { if (c) c.forEach(q => { const dd = Math.hypot(q.x - lastP.x, q.y - lastP.y); if (dd < 0.16 && (!hit || dd < hit.d)) hit = { ...q, d: dd }; }); });
                 if (hit) s += `<circle cx="${hit.x}" cy="${hit.y}" r="0.15" fill="${fillC}" stroke="${col}" stroke-width="${1.4 * u}"/>`; }
         }
+        if (textEdit && mol.arrows[textEdit.k]) {      // typing into a text: a soft frame and a blinking caret at the end of the drawn text
+            const ta = mol.arrows[textEdit.k], tb = textBox(ta), nl = tb.lines.length, last = tb.lines[nl - 1], lastTxt = (ta.text || '').split('\n')[nl - 1];
+            const x = lastTxt ? ta.x1 + last.w / 2 + 0.02 : ta.x1, ly0 = tb.y0 + (nl - 1) * tb.lh;
+            s += `<rect x="${tb.x0 - 0.06}" y="${tb.y0 - 0.06}" width="${tb.x1 - tb.x0 + 0.12}" height="${tb.y1 - tb.y0 + 0.12}" rx="0.06" fill="none" stroke="#2563eb" stroke-width="${u}" stroke-dasharray="${3 * u} ${3 * u}"/>`
+               + `<line class="text-caret" x1="${x}" y1="${ly0 + 0.02}" x2="${x}" y2="${ly0 + tb.f * 1.04 - 0.02}" stroke="#2563eb" stroke-width="${1.8 * u}"/>`;
+        }
         if (selQ && mol.atoms[selQ.i]) {      // the selected charge / lone pair
             let q = null; if (selQ.k === 'q') q = qCache[selQ.i]; else if (selQ.k === 'pq') q = pqCache[selQ.i];
             else { const c = (lpCache[selQ.i] || []).filter(o => o.t === (selQ.k === 'r' ? 'r' : 'p')); q = c.find(o => o.k === selQ.idx) || c[0]; if (q) q = { ...q, r: 0.11 }; }
@@ -2441,25 +2471,35 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     let drag = null, spaceDown = false, lastClick = { t: 0, x: 0, y: 0 };
     tool.shapeStyle = { color: '#1e293b', fill: null, lw: 1, dash: 'solid' };
     function newShape(p0, p1) {
-        const sh = tool.shape === 'ellipse' ? 'ellipse' : tool.shape === 'line' ? 'line' : 'rect', st2 = tool.shapeStyle;
-        return { t: 'shape', shape: sh, x1: p0.x, y1: p0.y, x2: p1.x, y2: p1.y, round: tool.shape === 'round', shadow: tool.shape === 'shadow', color: st2.color, fill: st2.fill, lw: st2.lw * U(), dash: st2.dash };
+        const ts = tool.shape, sh = ts === 'ellipse' || ts === 'ellshadow' ? 'ellipse' : ts === 'line' ? 'line' : 'rect', st2 = tool.shapeStyle;
+        return { t: 'shape', shape: sh, x1: p0.x, y1: p0.y, x2: p1.x, y2: p1.y, round: ts === 'round' || ts === 'roundshadow', shadow: ts === 'shadow' || ts === 'roundshadow' || ts === 'ellshadow', color: st2.color, fill: st2.fill, lw: st2.lw * U(), dash: st2.dash };
     }
-    function floatInput(x, y, value, w, onDone) {      // a small text box over the canvas at model point (x, y)
+    let textEdit = null, textHold = false;      // the text box being typed in (live preview below the input); textHold: a TEXT option is being used
+    function floatInput(x, y, value, w, onDone, onInput, above, multi) {      // a small text box over the canvas at model point (x, y); multi: Enter adds a line
         const old = $('label-edit'); if (old) old.remove();
         const r = wrap.getBoundingClientRect(), [sx, sy] = moleculeStudio.toScreen(x, y);
-        const inp = document.createElement('input'); inp.id = 'label-edit'; inp.value = value; inp.setAttribute('aria-label', 'Text');
-        inp.style.width = w + 'px'; inp.style.left = clamp(sx - r.left - w / 2, 4, r.width - w - 4) + 'px'; inp.style.top = (sy - r.top - 16) + 'px'; wrap.appendChild(inp); inp.select(); inp.focus();
+        const inp = document.createElement(multi ? 'textarea' : 'input'); inp.id = 'label-edit'; inp.value = value; inp.setAttribute('aria-label', 'Text');
+        inp.style.width = w + 'px'; inp.style.left = clamp(sx - r.left - w / 2, 4, r.width - w - 4) + 'px'; inp.style.top = (sy - r.top - 16 - (above || 0)) + 'px'; wrap.appendChild(inp); inp.select(); inp.focus();
         let done = false; const finish = (ok) => { if (done) return; done = true; const v = inp.value; inp.remove(); onDone(ok, v); };
-        inp.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') finish(true); if (e.key === 'Escape') finish(false); });
-        inp.addEventListener('blur', () => finish(true));
+        inp.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter' && !multi) finish(true); if (e.key === 'Escape') finish(!!multi); });
+        if (onInput) inp.addEventListener('input', () => onInput(inp.value));
+        inp.addEventListener('blur', () => setTimeout(() => { if (textHold || document.activeElement === inp) return; finish(true); }, 0));      // using AUTO FORMULA / PLAIN TEXT / SIZE keeps it open
+        return inp;
     }
-    function newText(p) {
-        floatInput(p.x, p.y, '', 220, (ok, v) => { v = v.trim(); if (!ok || !v) return; commit(); mol.arrows.push({ t: 'text', x1: p.x, y1: p.y, text: v, size: U(), fmt: tool.textFmt !== false }); changed(); });
+    // typing a reagent: the formatted text appears live just below the box; AUTO FORMULA / PLAIN TEXT and SIZE apply as you type
+    function liveText(k, isNew) {
+        const ar = mol.arrows[k], before = ar.text, start = { ...ar };
+        clearSel(); sel.arrows.add(k);
+        const inp = floatInput(ar.x1, ar.y1, ar.text, Math.max(220, textBox(ar).w * view.s + 40), (ok, v) => {
+            textEdit = null; v = v.replace(/^\s+|\s+$/g, '');
+            if (!ok) { if (isNew) { mol.arrows.splice(k, 1); undoStack.pop(); } else Object.assign(ar, start); clearSel(); changed(); return; }
+            if (!v) { mol.arrows.splice(k, 1); if (isNew) undoStack.pop(); clearSel(); changed(); return; }
+            ar.text = v; if (!isNew && v === before && ar.fmt === start.fmt && ar.size === start.size) undoStack.pop(); changed();
+        }, (v) => { ar.text = v; render(); drawHover(); }, 0, true);
+        inp.classList.add('ghost'); textEdit = { k, inp }; updateSelBar(); render();
     }
-    function editText(k) {
-        const ar = mol.arrows[k]; if (!ar) return;
-        floatInput(ar.x1, ar.y1, ar.text, Math.max(160, textBox(ar).w * view.s + 40), (ok, v) => { v = v.trim(); if (!ok || v === ar.text) return; commit(); if (!v) mol.arrows.splice(k, 1); else ar.text = v; changed(); });
-    }
+    function newText(p) { commit(); mol.arrows.push({ t: 'text', x1: p.x, y1: p.y, text: '', size: U(), fmt: tool.textFmt !== false }); liveText(mol.arrows.length - 1, true); }
+    function editText(k) { if (!mol.arrows[k]) return; commit(); liveText(k, false); }
     // a group typed into an open position: element symbols become atoms (CH3, OH, NH2 keep their H count), anything else a label
     function editSlot(i, k) {
         const a = mol.atoms[i], sl = a.slots[k], len = (sl.len || 1) * (a.fs || 1), x = a.x + sl.d[0] * len, y = a.y + sl.d[1] * len;
@@ -2662,6 +2702,13 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         let ai = atomAt(p), bk = ai < 0 ? bondAt(p) : -1; const ar = (ai < 0 && bk < 0) ? arrowAt(p) : -1;
         if (tool.kind === 'ring' || tool.kind === 'template') { const bm = bondMid(p); if (bm >= 0) { ai = -1; bk = bm; } }      // ring tool: a click on a bond's middle fuses the ring there
         Object.assign(drag, { ai, bk, ar });
+        if ((tool.kind === 'ring' || tool.kind === 'template') && ai < 0 && bk < 0 && ar < 0 && !hitHandle(p)) {      // place it, then (holding the button) drag to turn it
+            commit(); const n0 = mol.atoms.length;
+            if (tool.kind === 'ring') placeRing(tool.ring, p.x, p.y, -90 * deg + (tool.ring % 2 ? 0 : Math.PI / tool.ring), tool.arom); else placeTemplateFree(p);
+            const ids = []; for (let k = n0; k < mol.atoms.length; k++) ids.push(k);
+            drag.placeRot = { snap: snapshotItems({ atoms: ids, arrows: [] }), cx: p.x, cy: p.y, base: null, ids, tpl: tool.kind === 'template' };
+            render(); return;
+        }
         if ((tool.kind === 'charge' || tool.kind === 'pcharge') && ai >= 0) {      // press on an atom: the charge appears (most open spot); keep holding and drag to swing it round
             commit(); const a = mol.atoms[ai];
             if (tool.kind === 'charge') { a.charge = clamp((a.charge || 0) + tool.q, -3, 3); a.hx = null; delete a.qAng; delete a.qOut; drag.qkind = 'q'; }
@@ -2674,8 +2721,8 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             else if (ai >= 0) drag.moveSnap = snapshotItems(groupItems({ atoms: [ai], arrows: [] }));
             else if (bk >= 0) drag.moveSnap = snapshotItems(groupItems({ atoms: [mol.bonds[bk].a, mol.bonds[bk].b], arrows: [] }));
             else if (ar >= 0) drag.moveSnap = snapshotItems(groupItems({ atoms: [], arrows: [ar] }));
-            else if (tool.kind === 'lasso') { drag.lasso = true; lassoPts = [p]; }
-            else drag.rubber = true;
+            else if (tool.kind === 'lasso') { drag.lasso = true; lassoPts = [p]; svg.classList.add('pen-sel'); }
+            else { drag.rubber = true; svg.classList.add('pen-sel'); }
             if (drag.moveSnap) commit();
             // an atom (or group) hanging off the rest by one bond swings around its attachment, keeping the bond length (arrow keys still nudge freely)
             if (drag.moveSnap && !e.altKey && !(ai >= 0 && mol.atoms[ai].grp != null)) { const tt = onSel ? selItems() : ai >= 0 ? { atoms: [ai], arrows: [] } : null;
@@ -2752,6 +2799,9 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             }
             render(); return;
         }
+        if (drag.placeRot) { const P = drag.placeRot; if (!drag.moved || Math.hypot(p.x - P.cx, p.y - P.cy) < 0.3) return;
+            const an = Math.atan2(p.y - P.cy, p.x - P.cx); if (P.base == null) P.base = an;
+            let th = wrapAng(an - P.base); th = e.altKey ? th : snapRot(th); rotateFrom(P.snap, P.cx, P.cy, th); render(); return; }
         if (drag.qdrag != null) { const a = mol.atoms[drag.qdrag], an = Math.atan2(p.y - a.y, p.x - a.x); if (drag.qnew && (!drag.moved || Math.hypot(p.x - a.x, p.y - a.y) < 0.15)) return;
             if (drag.qkind === 'pq') { if (a.pq) a.pqAng = an; } else if (a.charge) { a.qAng = an; delete a.qOut; } render(); return; }
         if (drag.shapeNew) {
@@ -2770,7 +2820,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             th = wrapAng(th);
             if (e.altKey || e.ctrlKey || e.metaKey) { /* free rotation */ }
             else if (e.shiftKey) th = Math.round(th / (15 * deg)) * 15 * deg;
-            else th = Math.round(th / (Math.PI / 2)) * Math.PI / 2;                 // 90° steps (Shift: 15°, Alt/Ctrl: free)
+            else th = snapRot(th);                 // smooth, with snaps at 60° and 90° multiples (Shift: 15° steps, Alt/Ctrl: no snapping)
             R.th = th; rotateFrom(R.snap, R.cx, R.cy, th); render(); return;
         }
         if (drag.moveSnap && drag.orbit) { const O = drag.orbit; let th = wrapAng(Math.atan2(p.y - O.cy, p.x - O.cx) - O.a0); if (e.shiftKey) th = Math.round(th / (15 * deg)) * 15 * deg;
@@ -2785,6 +2835,9 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             const a = mol.atoms[drag.lp.i], ang0 = Math.atan2(p.y - a.y, p.x - a.x), ang = e.shiftKey ? Math.round(ang0 / (15 * deg)) * 15 * deg : ang0;
             if (Math.hypot(p.x - a.x, p.y - a.y) < 0.12 || !drag.moved) return;
             if (drag.lp.rad) {
+                if (!a.rad && !drag.lp.sel) {      // dragging from an atom with no radical yet: add one, then it follows the pointer
+                    const nb2 = neighbors(mol); if (a.pseudo || VE[a.el] == null || implicitH(mol, drag.lp.i, nb2) < 1) return;
+                    a.rad = 1; a.hx = null; drag.lp.added = true; render(); }
                 if (!a.rad) return;
                 if (drag.lp.sel) { if (drag.lp.k == null) { let bd = 9; a.radAng.forEach((v, k) => { const d = Math.abs(wrapAng(v - ang)); if (d < bd) { bd = d; drag.lp.k = k; } }); } a.radAng[drag.lp.k] = ang; drag.lp.rot = true; render(); return; }
                 const c = (lpCache[drag.lp.i] || []).filter(q => q.t === 'r'); if (!c.length) return;
@@ -2815,9 +2868,10 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     });
     svg.addEventListener('pointerup', (e) => {
         if (!drag) return;
-        const d = drag; drag = null; preview = null; svg.classList.remove('panning');
+        const d = drag; drag = null; preview = null; svg.classList.remove('panning'); svg.classList.remove('pen-sel');
         if (d.pan) { render(); return; }
         if (d.qdrag != null && d.qnew) { changed(); return; }
+        if (d.placeRot) { if (d.placeRot.tpl) { const keep = d.placeRot.ids; setTool('sel'); clearSel(); keep.forEach(i => sel.atoms.add(i)); } changed(); return; }
         if (d.qdrag != null) {
             const now = performance.now(), dbl = !d.moved && now - lastQClick.t < 380 && lastQClick.i === d.qdrag && lastQClick.k === d.qkind;
             lastQClick = { t: dbl ? 0 : now, i: d.qdrag, k: d.qkind };
@@ -2963,11 +3017,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
                 T.bonds.forEach(b => mol.bonds.push({ ...b, a: b.a + n0, b: b.b + n0 }));
                 mol.bonds.push({ a: d.ai, b: n0, order: 1 });
                 clearSel(); T.atoms.forEach((_, k) => sel.atoms.add(n0 + k));
-            } else {
-                T.atoms.forEach(o => { const a = { ...o, x: (o.x - cx) * u + p.x, y: (o.y - cy) * u + p.y }; if (u !== 1) a.fs = u; mol.atoms.push(a); });
-                T.bonds.forEach(b => mol.bonds.push({ ...b, a: b.a + n0, b: b.b + n0 }));
-                clearSel(); T.atoms.forEach((_, k) => sel.atoms.add(n0 + k));
-            }
+            } else placeTemplateFree(p);
             placedTemplate = true;
         } else if (K === 'fill') {
             // the smallest ring around the click gets the current fill; clicking the same fill again removes it
@@ -3040,13 +3090,15 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         return `<g stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round">${out}</g>`;
     }
     const I = {
-        select: `<rect x="3.5" y="3.5" width="13" height="13" rx="1" ${stroke} stroke-dasharray="2.6 2.2"/><path d="M12 11l8 3.2-3.4 1.2-1.2 3.4z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>`,
+        select: `<rect x="3.5" y="4" width="17" height="11" rx="1.2" ${stroke} stroke-dasharray="2.4 2"/><path d="M7.5 15.5c-1 1.2-1 2.8.4 3.6 1.2.7 2.6.1 2.9-1.2" ${stroke}/>`,
         pan: `<path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V12M11 11V5a1.5 1.5 0 0 1 3 0v6M14 11V6.5a1.5 1.5 0 0 1 3 0V14c0 4-2.5 7-6 7-2.5 0-3.8-1.2-5.2-3.5L4 14.5a1.4 1.4 0 0 1 2.3-1.6L8 15" ${stroke}/>`,
         erase: `<path d="M7 20h11M4.5 14.5l7-7a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L12 19H8.5z" ${stroke}/>`,
         b1: `<path d="M4 18L20 6" ${stroke}/>`, b2: `<path d="M3 16L17 5.5M7 18.5L21 8" ${stroke}/>`, b3: `<path d="M3 15L16 5M5 18L19 8M7.5 20.5L21 10.5" ${stroke}/>`,
         wedge: '<path d="M4 19L19 5l2 3z" fill="currentColor"/>',
         hash: `<path d="M6 17.5l1 1M9 14.5l2 2M12 11.5l3 3M15 8.5l4 4M18 5.5l4 4" ${stroke}/>`,
-        wavy: `<path d="M3 19q2-1 2.5-3t2.5-3 2.5-3 2.5-3 2.5-3 2.5-3" ${stroke}/>`,
+        wavy: (() => { const L = 20, x1 = 3, y1 = 19, ux = 0.7071, uy = -0.7071, nx = -uy, ny = ux, n = Math.max(6, Math.round(1 / 0.11)), amp = 0.095 * L; let d = `M${x1} ${y1}`;
+            for (let q = 0; q < n; q++) { const t0 = (q + 0.5) / n, t1 = (q + 1) / n, sg = q % 2 ? -1 : 1; d += ` Q${(x1 + ux * L * t0 + nx * amp * sg).toFixed(2)} ${(y1 + uy * L * t0 + ny * amp * sg).toFixed(2)} ${(x1 + ux * L * t1).toFixed(2)} ${(y1 + uy * L * t1).toFixed(2)}`; }
+            return `<path d="${d}" ${stroke} stroke-width="1.4"/>`; })(),
         chain: `<path d="M2 16l5-6 5 6 5-6 5 6" ${stroke}/>`,
         plus: `<circle cx="12" cy="12" r="8" ${stroke}/><path d="M12 8v8M8 12h8" ${stroke}/>`,
         minus: `<circle cx="12" cy="12" r="8" ${stroke}/><path d="M8 12h8" ${stroke}/>`,
@@ -3062,6 +3114,8 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         roundrect: `<rect x="3.5" y="6" width="17" height="12" rx="3.5" ${stroke}/>`,
         shadowrect: `<path d="M18.9 8.5H21.5V19.5H6.5V16.9H18.9z" fill="currentColor"/><rect x="3" y="5" width="15" height="11" fill="none" stroke="currentColor" stroke-width="1.8"/>`,
         ellipse: `<ellipse cx="12" cy="12" rx="9" ry="6.5" ${stroke}/>`,
+        roundshadow: `<path d="M18.9 9.3a2.6 2.6 0 0 1 2.6 2.6v5a2.6 2.6 0 0 1-2.6 2.6H9a2.6 2.6 0 0 1-2.5-2.6h10.4a2 2 0 0 0 2-2z" fill="currentColor"/><rect x="3" y="5" width="15" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>`,
+        ellshadow: `<ellipse cx="13.6" cy="13.4" rx="8" ry="5.8" fill="currentColor"/><ellipse cx="11" cy="11" rx="8" ry="5.8" fill="#1e293b" stroke="currentColor" stroke-width="1.8"/>`,
         sline: `<path d="M4 19L20 5" ${stroke}/>`,
         text: '<text x="12" y="18" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" font-family="Georgia, serif">T</text>',
         newman: `<circle cx="12" cy="12" r="5.5" ${stroke}/><path d="M12 12V3M12 12l-7.8 4.5M12 12l7.8 4.5M16.8 9.2l3.4-2M7.2 9.2l-3.4-2M12 17.5V21" ${stroke}/>`,
@@ -3114,8 +3168,8 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             { id: 'lp', icon: I.lp, tip: 'Lone pairs: click an atom to show/hide its lone pairs (placed by VSEPR) · press and drag around the atom to move a pair', set: { kind: 'lp' } },
             { id: 'rad', icon: I.rad, tip: 'Radical: click an atom to add an unpaired electron (it loses an H); click again for two, a third time clears · drag to move the dot', set: { kind: 'radical' } }] },
         { id: 'g-tpl', items: [
-            { id: 't-chair', icon: I.chair, tip: 'Cyclohexane chair: click to place · with a bond tool, drag from a ring carbon toward an axial or equatorial position', set: { kind: 'template', tpl: 'chair' } },
-            { id: 't-chair2', icon: I.chair2, tip: 'Cyclohexane chair (the other chair — after a ring flip)', set: { kind: 'template', tpl: 'chair2' } },
+            { id: 't-chair', icon: tplIcon('chair'), tip: 'Cyclohexane chair: click to place · with a bond tool, drag from a ring carbon toward an axial or equatorial position', set: { kind: 'template', tpl: 'chair' } },
+            { id: 't-chair2', icon: tplIcon('chair2'), tip: 'Cyclohexane chair (the other chair — after a ring flip)', set: { kind: 'template', tpl: 'chair2' } },
             { id: 't-nbSide', icon: tplIcon('nbSide'), tip: 'Bicyclo[2.2.1]heptane (norbornane): click to place', set: { kind: 'template', tpl: 'nbSide' } },
             { id: 't-bcoSide', icon: tplIcon('bcoSide'), tip: 'Bicyclo[2.2.2]octane: click to place', set: { kind: 'template', tpl: 'bcoSide' } },
             { id: 't-bcnSide', icon: tplIcon('bcnSide'), tip: 'Bicyclo[3.3.1]nonane: click to place', set: { kind: 'template', tpl: 'bcnSide' } },
@@ -3130,7 +3184,9 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             { id: 'sh-rect', icon: I.rect, tip: 'Rectangle: drag to draw (Shift for a square) · style it in the options bar', set: { kind: 'shape', shape: 'rect' } },
             { id: 'sh-round', icon: I.roundrect, tip: 'Rounded rectangle', set: { kind: 'shape', shape: 'round' } },
             { id: 'sh-shadow', icon: I.shadowrect, tip: 'Rectangle with an offset shadow', set: { kind: 'shape', shape: 'shadow' } },
+            { id: 'sh-roundshadow', icon: I.roundshadow, tip: 'Rounded rectangle with an offset shadow', set: { kind: 'shape', shape: 'roundshadow' } },
             { id: 'sh-ellipse', icon: I.ellipse, tip: 'Ellipse (Shift for a circle)', set: { kind: 'shape', shape: 'ellipse' } },
+            { id: 'sh-ellshadow', icon: I.ellshadow, tip: 'Ellipse with an offset shadow (Shift for a circle)', set: { kind: 'shape', shape: 'ellshadow' } },
             { id: 'sh-line', icon: I.sline, tip: 'Straight line', set: { kind: 'shape', shape: 'line' } }] },
         { id: 'g-text', items: [{ id: 'text', icon: I.text, tip: 'Text box (reagents, conditions): click to type · formulas like H2SO4 or Fe3+ get proper subscripts and superscripts', set: { kind: 'text' } }] },
         { id: 'g-fill', items: [{ id: 'fill', icon: I.fill, tip: 'Ring fill: pick a color and style in the options bar, then click inside a ring (again to remove)', set: { kind: 'fill' } }] },
@@ -3202,7 +3258,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         if (!fly.hidden && !fly.contains(e.target) && !e.target.closest('.grp')) closeFlyout();
         if (!e.target.closest('#display-menu') && !e.target.closest('#b-display')) $('display-menu').hidden = true;
     });
-    const HINTS = { select: 'Click an atom, bond or object · double-click a structure · drag a box · drag or arrow keys move · round handle rotates in 90° steps (Shift 15°, Alt free) · corner squares resize · Ctrl+C / V',
+    const HINTS = { select: 'Click an atom, bond or object · double-click a structure · drag a box · drag or arrow keys move · round handle rotates smoothly, snapping at 60° and 90° (Shift 15° steps, Alt no snap) · corner squares resize · Ctrl+C / V',
         pan: 'Drag to pan · scroll to zoom', erase: 'Click an atom, bond or arrow to delete it',
         bond: 'Click empty space, an atom or a bond · drag from an atom · hover a structure and drag its round handle to rotate it',
         wedge: 'Click a bond to make it a stereo bond (again to flip) · click or drag from an atom to add one',
@@ -3212,7 +3268,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         radical: 'Click an atom to add a radical (it loses an H) · click again for a diradical, again to clear · drag the dot to move it',
         fill: 'Pick a color and style in the options bar, then click inside a ring · same fill again removes it',
         shape: 'Drag to draw (Shift keeps it square / round) · then set fill, border, line style, corners and shadow in the options bar',
-        text: 'Click to type (Enter to finish) · formulas get subscripts and charges superscripts automatically · click a text to edit it',
+        text: 'Click to type (Enter starts a new line · click elsewhere to finish) · formulas get subscripts and charges superscripts automatically · click a text to edit it',
         template: 'Click to place the template (it comes in selected so you can move, rotate or resize it) · chair: add bonds from a ring carbon toward an axial or equatorial spot',
         lasso: 'Draw around atoms and arrows to select them · Shift adds · click an atom/bond/arrow, double-click a structure · drag to move · round handle rotates', atom: 'Click to place or change an atom · drag from an atom to bond a new one',
         arrow: 'Drag to draw · drag the square handles to move an end and the red dot to bend it · click a curved arrow to flip its bow' };
@@ -3224,6 +3280,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         groupBtns.forEach((b, gi) => b.classList.toggle('active', id !== 'atom' && ALL[id].group === gi));
         document.querySelectorAll('#elements .el').forEach(b => b.classList.toggle('active', id === 'atom' && b.dataset.el === tool.el && !!b.dataset.pseudo === !!tool.pseudo));
         svg.classList.toggle('move', isSelKind() || tool.kind === 'pan');
+        svg.classList.toggle('cur-lasso', tool.kind === 'lasso'); svg.classList.toggle('cur-box', tool.kind === 'select');
         $('sketch-hint').textContent = HINTS[tool.kind] || '';
         rotHold = null; aHold = null; render();
     }
@@ -3383,13 +3440,19 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
       const sb = document.createElement('button'); sb.className = 'tool txt'; sb.id = 'sh-shadow'; sb.textContent = 'SHADOW'; sb.addEventListener('click', () => { const ks = selShapes(); const v = !(ks.length && mol.arrows[ks[0]].shadow); setShapeProp('shadow', v); }); ctxShape.appendChild(sb);
       ctxText.appendChild(lab('TEXT'));
       const fm = document.createElement('button'); fm.className = 'tool txt active'; fm.id = 'tx-fmt'; fm.textContent = 'AUTO FORMULA'; fm.title = 'Write formulas with subscripts (H2SO4 → H₂SO₄) and superscript charges (Fe3+ → Fe³⁺). Use _ and ^ to force them.';
-      fm.addEventListener('click', () => { const ks = selTexts(); const v = ks.length ? mol.arrows[ks[0]].fmt === false : !(tool.textFmt !== false); tool.textFmt = v;
-          fm.classList.toggle('active', v); if (ks.length) { commit(); ks.forEach(k => { mol.arrows[k].fmt = v; }); changed(); } });
-      ctxText.appendChild(fm);
+      const pl = document.createElement('button'); pl.className = 'tool txt'; pl.id = 'tx-plain'; pl.textContent = 'PLAIN TEXT'; pl.title = 'Write the text exactly as typed (no subscripts or superscripts)';
+      const txTargets = () => textEdit ? [textEdit.k] : selTexts();
+      const setFmt = (v) => { tool.textFmt = v; fm.classList.toggle('active', v); pl.classList.toggle('active', !v);
+          const ks = txTargets(); if (ks.length) { if (!textEdit) commit(); ks.forEach(k => { mol.arrows[k].fmt = v; }); if (textEdit) render(); else changed(); }
+          if (textEdit) textEdit.inp.focus(); };
+      [fm, pl].forEach(b => b.addEventListener('pointerdown', (e) => { if (textEdit) { e.preventDefault(); } }));      // keep typing
+      fm.addEventListener('click', () => setFmt(true)); pl.addEventListener('click', () => setFmt(false));
+      ctxText.append(fm, pl);
       const tw = document.createElement('label'); tw.className = 'ctx-slider'; tw.title = 'Text size';
       const ts = document.createElement('input'); ts.type = 'range'; ts.min = '0.5'; ts.max = '3'; ts.step = '0.05'; ts.value = '1'; ts.id = 'tx-size'; ts.setAttribute('aria-label', 'Text size');
-      let tc = false; ts.addEventListener('input', () => { const ks = selTexts(); if (!ks.length) return; if (!tc) { commit(); tc = true; } ks.forEach(k => { mol.arrows[k].size = +ts.value; }); render(); });
-      ts.addEventListener('change', () => { tc = false; changed(); });
+      let tc = false; ts.addEventListener('pointerdown', () => { if (textEdit) textHold = true; });
+      ts.addEventListener('input', () => { const ks = txTargets(); if (!ks.length) return; if (!tc && !textEdit) { commit(); tc = true; } ks.forEach(k => { mol.arrows[k].size = +ts.value; }); render(); });
+      ts.addEventListener('change', () => { tc = false; if (textEdit) { textHold = false; textEdit.inp.focus(); render(); } else changed(); });
       tw.append('SIZE ', ts); ctxText.appendChild(tw);
       ctxQ.appendChild(lab('CHARGE'));
       const qw = document.createElement('label'); qw.className = 'ctx-slider'; qw.title = 'Size of the formal-charge circles (drag a charge to move it around its atom)';
@@ -3507,10 +3570,22 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     function highlightSel(c) {
         if (!sel.atoms.size) return;
         commit();
-        sel.atoms.forEach(i => { if (c) mol.atoms[i].hl = c; else delete mol.atoms[i].hl; });
-        mol.bonds.forEach(b => { if (sel.atoms.has(b.a) && sel.atoms.has(b.b)) { if (c) b.hl = c; else delete b.hl; } });
+        const gl = (o) => { if (c && tool.hlGlow) o.hlGlow = tool.hlGlowR; else delete o.hlGlow; };
+        sel.atoms.forEach(i => { if (c) mol.atoms[i].hl = c; else delete mol.atoms[i].hl; gl(mol.atoms[i]); });
+        mol.bonds.forEach(b => { if (sel.atoms.has(b.a) && sel.atoms.has(b.b)) { if (c) b.hl = c; else delete b.hl; gl(b); } });
         changed();
     }
+    // GLOW: the highlighted selection glows in its highlight colour (radius adjustable)
+    tool.hlGlow = false; tool.hlGlowR = 0.3;
+    function applyHlGlow(live) {
+        const selB = mol.bonds.filter(b => sel.atoms.has(b.a) && sel.atoms.has(b.b)), objs = [...sel.atoms].map(i => mol.atoms[i]).concat(selB).filter(o => o.hl);
+        if (!objs.length) return false; if (!live) commit();
+        objs.forEach(o => { if (tool.hlGlow) o.hlGlow = tool.hlGlowR; else delete o.hlGlow; }); return true;
+    }
+    $('hl-glow').addEventListener('click', (e) => { tool.hlGlow = !tool.hlGlow; e.currentTarget.textContent = tool.hlGlow ? 'GLOW: ON' : 'GLOW: OFF'; e.currentTarget.classList.toggle('active', tool.hlGlow);
+        if (applyHlGlow()) changed(); });
+    { let lc = false; $('hl-glowr').addEventListener('input', (e) => { tool.hlGlowR = +e.target.value; if (!tool.hlGlow) return; if (!lc) { commit(); lc = true; } applyHlGlow(true); render(); });
+      $('hl-glowr').addEventListener('change', () => { lc = false; changed(); }); }
     function updateSelBar() {
         if (hasSel()) expandGroups();      // selecting any member selects its whole group
         const showFill = tool.kind === 'fill', showSel = hasSel(), selArrows = [...sel.arrows].some(k => isArrowT(mol.arrows[k]));
@@ -3520,7 +3595,8 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         const shK = selShapes(), txK = selTexts(), qA = [...sel.atoms].filter(i => mol.atoms[i] && (mol.atoms[i].charge || mol.atoms[i].pq));
         ctxShape.hidden = !(tool.kind === 'shape' || shK.length); ctxText.hidden = !(tool.kind === 'text' || txK.length); ctxQ.hidden = !qA.length; ctxQd.hidden = !(tool.kind === 'charge' || tool.kind === 'pcharge');
         if (shK.length) { const A0 = mol.arrows[shK[0]]; $('sh-lw').value = A0.lw || 1; $('sh-dash').value = A0.dash || 'solid'; $('sh-round').classList.toggle('active', !!A0.round); $('sh-shadow').classList.toggle('active', !!A0.shadow); }
-        if (txK.length) { const A0 = mol.arrows[txK[0]]; $('tx-size').value = A0.size || 1; $('tx-fmt').classList.toggle('active', A0.fmt !== false); }
+        if (txK.length) { const A0 = mol.arrows[txK[0]]; $('tx-size').value = A0.size || 1; $('tx-fmt').classList.toggle('active', A0.fmt !== false); $('tx-plain').classList.toggle('active', A0.fmt === false); }
+        else if (tool.kind === 'text') { $('tx-fmt').classList.toggle('active', tool.textFmt !== false); $('tx-plain').classList.toggle('active', tool.textFmt === false); }
         if (qA.length) $('q-size').value = (mol.atoms[qA[0]].charge ? mol.atoms[qA[0]].qScale : mol.atoms[qA[0]].pqScale) || 1;
         if (selArrows) { const k = [...sel.arrows].find(k2 => isArrowT(mol.arrows[k2])), A0 = mol.arrows[k], h = A0.head || 'barb'; ctxArrow.querySelectorAll('.head-btn').forEach(x => x.classList.toggle('active', x.dataset.head === h));
             ctxArrow.querySelectorAll('.ctx-slider input').forEach(s => { s.value = A0[s.dataset.prop] || 1; }); }
@@ -4207,6 +4283,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         const bondInk = new THREE.InstancedMesh(cyl, INK, Math.max(1, lines.length)); bondInk.instanceMatrix = bondMesh.instanceMatrix; bondInk.frustumCulled = false; world.add(bondInk);
         objects.push(bondMesh, bondInk);
         M3 = { g, base, cur, parts, objects, lines, bondMesh, bondInk, bondMat, nb: neighbors(g), rot: findRotors3(g), glows: parts.map(p => p.glow) };
+        try { mmAuto(); } catch (err) { /* keep the embedded geometry */ }      // every new / changed model gets a molecular-mechanics clean-up
         M3.th = new Float32Array(M3.rot.length); M3.om = new Float32Array(M3.rot.length); M3.th0 = new Float32Array(M3.rot.length);
         const R = Math.max(3, ...base.map(v => v.length())) + 2;
         M3.radius = R;
@@ -4337,7 +4414,6 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     const pick = (a, b, on) => { $(a).classList.toggle('active', on); $(b).classList.toggle('active', !on); };
     $('b-sf').addEventListener('click', () => { st.sf = true; pick('b-sf', 'b-bs', true); });
     $('b-bs').addEventListener('click', () => { st.sf = false; pick('b-sf', 'b-bs', false); });
-    $('b-h').addEventListener('click', (e) => { st.showH = !st.showH; e.currentTarget.textContent = st.showH ? 'HIDE HYDROGENS' : 'SHOW HYDROGENS'; place3D(); });
     function setFlex(on) {
         st.flex = on; $('b-flex').classList.toggle('active', on); $('b-flex').textContent = 'SINGLE-BOND ROTATION: ' + (on ? 'ON' : 'OFF');
         if (!on && M3) { M3.om.fill(0); bakeConformation(); }        // hold the molecule in its current shape
@@ -4350,7 +4426,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     const BGS = [
         { name: 'Deep blue', g: ['#1d6a93', '#0c3550', '#061a2a'] }, { name: 'Teal', g: ['#3fa3a0', '#17606a', '#0b2f37'] },
         { name: 'Dusk violet', g: ['#6a5aa0', '#33295e', '#140f28'] }, { name: 'Slate', g: ['#4b5563', '#2b333e', '#1c222b'] },
-        { name: 'Black', g: ['#1f2937', '#0b0f14', '#000000'] }, { name: 'Cream', g: ['#f7f6ec', '#ecebdc', '#dcdac6'] }, { name: 'White', g: ['#ffffff', '#f3f4f6', '#e2e5ea'] }
+        { name: 'Black', g: ['#1f2937', '#0b0f14', '#000000'] }, { name: 'Red', g: ['#b8323a', '#6e151c', '#2e070b'] }, { name: 'Orange', g: ['#d9822b', '#8a4512', '#3a1a06'] }, { name: 'Cream', g: ['#f7f6ec', '#ecebdc', '#dcdac6'] }, { name: 'White', g: ['#ffffff', '#f3f4f6', '#e2e5ea'] }
     ];
     const bgBtns = BGS.map((it, i) => {
         const b = document.createElement('button'); b.className = 'sw' + (i ? '' : ' active'); b.title = it.name; b.setAttribute('aria-label', it.name);
@@ -4372,12 +4448,13 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         for (let i = 0; i < M3.cur.length; i++) M3.base[i].copy(M3.cur[i]);
         M3.th.fill(0); M3.om.fill(0); M3.th0.fill(0);
     }
-    $('cartoon3d').addEventListener('click', (e) => {
-        st.classic = !st.classic; TOON.classic.value = st.classic ? 1 : 0;
-        TOON.px.value = st.classic ? 0 : (st.outline != null ? st.outline : 5) * DPR;
-        e.currentTarget.textContent = st.classic ? 'CLASSIC MODE' : 'CARTOON MODE'; e.currentTarget.classList.toggle('classic', st.classic);
-        document.querySelector('.cartoon-only').classList.toggle('off', st.classic);      // outlines don't apply to classic shading
-    });
+    function setClassic(on) {
+        st.classic = on; TOON.classic.value = on ? 1 : 0;
+        TOON.px.value = on ? 0 : (st.outline != null ? st.outline : 5) * DPR;
+        $('cartoon3d').classList.toggle('active', !on); $('classic3d').classList.toggle('active', on);
+        document.querySelector('.cartoon-only').classList.toggle('off', on);      // outlines don't apply to classic shading
+    }
+    $('cartoon3d').addEventListener('click', () => setClassic(false)); $('classic3d').addEventListener('click', () => setClassic(true));
     vwrap.addEventListener('pointerenter', () => { over3D = true; });
     vwrap.addEventListener('pointerleave', () => { over3D = false; });
     const panR = V(0, 0, 0), panU = V(0, 0, 0);
@@ -4427,9 +4504,13 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         const an = styleEl.animate(open ? [small, big] : [big, small], { duration: open ? 460 : 380, easing: open ? 'cubic-bezier(.16,.9,.3,1)' : 'cubic-bezier(.55,0,.85,.35)', fill: 'forwards' });
         an.onfinish = () => { if (done) done(); an.cancel(); };
     }
-    function placeRight() { const v = vwrap.getBoundingClientRect(), t = tabEl.getBoundingClientRect(), w = Math.min(700, v.width - 50);
+    // the same size wherever it opens: 680 px wide (or what fits), only as tall as its contents
+    const styleW = () => Math.min(680, innerWidth - 80);
+    function placeRight() { const v = vwrap.getBoundingClientRect(), t = tabEl.getBoundingClientRect(), w = Math.min(styleW(), t.left - 12);
         Object.assign(styleEl.style, { left: (t.left - w - 4) + 'px', top: (v.top + 8) + 'px', width: w + 'px', height: 'auto', maxHeight: (v.height - 16) + 'px' }); }
-    function placeOver() { const r = $('editor').getBoundingClientRect(); Object.assign(styleEl.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' }); }
+    function placeOver() { const r = $('sketch-wrap').getBoundingClientRect(), w = Math.min(styleW(), r.width - 16);      // centred in the white drawing area
+        Object.assign(styleEl.style, { left: (r.left + (r.width - w) / 2) + 'px', top: r.top + 'px', width: w + 'px', height: 'auto', maxHeight: (r.height - 16) + 'px' });
+        const h = styleEl.offsetHeight; styleEl.style.top = (r.top + Math.max(8, (r.height - h) / 2)) + 'px'; }
     function openStyle() {
         if (styleMode) return;
         barEl.style.transition = 'none';
@@ -4568,6 +4649,22 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         for (let i = 0; i < T.n; i++) { M3.base[i].copy(mm.P[i]); M3.cur[i].copy(mm.P[i]); }
         if (mm.running) $('mm-out').textContent = 'Energy ' + mm.E.toFixed(1) + ' kcal/mol · step ' + mm.it;
     }
+    // a quick, silent minimisation when the model is built (time-boxed so big molecules stay responsive)
+    function mmAuto() {
+        if (!M3 || M3.g.atoms.length > 400) return;
+        const T = mmSetup(), P = M3.base.map(v => v.clone()), G = P.map(() => V(0, 0, 0)), trial = P.map(v => v.clone()), Gt = P.map(() => V(0, 0, 0));
+        let E = mmEnergyGrad(P, T, G), step = 0.05; const E0 = E, t0 = performance.now();
+        for (let it = 0; it < 3000 && performance.now() - t0 < 120; it++) {
+            let gmax = 0; for (const g of G) gmax = Math.max(gmax, g.length()); if (gmax < 0.05) break;
+            const sc = step / gmax; for (let i = 0; i < T.n; i++) trial[i].copy(P[i]).addScaledVector(G[i], -sc);
+            const Et = mmEnergyGrad(trial, T, Gt);
+            if (Et < E) { for (let i = 0; i < T.n; i++) { P[i].copy(trial[i]); G[i].copy(Gt[i]); } E = Et; step = Math.min(step * 1.15, 0.2); } else { step *= 0.5; if (step < 1e-5) break; }
+        }
+        // keep the centre of mass on the pivot
+        const c = V(0, 0, 0); let W = 0; M3.g.atoms.forEach((a, i) => { const m = (ELEMENTS[a.el] && ELEMENTS[a.el].m) || 12; c.addScaledVector(P[i], m); W += m; }); c.multiplyScalar(1 / (W || 1));
+        for (let i = 0; i < T.n; i++) { P[i].sub(c); M3.base[i].copy(P[i]); M3.cur[i].copy(P[i]); }
+        $('mm-out').textContent = `Auto-optimized: ${E.toFixed(1)} kcal/mol (from ${E0.toFixed(1)}) · simple force field`;
+    }
     $('b-opt').addEventListener('click', () => { if (mm.running) mmStop('Stopped at ' + mm.E.toFixed(1) + ' kcal/mol'); else mmStart(); });
     Object.defineProperty(window.moleculeStudio, 'm3', { get: () => M3 });
 
@@ -4655,8 +4752,9 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     let bgCols = BGS[0].g;
     function applyBG() {
         const v = st.vignette, g = bgCols;
-        const outer = hexMix(g[2], '#000000', v * 0.65), mid = Math.round(62 - 30 * v), size = Math.round(150 - 55 * v);
-        vwrap.style.background = `radial-gradient(${size}% ${Math.round(size * 0.78)}% at 50% 38%, ${g[0]} 0%, ${g[1]} ${mid}%, ${outer} 100%)`;
+        // more vignette = a brighter centre, a darker rim and a tighter falloff
+        const inner = hexMix(g[0], '#ffffff', v * 0.22), outer = hexMix(g[2], '#000000', Math.min(1, v * 1.05)), mid = Math.round(64 - 44 * v), size = Math.round(150 - 85 * v);
+        vwrap.style.background = `radial-gradient(${size}% ${Math.round(size * 0.8)}% at 50% 42%, ${inner} 0%, ${g[1]} ${mid}%, ${outer} 100%)`;
     }
     st.vignette = 0.45;
     bgBtns.forEach((b, i) => b.addEventListener('click', () => { bgCols = BGS[i].g; applyBG(); }));
@@ -4722,14 +4820,14 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     st.glow = false; st.glowSpeed = 1;
     function addGlow(mesh, n) { const gm = new THREE.InstancedMesh(sphereLo, GLOW, n); gm.instanceMatrix = mesh.instanceMatrix; gm.frustumCulled = false; gm.visible = st.glow; gm.renderOrder = 5; world.add(gm); return gm; }
     $('b-glow').addEventListener('click', (e) => { st.glow = !st.glow; e.currentTarget.classList.toggle('active', st.glow); e.currentTarget.textContent = st.glow ? 'GLOW: ON' : 'GLOW: OFF'; if (M3) M3.glows.forEach(g => { g.visible = st.glow; }); });
-    $('glow-col').addEventListener('input', (e) => GLOWU.col.value.set(e.target.value));
+    $('glow-col').addEventListener('input', (e) => { if (PARTY.on && typeof setParty === 'function') setParty(true, e.target.value); else GLOWU.col.value.set(e.target.value); });      // in Party Mode the glow colour is the party colour
     // brightness: large halos overlap a lot, so their strength is eased down as the radius grows
     const glowK = () => { GLOWU.k.value = 0.75 * (st.glowB || 1) / (1 + 0.32 * Math.max(0, GLOWU.r.value - 1)); };
     bindSlider('s-glowr', v => v.toFixed(1) + '×', v => { GLOWU.r.value = v; glowK(); });
     bindSlider('s-glowb', v => Math.round(v * 100) + '%', v => { st.glowB = v; glowK(); });
-    ['#7dd3fc', '#60a5fa', '#a78bfa', '#f472b6', '#f87171', '#fb923c', '#fbbf24', '#4ade80', '#2dd4bf', '#ffffff'].forEach(c => {
+    ['#60a5fa', '#a78bfa', '#f472b6', '#f87171', '#fb923c', '#fbbf24', '#4ade80', '#2dd4bf', '#ffffff'].forEach(c => {
         const b = document.createElement('button'); b.style.background = c; b.title = 'Glow ' + c; b.setAttribute('aria-label', 'Glow color ' + c);
-        b.addEventListener('click', () => { GLOWU.col.value.set(c); $('glow-col').value = c; if (!st.glow) $('b-glow').click(); }); $('glow-presets').appendChild(b); });
+        b.addEventListener('click', () => { if (PARTY.on) { setParty(true, c); return; } GLOWU.col.value.set(c); $('glow-col').value = c; if (!st.glow) $('b-glow').click(); }); $('glow-presets').appendChild(b); });
     bindSlider('s-glowp', v => v ? v.toFixed(1) + ' /s' : 'steady', v => { st.glowSpeed = v; });
     let glowT = 0;
     const glowPulse = (ph) => 0.62 + 0.38 * Math.sin(ph);
@@ -4765,7 +4863,8 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         fragmentShader: 'uniform sampler2D tSrc; varying vec2 vUv; void main() { gl_FragColor = texture2D(tSrc, vUv); }' });
     function bgResize() { const v = TOON.res.value; bgRT.setSize(v.x, v.y); bgRT2.setSize(v.x, v.y);
         Object.entries(bgSmall).forEach(([f, p]) => p.forEach(t => t.setSize(Math.max(1, Math.ceil(v.x / f)), Math.max(1, Math.ceil(v.y / f))))); }
-    function bgDispose() { BG.parts.forEach(p => { p.meshes.forEach(m => { m.parent && m.parent.remove(m); m.material !== INK && m.material.dispose(); }); }); BG.parts = []; }
+    function bgDispose() { BG.parts.forEach(p => { p.meshes.forEach(m => { m.parent && m.parent.remove(m); m.material !== INK && m.material.dispose(); }); }); BG.parts = [];
+        (BG.bonds || []).forEach(m => { m.parent && m.parent.remove(m); }); BG.bonds = []; }
     function bgBuild() {        // instanced spheres for every copy, one set per blur layer
         bgDispose(); if (!M3 || !BG.n) return;
         const n = BG.n;
@@ -4778,6 +4877,10 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             });
             BG.parts.push({ el: p.el, idx: p.idx, meshes });
         });
+        BG.bonds = [];      // per layer: bond cylinders (+ ink) like the main model's ball-and-stick bonds
+        bgLayers.forEach(layer => { const nB = Math.max(1, M3.lines.length * n);
+            const bm = new THREE.InstancedMesh(cyl, M3.bondMat, nB), bi = new THREE.InstancedMesh(cyl, INK, nB); bi.instanceMatrix = bm.instanceMatrix;
+            bm.frustumCulled = bi.frustumCulled = false; bm.count = bi.count = 0; layer.add(bm); layer.add(bi); BG.bonds.push(bm, bi); });
         BG.R = M3.radius * BGSC; BG.D = M3.fitDist || 30;
         while (BG.mols.length < n) BG.mols.push(newBgMol());
         BG.mols.length = n;
@@ -4811,11 +4914,27 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         BG.mols.forEach(m => {
             const L = clamp(Math.floor((m.p.z - zMin) / (zMax - zMin) * BGL), 0, BGL - 1);       // 0 far … 2 near
             BG.parts.forEach((p, pi) => {
-                const rad = SF(p.el) * (p.el === 'H' && !st.showH ? 0 : 1), mesh = p.meshes[L * 2];
+                const rad = lerp(BS(p.el), SF(p.el), st.sfA) * (p.el === 'H' && !st.showH ? 0 : 1), mesh = p.meshes[L * 2];
                 const far = clamp((zMax - m.p.z) / (zMax - zMin), 0, 1), sc = 1 - 0.55 * far, rs = rad * BGSC * sc; p.idx.forEach(i => { bp.copy(M3.base[i]).multiplyScalar(BGSC * sc).applyQuaternion(m.q).add(m.p); bs3.set(rs, rs, rs); bM.compose(bp, q0, bs3); mesh.setMatrixAt(counts[pi][L]++, bM); });
             });
         });
         BG.parts.forEach((p, pi) => [0, 1, 2].forEach(L => { const mesh = p.meshes[L * 2], ink = p.meshes[L * 2 + 1]; mesh.count = ink.count = counts[pi][L]; mesh.instanceMatrix.needsUpdate = true; }));
+        // bonds (ball-and-stick): same layer as their copy, sized with it
+        if (BG.bonds && BG.bonds.length) {
+            const bc = [0, 0, 0], showB = st.sfA < 0.99, g = M3.g, A = V(0, 0, 0), B = V(0, 0, 0), dv = V(0, 0, 0), sd = V(0, 0, 0), md = V(0, 0, 0), qq = new THREE.Quaternion(), ss = V(1, 1, 1), MM = new THREE.Matrix4();
+            if (showB) BG.mols.forEach(m => {
+                const L = clamp(Math.floor((m.p.z - zMin) / (zMax - zMin) * BGL), 0, BGL - 1), far = clamp((zMax - m.p.z) / (zMax - zMin), 0, 1), k = BGSC * (1 - 0.55 * far), bm = BG.bonds[L * 2];
+                const P = (i, out) => out.copy(M3.base[i]).multiplyScalar(k).applyQuaternion(m.q).add(m.p);
+                M3.lines.forEach(ln => { const b = g.bonds[ln.k]; if (!st.showH && (g.atoms[b.a].el === 'H' || g.atoms[b.b].el === 'H')) return;
+                    P(b.a, A); P(b.b, B); dv.copy(B).sub(A); const Ln = dv.length(); if (Ln < 1e-6) return; dv.multiplyScalar(1 / Ln);
+                    let off = 0, rad = 0.1;
+                    if (ln.n > 1) { const ref = M3.nb[b.a].find(x => x.j !== b.b) || M3.nb[b.b].find(x => x.j !== b.a); if (ref) P(ref.j, sd).sub(A); else sd.set(0, 1, 0);
+                        sd.addScaledVector(dv, -sd.dot(dv)); if (sd.lengthSq() < 1e-8) sd.set(1, 0, 0); sd.normalize(); off = (ln.n === 2 ? (ln.t ? 0.13 : -0.13) : (ln.t - 1) * 0.2) * k; rad = ln.n === 2 ? 0.075 : 0.06; }
+                    md.copy(A).add(B).multiplyScalar(0.5).addScaledVector(sd, off); qq.setFromUnitVectors(V(0, 1, 0), dv); ss.set(rad * k, Ln, rad * k); MM.compose(md, qq, ss);
+                    bm.setMatrixAt(bc[L]++, MM); });
+            });
+            [0, 1, 2].forEach(L => { const bm = BG.bonds[L * 2], bi = BG.bonds[L * 2 + 1]; bm.count = showB ? bc[L] : 0; bi.count = st.sfA < 0.02 ? bm.count : 0; bm.instanceMatrix.needsUpdate = true; });
+        }
     }
     function bgRender(w, h) {     // far layer first; each layer blurred by depth, then laid over the background
         if (!BG.parts.length || !BG.mols.length) return;
