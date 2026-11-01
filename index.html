@@ -252,7 +252,7 @@
                 <svg id="sketch" aria-label="2D structure editor"><defs><filter id="neon-glow" filterUnits="userSpaceOnUse" x="-2000" y="-2000" width="4000" height="4000" color-interpolation-filters="sRGB">
                     <feGaussianBlur in="SourceAlpha" stdDeviation="0.06" result="b1"/><feGaussianBlur in="SourceAlpha" stdDeviation="0.18" result="b2"/><feGaussianBlur in="SourceAlpha" stdDeviation="0.45" result="b3"/>
                     <feMerge result="bm"><feMergeNode in="b3"/><feMergeNode in="b2"/><feMergeNode in="b1"/></feMerge>
-                    <feFlood id="neon-flood" flood-color="#39ff14" flood-opacity="0.85" result="fl"/><feComposite in="fl" in2="bm" operator="in" result="glow"/>
+                    <feFlood id="neon-flood" flood-color="#1fb6ff" flood-opacity="0.85" result="fl"/><feComposite in="fl" in2="bm" operator="in" result="glow"/>
                     <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><defs id="fdefs"></defs><g id="view"><g id="g-fills"></g><g id="g-bonds" stroke="#1e293b" stroke-width="0.065" stroke-linecap="round" fill="none"></g><g id="g-atoms"></g><g id="g-arrows" stroke="#1e293b" stroke-linecap="round" stroke-linejoin="round" fill="none"></g><g id="g-over"></g></g></svg>
                 <div id="sketch-hint"></div>
                 <button id="restore-bars" class="restore" hidden title="Show the hidden toolbars">☰ TOOLBARS</button>
@@ -1541,7 +1541,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     const isSelKind = () => tool.kind === 'select' || tool.kind === 'lasso';
     const tool = { kind: 'bond', order: 1, el: 'C', pseudo: false, ring: 6, arom: true, wedge: 'wedge', arrow: 'rxn', q: 1 };
     const view = { s: 40, tx: 0, ty: 0 };
-    const PARTY = { on: false, col: '#39ff14', saved: null };
+    const PARTY = { on: false, col: '#1fb6ff', saved: null };
     const svg = $('sketch'), gView = $('view'), gB = $('g-bonds'), gA = $('g-atoms'), gO = $('g-over'), gR = $('g-arrows');
     const wrap = $('sketch-wrap');
 
@@ -2105,7 +2105,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
                     for (let k = 0; k < 48; k++) { const t = -Math.PI + k * Math.PI / 24; const md = occ.concat(a.lpAng || []).reduce((m, o) => o == null ? m : Math.min(m, Math.abs(wrapAng(t - o))), Math.PI);
                         const sc2 = Math.min(md, 2.2) - 0.08 * Math.abs(wrapAng(t + Math.PI / 4)); if (sc2 > bs) { bs = sc2; bt = t; } }
                     occ.push(bt); ang = bt; }
-                const rr = (info.show ? f * 0.62 : 0.2 * (a.fs || 1)) * (disp.qDist || 1) + fz * 0.62 + (nP + nR ? 0.06 : 0), cx = a.x + Math.cos(ang) * rr, cy = a.y + Math.sin(ang) * rr;
+                const rr = (info.show ? f * 0.55 : 0.16 * (a.fs || 1)) * (disp.qDist || 1) + fz * 0.45 + (nP + nR ? 0.05 : 0), cx = a.x + Math.cos(ang) * rr, cy = a.y + Math.sin(ang) * rr;
                 aH += `<text x="${cx.toFixed(3)}" y="${(cy + fz * 0.34).toFixed(3)}" text-anchor="middle" font-size="${fz.toFixed(3)}" font-family='${S.fam}' font-weight="${S.weight}" fill="${pc}" stroke="none">δ${a.pq > 0 ? '+' : '−'}</text>`;
                 if (record) pqCache[i] = { x: cx, y: cy, r: fz * 0.62 };
             }
@@ -2188,7 +2188,6 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
                    `<line x1="${ar.x2 + nx * o}" y1="${ar.y2 + ny * o}" x2="${ar.x1 + nx * o + ux * hl * 0.6}" y2="${ar.y1 + ny * o + uy * hl * 0.6}" stroke="${ink}"/>` + head(ar.x1 + nx * o, ar.y1 + ny * o, -ux, -uy, true, ink, -1); }
         // curved electron-pushing arrows: full head = electron pair, fishhook (half head) = one electron
         const g = arcOf(ar), lwC = (S.lw * 0.85 * (ar.lw || 1)).toFixed(4);
-        if (g && hl > g.r * 0.7) { hl = Math.max(g.r * 0.7, hl0 * 0.6); hw = hl * 0.46; }      // a very tight bend gets a slightly smaller head
         if (!g) return `<line x1="${ar.x1}" y1="${ar.y1}" x2="${ar.x2 - ux * hl * 0.7}" y2="${ar.y2 - uy * hl * 0.7}" stroke="${red}" stroke-width="${lwC}"/>` + head(ar.x2, ar.y2, ux, uy, ar.t === 'fish', red);
         // the point on the arc one head-length back from the tip: the head points from there, and the stroke ends inside the head
         // the head's axis runs from the point on the arc one head-length back to the tip; the line joins it at the base and then runs
@@ -2226,7 +2225,7 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
         if (PARTY.on) {      // Party Mode: every colour becomes the neon colour, the paper becomes black (CSS adds the glow)
             const core = hexMix(PARTY.col, '#ffffff', 0.35);      // a slightly whiter core, like a lit neon tube; the CSS glow is the pure colour
             const nz = (str) => str.replace(/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/g, m => /^#(f8fafc|fff|ffffff)$/i.test(m) ? '#000000' : core);
-            ['b', 'a', 'r', 'f', 'defs'].forEach(k => { P[k] = nz(P[k]); });
+            ['b', 'a', 'r', 'f', 'defs'].forEach(k => { P[k] = nz(P[k].replace(/fill="#f8fafc"/gi, 'fill="none"')); });
         }
         { const cc = PARTY.on ? hexMix(PARTY.col, '#ffffff', 0.35) : '#1e293b'; gB.setAttribute('stroke', cc); gR.setAttribute('stroke', cc); }
         // a steady neon aura around every line, label and arrow (an SVG glow filter on the drawing)
@@ -2332,6 +2331,12 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
                 return ''; };
             if (drag && drag.p0) { s += mark(snapCurve(drag.p0)); if (drag.path && drag.path.length) s += mark(snapCurve(drag.path[drag.path.length - 1], true)); }
             else if (pointerIn) s += mark(snapCurve(lastP));
+        }
+        if (pointerIn && !drag && (isSelKind() || tool.kind === 'erase')) {      // hovering a charge (or, erasing, a lone pair): highlight it
+            const qh = chargeAt(lastP), er = tool.kind === 'erase', col = er ? '#dc2626' : '#2563eb', fillC = er ? 'rgba(220,38,38,0.16)' : 'rgba(37,99,235,0.14)';
+            if (qh) { const q = qh.k === 'pq' ? pqCache[qh.i] : qCache[qh.i]; if (q) s += `<circle cx="${q.x}" cy="${q.y}" r="${q.r + 0.06}" fill="${fillC}" stroke="${col}" stroke-width="${1.4 * u}"/>`; }
+            else { let hit = null; lpCache.forEach(c => { if (c) c.forEach(q => { const dd = Math.hypot(q.x - lastP.x, q.y - lastP.y); if (dd < 0.16 && (!hit || dd < hit.d)) hit = { ...q, d: dd }; }); });
+                if (hit) s += `<circle cx="${hit.x}" cy="${hit.y}" r="0.15" fill="${fillC}" stroke="${col}" stroke-width="${1.4 * u}"/>`; }
         }
         if (selQ && mol.atoms[selQ.i]) {      // the selected charge / lone pair
             let q = null; if (selQ.k === 'q') q = qCache[selQ.i]; else if (selQ.k === 'pq') q = pqCache[selQ.i];
@@ -3339,8 +3344,8 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
     // colour every arrow of the current type (curved, fishhook, reaction…); new ones of that type follow. COLOR ▾ still colours single arrows.
     tool.typeColor = {};
     const typeColRow = document.createElement('span'); typeColRow.className = 'ctx-typecol'; typeColRow.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:0 4px';
-    { const lab = document.createElement('span'); lab.className = 'ctx-lbl'; lab.textContent = 'ALL OF THIS TYPE'; typeColRow.appendChild(lab);
-      [['auto', null], ['#1e293b', '#1e293b'], ['#dc2626', '#dc2626'], ['#2563eb', '#2563eb'], ['#16a34a', '#16a34a'], ['#9333ea', '#9333ea'], ['#ea580c', '#ea580c'], ['#db2777', '#db2777'], ['#0891b2', '#0891b2']].forEach(([k, c]) => {
+    { const lab = document.createElement('span'); lab.className = 'ctx-lbl'; lab.textContent = 'COLOR'; typeColRow.appendChild(lab);
+      [['#1e293b', '#1e293b'], ['#dc2626', '#dc2626'], ['#2563eb', '#2563eb'], ['#16a34a', '#16a34a'], ['#9333ea', '#9333ea'], ['#ea580c', '#ea580c'], ['#db2777', '#db2777'], ['#0891b2', '#0891b2']].forEach(([k, c]) => {
         const b = document.createElement('button'); b.className = 'tool sym'; b.style.cssText = 'width:22px;height:22px;min-width:0;padding:0;border-radius:50%;' + (c ? `background:${c};` : 'background:conic-gradient(#dc2626 0 50%,#1e293b 0);');
         b.title = c ? 'Make every arrow of this type ' + c : 'Default colours for this type'; b.setAttribute('aria-label', b.title);
         b.addEventListener('click', () => {
@@ -3349,7 +3354,15 @@ if (typeof module !== 'undefined') module.exports = { coreBridgeLayout, isBridge
             if (c) tool.typeColor[t] = c; else delete tool.typeColor[t];
             if (mol.arrows.some(same)) { commit(); mol.arrows.forEach(ar => { if (same(ar)) { if (c) ar.color = c; else delete ar.color; } }); changed(); }
         });
-        typeColRow.appendChild(b); }); }
+        typeColRow.appendChild(b); });
+      // any colour: the picker at the end of the row
+      const cp = document.createElement('input'); cp.type = 'color'; cp.value = '#dc2626'; cp.title = 'Pick any colour for every arrow of this type'; cp.setAttribute('aria-label', cp.title);
+      cp.style.cssText = 'width:24px;height:24px;padding:0;border:2px solid rgba(255,255,255,0.35);border-radius:50%;background:none;cursor:pointer;overflow:hidden';
+      let cpC = false;
+      cp.addEventListener('input', () => { const t = tool.kind === 'arrow' ? tool.arrow : null; if (!t) return; tool.typeColor[t] = cp.value;
+          if (mol.arrows.some(ar => ar.t === t)) { if (!cpC) { commit(); cpC = true; } mol.arrows.forEach(ar => { if (ar.t === t) ar.color = cp.value; }); render(); } });
+      cp.addEventListener('change', () => { cpC = false; changed(); });
+      typeColRow.appendChild(cp); }
     ctxArrow.appendChild(typeColRow);
     tool.fillColor = PALETTE[5]; tool.fillStyle = 'glow';
     function swatchRow(box, cur, onPick, withNone) {
