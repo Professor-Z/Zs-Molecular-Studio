@@ -137,6 +137,13 @@
     #sketch.pen-sel { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext x='1' y='26' font-size='26'%3E%E2%9C%8D%EF%B8%8F%3C/text%3E%3C/svg%3E") 3 27, crosshair !important; }
     #sketch { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; user-select: none; }
     #sketch.move { cursor: grab; }
+    #sketch.seq-mode { cursor: pointer; }
+    .ctx-seq[hidden], .ctx-seq [hidden] { display: none !important; }
+    .menu .mi:disabled { opacity: 0.4; cursor: default; } .menu .mi:disabled:hover { background: none; }
+    #seq-chip { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 8px; padding: 5px 6px 5px 12px; border-radius: 999px; background: rgba(15,23,42,0.92); color: #e2e8f0; font: 800 11px/1 system-ui, sans-serif; letter-spacing: 0.06em; box-shadow: 0 6px 18px rgba(0,0,0,0.25); white-space: nowrap; }
+    #seq-chip[hidden] { display: none; }
+    #seq-chip button { border: none; border-radius: 999px; padding: 6px 10px; font: inherit; letter-spacing: inherit; cursor: pointer; background: #334155; color: #e2e8f0; }
+    #seq-chip button:hover { background: #475569; } #seq-chip button.on { background: #2563eb; color: #fff; } #seq-chip button.on:hover { background: #1d4ed8; }
     #sketch.cur-lasso, #sketch.pen-sel.cur-lasso { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext x='1' y='26' font-size='26'%3E%E2%9C%8D%EF%B8%8F%3C/text%3E%3C/svg%3E") 3 27, crosshair; }
     #sketch.cur-box, #sketch.pen-sel.cur-box { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext x='1' y='26' font-size='26'%3E%E2%9C%8D%EF%B8%8F%3C/text%3E%3C/svg%3E") 3 27, crosshair; }      /* same hand-with-pen as the lasso */
     #sketch-hint { position: absolute; left: 10px; right: 10px; bottom: 8px; font-size: 0.72rem; color: #64748b; pointer-events: none; }
@@ -3020,6 +3027,9 @@ function autoMapAtoms(m, R, P) {
         mol.bonds = mol.bonds.filter(b => !kill.has(b.a) && !kill.has(b.b)).map(b => ({ ...b, a: map[b.a], b: map[b.b] }));
         mol.atoms = mol.atoms.filter((_, i) => !kill.has(i));
         mol.fills = (mol.fills || []).filter(f => f.ring.every(i => !kill.has(i))).map(f => ({ ...f, ring: f.ring.map(i => map[i]) }));
+        mol.arrows.forEach(ar => ['src', 'dst'].forEach(k => { const r = ar[k]; if (!r) return;      // keep curved-arrow atom references in step
+            if (r.at != null) { if (map[r.at] >= 0) r.at = map[r.at]; else delete ar[k]; }
+            else if (r.bd) { if (map[r.bd[0]] >= 0 && map[r.bd[1]] >= 0) r.bd = [map[r.bd[0]], map[r.bd[1]]]; else delete ar[k]; } }));
         clearSel();
     }
     const deleteAtom = (i) => deleteAtoms([i]);
@@ -3142,7 +3152,19 @@ function autoMapAtoms(m, R, P) {
         if (!gs.size) return t;
         const atoms = new Set(t.atoms), arrows = new Set(t.arrows);
         mol.atoms.forEach((a, i) => { if (gs.has(a.grp)) atoms.add(i); }); mol.arrows.forEach((ar, k) => { if (gs.has(ar.grp)) arrows.add(k); });
+        [...atoms].forEach(i => { if (gs.has(mol.atoms[i].grp)) fragmentOf(i).forEach(j => atoms.add(j)); });      // a group holds whole structures (atoms drawn on later come along)
         return { atoms: [...atoms], arrows: [...arrows] };
+    }
+    // a curved arrow drawn onto a structure (from / to its atoms, lone pairs or bonds) is grouped with it, so they move together
+    function groupCurved(ar) {
+        if (!ar || !isCurved(ar)) return;
+        const ats = [ar.src && ar.src.at, ...((ar.src && ar.src.bd) || []), ar.dst && ar.dst.at, ...((ar.dst && ar.dst.bd) || [])].filter(i => i != null && mol.atoms[i]);
+        if (!ats.length) return;
+        const frag = new Set(); ats.forEach(i => fragmentOf(i).forEach(j => frag.add(j)));
+        const old = new Set(); frag.forEach(i => { if (mol.atoms[i].grp != null) old.add(mol.atoms[i].grp); });
+        const g = old.size ? [...old][0] : newGroupId();
+        if (old.size > 1) { mol.atoms.forEach(a => { if (old.has(a.grp)) a.grp = g; }); mol.arrows.forEach(x => { if (old.has(x.grp)) x.grp = g; }); }
+        frag.forEach(i => { mol.atoms[i].grp = g; }); ar.grp = g;
     }
     function expandGroups() { const t = groupItems(selItems()); t.atoms.forEach(i => sel.atoms.add(i)); t.arrows.forEach(k => sel.arrows.add(k)); }
     function selGroupIds() { const gs = new Set(); let loose = false;
@@ -3530,7 +3552,8 @@ function autoMapAtoms(m, R, P) {
         if (ar.lw && ar.lw !== 1 && ar.t !== 'plus') s = `<g stroke-width="${(S.lw * 1.15 * ar.lw).toFixed(4)}">${s}</g>`;
         return s + arrowLabelsSVG(ar, S);
     }
-    let shadowSeq = 0;
+    let shadowSeq = 0, lastCurveGeo = null, resAnim = null;
+    const RES_WIPE = 3, RES_FADE = 3;      // seconds: resonance arrow wiping in, then the new structure fading in (app and .mov)      // resAnim: the DRAW RESONANCE STRUCTURE fade-in, while it plays      // lastCurveGeo: the drawn path of the last curved arrow (for the arrow movie)
     function arrowSVG0(ar, S) {
         const esc2 = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
         if (ar.t === 'text') return richTextSVG(ar, S);
@@ -3580,6 +3603,7 @@ function autoMapAtoms(m, R, P) {
                    `<line x1="${ar.x2 + nx * o}" y1="${ar.y2 + ny * o}" x2="${ar.x1 + nx * o + ux * hl * 0.6}" y2="${ar.y1 + ny * o + uy * hl * 0.6}" stroke="${ink}"/>` + head(ar.x1 + nx * o, ar.y1 + ny * o, -ux, -uy, true, ink, -1); }
         // curved electron-pushing arrows: full head = electron pair, fishhook (half head) = one electron
         const g = arcOf(ar), lwC = (S.lw * 0.85 * (ar.lw || 1)).toFixed(4);
+        if (!g) lastCurveGeo = { g: null, uq: 1, tip: { x: ar.x2, y: ar.y2 } };
         if (!g) return `<line x1="${ar.x1}" y1="${ar.y1}" x2="${ar.x2 - ux * hl * 0.7}" y2="${ar.y2 - uy * hl * 0.7}" stroke="${red}" stroke-width="${lwC}"/>` + head(ar.x2, ar.y2, ux, uy, ar.t === 'fish', red);
         // the point on the arc one head-length back from the tip: the head points from there, and the stroke ends inside the head
         // the head's axis runs from the point on the arc one head-length back to the tip; the line joins it at the base and then runs
@@ -3607,13 +3631,21 @@ function autoMapAtoms(m, R, P) {
         const endP = HS === 'open' ? { x: tipX - vx * hl * 0.06, y: tipY - vy * hl * 0.06 } : { x: tipX - vx * hl * 0.72, y: tipY - vy * hl * 0.72 };
         const M0 = curveApex(ar), side = Math.sign((M0.x - ar.x1) * -dy + (M0.y - ar.y1) * dx) || 1;
         const large = g.sweep * uq > Math.PI ? 1 : 0, flag = g.dir > 0 ? 1 : 0;
+        lastCurveGeo = { g, uq, tip: { x: tipX, y: tipY } };
         return `<path d="M${ar.x1.toFixed(3)} ${ar.y1.toFixed(3)} A${g.r.toFixed(3)} ${g.r.toFixed(3)} 0 ${large} ${flag} ${Q.x.toFixed(3)} ${Q.y.toFixed(3)} L${endP.x.toFixed(3)} ${endP.y.toFixed(3)}" fill="none" stroke="${red}" stroke-width="${lwC}" stroke-linejoin="round" stroke-linecap="round"/>` + head(tipX, tipY, vx, vy, ar.t === 'fish', red, side);
     }
     function render() {
         const S = STYLES[disp.style];
         gView.setAttribute('transform', `translate(${view.tx},${view.ty}) scale(${view.s})`);
         gB.setAttribute('stroke-width', S.lw); gR.setAttribute('stroke-width', S.lw * 1.15);
-        const P = drawParts(S, null, null, '#f8fafc', true);
+        const RA = resAnim && mol.arrows[resAnim.ak] ? resAnim : null;
+        const P = drawParts(S, RA ? (i => !RA.set.has(i)) : null, RA ? (k => k !== RA.ak) : null, '#f8fafc', true);
+        if (RA) {      // DRAW RESONANCE STRUCTURE just ran: the arrow wipes in, then the new structure fades in
+            const t = (performance.now() - RA.t0) / 1000, xa = easeIO(clamp(t / RES_WIPE, 0, 1)), os = easeIO(clamp((t - RES_WIPE) / RES_FADE, 0, 1));
+            const Q = drawParts(S, i => RA.set.has(i), k => k === RA.ak, '#f8fafc', false, 'ra');
+            P.defs += Q.defs + resWipe('ra-wipe', mol.arrows[RA.ak], xa, { x0: -5000, y0: -5000, x1: 5000, y1: 5000 });
+            P.r += `<g mask="url(#ra-wipe)">${Q.r}</g>`; P.b += `<g opacity="${os.toFixed(3)}">${Q.b}</g>`; P.a += `<g opacity="${os.toFixed(3)}">${Q.a}</g>`; P.f += `<g opacity="${os.toFixed(3)}">${Q.f}</g>`;
+        }
         if (PARTY.on) {      // Party Mode: every colour becomes the (CSS) neon colour; see-through where the paper was; gaps behind crossing bonds are cut with a mask
             let halos = '';
             if (P.bSplit >= 0) { const back = P.b.slice(0, P.bSplit); let front = P.b.slice(P.bSplit);
@@ -3636,6 +3668,7 @@ function autoMapAtoms(m, R, P) {
     let hover = { atom: -1, bond: -1, arrow: -1 }, preview = null, rubber = null, rotHold = null, lassoPts = null;
     const HANDLE_PX = 7;
     function rotTarget() {
+        if (tool.seqMode) return null;
         if (['erase', 'pan', 'lp', 'radical', 'fill'].includes(tool.kind) || (drag && !drag.rotate)) return drag && drag.rotate ? drag.rotate.t : null;
         if (drag && drag.rotate) return drag.rotate.t;
         const inSel = (hover.atom >= 0 && sel.atoms.has(hover.atom)) || (hover.bond >= 0 && sel.atoms.has(mol.bonds[hover.bond].a)) || (hover.arrow >= 0 && sel.arrows.has(hover.arrow));
@@ -3659,13 +3692,14 @@ function autoMapAtoms(m, R, P) {
         return { x: (b.x0 + b.x1) / 2, y: (b.y0 + b.y1) / 2, att: -1 };
     }
     function arrowHandleTargets() {
+        if (tool.seqMode) return [];
         if (!isSelKind() && tool.kind !== 'arrow') return [];
         const ks = new Set();
         if (drag && drag.ahandle) ks.add(drag.ahandle.k);
         else { if (hover.arrow >= 0) ks.add(hover.arrow); if (sel.arrows.size === 1 && !sel.atoms.size) ks.add([...sel.arrows][0]); if (aHold != null && mol.arrows[aHold]) ks.add(aHold); }
         return [...ks].filter(k => mol.arrows[k] && mol.arrows[k].t !== 'plus' && mol.arrows[k].t !== 'text' && mol.arrows[k].x2 != null);
     }
-    let aHold = null;
+    let aHold = null, cPend = null;      // cPend: a curved arrow whose start has been clicked, waiting for the click that sets its end
     function arrowHandles(k) {
         const ar = mol.arrows[k], h = [{ k, w: 1, x: ar.x1, y: ar.y1 }, { k, w: 2, x: ar.x2, y: ar.y2 }];
         if (isCurved(ar)) { const q = curveApex(ar); h.push({ k, w: 'apex', x: q.x, y: q.y }); }
@@ -3717,14 +3751,15 @@ function autoMapAtoms(m, R, P) {
         if (rubber) { const x = Math.min(rubber.x0, rubber.x1), y = Math.min(rubber.y0, rubber.y1);
             s += `<rect x="${x}" y="${y}" width="${Math.abs(rubber.x1 - rubber.x0)}" height="${Math.abs(rubber.y1 - rubber.y0)}" fill="rgba(37,99,235,0.08)" stroke="#2563eb" stroke-width="${u}" stroke-dasharray="${4 * u} ${3 * u}"/>`; }
         if (lassoPts && lassoPts.length > 1) s += `<polygon points="${lassoPts.map(q => q.x + ',' + q.y).join(' ')}" fill="rgba(37,99,235,0.08)" stroke="#2563eb" stroke-width="${u}" stroke-dasharray="${4 * u} ${3 * u}"/>`;
-        if (tool.kind === 'arrow' && (tool.arrow === 'curve' || tool.arrow === 'fish')) {
+        if (tool.kind === 'arrow' && (tool.arrow === 'curve' || tool.arrow === 'fish') && !tool.seqMode) {
             const mark = (q) => { if (!q) return '';
                 if (q.atom) return `<circle cx="${q.x}" cy="${q.y}" r="0.34" fill="rgba(220,38,38,0.14)" stroke="#dc2626" stroke-width="${1.3 * u}"/>`;
                 if (q.bond) { const bd = mol.bonds[q.bk], A2 = mol.atoms[bd.a], B2 = mol.atoms[bd.b]; return `<line x1="${A2.x}" y1="${A2.y}" x2="${B2.x}" y2="${B2.y}" stroke="rgba(220,38,38,0.3)" stroke-width="0.3" stroke-linecap="round"/>`; }
                 if (q.lp) return `<circle cx="${q.x}" cy="${q.y}" r="0.17" fill="rgba(220,38,38,0.18)" stroke="#dc2626" stroke-width="${1.3 * u}"/>`;
                 if (q.mid) { const A2 = mol.atoms[q.i], B2 = mol.atoms[q.j]; return `<line x1="${A2.x}" y1="${A2.y}" x2="${B2.x}" y2="${B2.y}" stroke="#dc2626" stroke-width="${1.3 * u}" stroke-dasharray="${4 * u} ${3 * u}"/><circle cx="${q.x}" cy="${q.y}" r="0.1" fill="#dc2626"/>`; }
                 return ''; };
-            if (drag && drag.p0) { s += mark(snapCurve(drag.p0)); if (drag.path && drag.path.length) s += mark(snapCurve(drag.path[drag.path.length - 1], true)); }
+            if (cPend && !drag) { s += mark(snapCurve(cPend.p0)); if (pointerIn) s += mark(snapCurve(lastP, true)); }
+            else if (drag && drag.p0) { s += mark(snapCurve(drag.p0)); if (drag.path && drag.path.length) s += mark(snapCurve(drag.path[drag.path.length - 1], true)); }
             else if (pointerIn) s += mark(snapCurve(lastP));
         }
         if (pointerIn && !drag && (isSelKind() || tool.kind === 'erase')) {      // hovering a charge (or, erasing, a lone pair): highlight it
@@ -3745,6 +3780,7 @@ function autoMapAtoms(m, R, P) {
             if (q) s += `<circle cx="${q.x}" cy="${q.y}" r="${(q.r || 0.15) + 0.07}" fill="rgba(37,99,235,0.12)" stroke="#2563eb" stroke-width="${1.4 * u}" stroke-dasharray="${3 * u} ${2 * u}"/>`;
         }
         try { s += extraHover(); } catch (err) {}
+        if (tool.seqMode) s += seqOverlay(u);
         if (preview) s += preview;
         gO.innerHTML = s;
     }
@@ -3861,7 +3897,7 @@ function autoMapAtoms(m, R, P) {
         let best = -1, bd = 0.2; mol.bonds.forEach((b, k) => { const A = mol.atoms[b.a], B = mol.atoms[b.b], ex = B.x - A.x, ey = B.y - A.y, l2 = ex * ex + ey * ey || 1, t = ((p.x - A.x) * ex + (p.y - A.y) * ey) / l2;
             if (t < 0.22 || t > 0.78) return; const d = Math.hypot(A.x + t * ex - p.x, A.y + t * ey - p.y); if (d < bd) { bd = d; best = k; } }); return best; };
     const snapCurve = (p, end) => {      // curved arrows start/end on lone pairs, atoms, bond middles — or (ends) between two atoms, where a new bond forms
-        for (const c of lpCache) if (c) for (const q of c) if (Math.hypot(q.x - p.x, q.y - p.y) < 0.22) return { x: q.x, y: q.y, lp: true, ang: q.ang };
+        for (let li = 0; li < lpCache.length; li++) { const c = lpCache[li]; if (c) for (const q of c) if (Math.hypot(q.x - p.x, q.y - p.y) < 0.22) return { x: q.x, y: q.y, lp: true, ang: q.ang, ai: li }; }
         { const bm = bondMid(p); if (bm >= 0) { const b = mol.bonds[bm]; return { x: (mol.atoms[b.a].x + mol.atoms[b.b].x) / 2, y: (mol.atoms[b.a].y + mol.atoms[b.b].y) / 2, bond: true, bk: bm }; } }
         const ai = atomAt(p, 0.35); if (ai >= 0) return { x: mol.atoms[ai].x, y: mol.atoms[ai].y, atom: true, ai };
         if (end) { let best = null; const nbm = neighbors(mol);
@@ -3943,7 +3979,9 @@ function autoMapAtoms(m, R, P) {
             if (!best || sc < best.sc) best = { sc, C, A2, B2 };
         }
         const { C, A2, B2 } = best;
-        const ar = { toAtom: !!b.atom, toBond: !!b.bond, ...(b.mid ? { mid: [b.i, b.j] } : {}), t: type || 'curve', x1: A2.x, y1: A2.y, x2: B2.x, y2: B2.y, head: tool.headC, size: tool.arrowSize, lw: tool.arrowLw };
+        const ref = (q) => (q.lp || q.atom) && q.ai != null ? { at: q.ai } : q.bond && mol.bonds[q.bk] ? { bd: [mol.bonds[q.bk].a, mol.bonds[q.bk].b] } : q.mid ? { bd: [q.i, q.j] } : null;
+        const rs = ref(a), rd = ref(b);      // what it starts / ends on, by atom (for grouping and DRAW RESONANCE STRUCTURE)
+        const ar = { ...(rs ? { src: rs } : {}), ...(rd ? { dst: rd } : {}), toAtom: !!b.atom, toBond: !!b.bond, ...(b.mid ? { mid: [b.i, b.j] } : {}), t: type || 'curve', x1: A2.x, y1: A2.y, x2: B2.x, y2: B2.y, head: tool.headC, size: tool.arrowSize, lw: tool.arrowLw };
         if (tool.typeColor && tool.typeColor[ar.t]) ar.color = tool.typeColor[ar.t];
         // keep the control point where it was so the tip still aims at the atom's centre
         const ex = ar.x2 - ar.x1, ey = ar.y2 - ar.y1, L2 = ex * ex + ey * ey || 1, rx = C.x - ar.x1, ry = C.y - ar.y1;
@@ -3980,6 +4018,13 @@ function autoMapAtoms(m, R, P) {
         const hh = (tool.kind !== 'erase' && tool.kind !== 'lp' && tool.kind !== 'pan' && e.button === 0 && !spaceDown) ? hitHandle(p) : null;
         drag = { p0: p, moved: false, sx: e.clientX, sy: e.clientY, vt: { ...view }, shift: e.shiftKey };
         if (e.button === 1 || spaceDown || tool.kind === 'pan') { drag.pan = true; svg.classList.add('panning'); return; }
+        if (tool.seqMode && e.button === 0) { drag = null; seqClick(p); return; }      // ARROW SEQUENCING: a click numbers (or un-numbers) a curved arrow
+        if (cPend && e.button === 0) {      // the second click of a curved arrow: its end (snapped to an atom, a bond, or between two atoms, as when dragging)
+            drag = null; const c = cPend; cPend = null; preview = null;
+            if (tool.kind !== 'arrow' || !(tool.arrow === 'curve' || tool.arrow === 'fish') || Math.hypot(p.x - c.p0.x, p.y - c.p0.y) < 0.15) { render(); return; }      // same spot again: cancel
+            commit(); mol.arrows.push(curvedFrom(c.p0, p, pathSide(c, p), tool.arrow)); groupCurved(mol.arrows[mol.arrows.length - 1]);
+            aHold = mol.arrows.length - 1; clearSel(); sel.arrows.add(mol.arrows.length - 1); changed(); return;
+        }
         if (hh && hh.type === 'arrow') { commit(); drag.ahandle = hh.h; aHold = hh.h.k; return; }
         if (hh && hh.type === 'scale') {
             commit(); const c = hh.c;
@@ -4092,6 +4137,9 @@ function autoMapAtoms(m, R, P) {
             else if (rotHold) { const b = itemsBox(rotHold, 0.45); if (!b || !rotHold.atoms.every(i => i < mol.atoms.length) || p.x < b.x0 - 0.4 || p.x > b.x1 + 0.4 || p.y < b.y0 - px2u(40) || p.y > b.y1 + 0.4) rotHold = null; }
             if (ar >= 0) aHold = ar;
             else if (aHold != null) { const A = mol.arrows[aHold]; const b = A && itemsBox({ atoms: [], arrows: [aHold] }, 0.6); if (!b || p.x < b.x0 || p.x > b.x1 || p.y < b.y0 || p.y > b.y1) aHold = null; }
+            if (cPend) { if (tool.kind === 'arrow' && (tool.arrow === 'curve' || tool.arrow === 'fish')) { const S = STYLES[disp.style]; cPend.path.push(p); if (cPend.path.length > 60) cPend.path.shift();
+                    preview = `<g opacity="0.55" stroke-width="${S.lw * 1.15}" stroke-linecap="round">${arrowSVG(curvedFrom(cPend.p0, p, pathSide(cPend, p), tool.arrow), S)}</g>`; svg.style.cursor = 'crosshair'; drawHover(); return; }
+                cPend = null; preview = null; }
             const hh = hitHandle(p);
             svg.style.cursor = hh ? (hh.type === 'rot' ? 'grab' : hh.type === 'scale' ? ((hh.c.x < hh.c.ax) === (hh.c.y < hh.c.ay) ? 'nwse-resize' : 'nesw-resize') : 'move') : (ai < 0 && bk < 0 && ar < 0 && hoverBoxHit(p) ? 'grab' : '');
             if (changedHover || true) drawHover();
@@ -4352,13 +4400,11 @@ function autoMapAtoms(m, R, P) {
             if (t === 'plus') mol.arrows.push({ t: 'plus', x1: p.x, y1: p.y, size: U() });
             else if (!d.moved && d.ar >= 0 && isCurved(mol.arrows[d.ar])) { const A = mol.arrows[d.ar]; if (A.ch == null) setApex(A, curveApex(A)); A.ch = -A.ch; }   // click a curved arrow: flip its bow
             else if (curved) {
-                if (d.moved) mol.arrows.push(curvedFrom(d.p0, p, pathSide(d, p), t));
-                else {        // a click: a ready-made arrow from that atom / lone pair out into open space
-                    const s0 = snapCurve(d.p0); let ang = -Math.PI / 4;
-                    if (s0.atom) ang = freeAngle(s0.ai); else if (s0.lp) ang = s0.ang;
-                    mol.arrows.push(curvedFrom(d.p0, { x: s0.x + Math.cos(ang) * 1.6, y: s0.y + Math.sin(ang) * 1.6 }, 0, t));
-                }
-                aHold = mol.arrows.length - 1; }
+                if (d.moved) { mol.arrows.push(curvedFrom(d.p0, p, pathSide(d, p), t)); groupCurved(mol.arrows[mol.arrows.length - 1]); aHold = mol.arrows.length - 1; }
+                else {        // a click sets the start (snapped like a drag); the next click sets the end — the arrow follows the pointer until then
+                    cPend = { p0: d.p0, path: [] }; aHold = null; clearSel(); did = false;
+                    showMsg('Now click where the arrow ends (Esc cancels)');
+                } }
             else if (d.moved && Math.hypot(p.x - d.p0.x, p.y - d.p0.y) > 0.4) mol.arrows.push({ t, x1: d.p0.x, y1: d.p0.y, x2: snapAxis(d.p0, p, e.altKey).x, y2: snapAxis(d.p0, p, e.altKey).y, head: tool.head, size: tool.arrowSize, lw: tool.arrowLw, ...(tool.typeColor[t] ? { color: tool.typeColor[t] } : {}) });
             else mol.arrows.push({ t, x1: d.p0.x - 0.9, y1: d.p0.y, x2: d.p0.x + 0.9, y2: d.p0.y, head: tool.head, size: tool.arrowSize, lw: tool.arrowLw, ...(tool.typeColor[t] ? { color: tool.typeColor[t] } : {}) });
         } else { const r = extraPointerUp(d, p, K); if (r === null) return; did = !!r; }
@@ -4869,6 +4915,371 @@ function autoMapAtoms(m, R, P) {
       cp.addEventListener('change', () => { cpC = false; changed(); });
       typeColRow.appendChild(cp); }
     ctxArrow.appendChild(typeColRow);
+    // ---- curved-arrow animation: ARROW SEQUENCING numbers the curved arrows (click them in order; the numbers show only in this mode),
+    //      GENERATE CURVED ARROW .MOV writes a QuickTime movie in which each numbered arrow draws itself from its tail to its head, in turn
+    tool.seqMode = false; tool.seqDur = 1;
+    // everything for curved-arrow animation sits behind one ANIMATE ▾ button; its menu floats over the canvas, and while sequencing
+    // a small chip floats at the top of the canvas — so the toolbar never grows a row and the drawing area keeps its size
+    const seqRow = document.createElement('span'); seqRow.className = 'ctx-seq'; seqRow.style.cssText = 'display:inline-flex;align-items:center;padding:0 4px;border-left:1px solid rgba(255,255,255,0.18);margin-left:4px';
+    const animBtn = document.createElement('button'); animBtn.className = 'tool txt'; animBtn.id = 'c-anim'; animBtn.textContent = 'ANIMATE ▾';
+    animBtn.title = 'Arrow sequencing, the curved-arrow movie (.mov) and the resonance structure';
+    const animMenu = document.createElement('div'); animMenu.className = 'menu'; animMenu.id = 'anim-menu'; animMenu.hidden = true; animMenu.style.width = '290px';
+    const mi = (label, hint) => { const b = document.createElement('button'); b.className = 'mi'; b.innerHTML = `${label}<span>${hint}</span>`; return b; };
+    const seqBtn = mi('ARROW SEQUENCING', 'number arrows');
+    seqBtn.title = 'Click the curved arrows in the order they should animate (1, 2, 3…) · click a numbered arrow again to take it out · Esc or DONE to finish';
+    const seqSpd = document.createElement('label'); seqSpd.className = 'mi'; seqSpd.style.cssText = 'align-items:center;cursor:default'; seqSpd.title = 'How long each arrow takes to draw in the movie';
+    const seqSpdIn = document.createElement('input'); seqSpdIn.type = 'range'; seqSpdIn.min = '0.4'; seqSpdIn.max = '3'; seqSpdIn.step = '0.1'; seqSpdIn.value = '1'; seqSpdIn.setAttribute('aria-label', 'Seconds per arrow'); seqSpdIn.style.width = '110px';
+    const seqSpdTx = document.createElement('span'); seqSpdTx.style.cssText = 'white-space:nowrap;font-weight:600;color:inherit;font-size:inherit'; seqSpdTx.textContent = 'SPEED  1.0 s/arrow';
+    seqSpdIn.addEventListener('input', () => { tool.seqDur = +seqSpdIn.value; seqSpdTx.textContent = 'SPEED  ' + tool.seqDur.toFixed(1) + ' s/arrow'; });
+    seqSpd.append(seqSpdTx, seqSpdIn);
+    const movBtn = mi('GENERATE CURVED ARROW .MOV', 'QuickTime');
+    movBtn.title = 'Make a QuickTime movie (.mov) of the drawing in which the numbered curved arrows draw themselves one after another';
+    const resBtn = mi('DRAW RESONANCE STRUCTURE', '↔');
+    resBtn.title = 'Move the electrons as the numbered arrows show and draw the result to the right, after a resonance arrow (bonds, lone pairs and formal charges updated)';
+    resBtn.addEventListener('click', () => { closeMenus(); drawResonance(); });
+    const animHint = document.createElement('div'); animHint.style.cssText = 'font-size:0.7rem;opacity:0.7;padding:6px 8px 2px';
+    const animHead = document.createElement('div'); animHead.className = 'dm-head'; animHead.style.cssText = 'margin-top:0;border-top:none;padding-top:0'; animHead.textContent = 'CURVED-ARROW ANIMATION';
+    animMenu.append(animHead, seqBtn, seqSpd, movBtn, resBtn, animHint);
+    document.body.appendChild(animMenu); MENUS.push('anim-menu');
+    animBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+    animBtn.addEventListener('click', () => {
+        const n = seqOrder().length; resBtn.disabled = movBtn.disabled = !n;
+        animHint.textContent = n ? `${n} arrow${n > 1 ? 's' : ''} numbered.` : 'Number the arrows first: ARROW SEQUENCING, then click them in order.';
+        toggleMenu('anim-menu', animBtn); });
+    seqRow.append(animBtn);
+    ctxArrow.appendChild(seqRow);
+    // the floating chip while sequencing
+    const seqChip = document.createElement('div'); seqChip.id = 'seq-chip'; seqChip.hidden = true;
+    const seqChipTx = document.createElement('span');
+    const seqClr = document.createElement('button'); seqClr.textContent = 'CLEAR #'; seqClr.title = 'Remove the numbers from every arrow';
+    const seqDone = document.createElement('button'); seqDone.textContent = 'DONE'; seqDone.className = 'on'; seqDone.title = 'Finish sequencing (Esc)';
+    seqDone.addEventListener('click', () => setSeqMode(false));
+    seqChip.append(seqChipTx, seqClr, seqDone);
+    $('sketch-wrap').appendChild(seqChip);
+    const seqChipText = () => { const n = seqOrder().length; seqChipTx.textContent = n ? `SEQUENCING · ${n} numbered · click the next arrow` : 'SEQUENCING · click the curved arrows in order'; };
+    function setSeqMode(on, quiet) {
+        tool.seqMode = !!on; animBtn.classList.toggle('active', tool.seqMode); seqChip.hidden = !tool.seqMode; seqChipText();
+        svg.classList.toggle('seq-mode', tool.seqMode);
+        if (tool.seqMode) { clearSel(); aHold = null; }      // the floating chip carries the instructions (a long status line would wrap the header)
+        if (!quiet) render();
+    }
+    const seqOrder = () => mol.arrows.map((ar, k) => k).filter(k => mol.arrows[k] && isCurved(mol.arrows[k]) && mol.arrows[k].seq > 0)
+        .sort((a, b) => (mol.arrows[a].seq - mol.arrows[b].seq) || (a - b));
+    function seqRenumber() { seqOrder().forEach((k, n) => { mol.arrows[k].seq = n + 1; }); mol.arrows.forEach(ar => { if (ar && ar.seq != null && !isCurved(ar)) delete ar.seq; }); }
+    function seqHit(p) {      // the curved arrow nearest the click (its curve, or the head)
+        let best = -1, bd = 0.3;
+        mol.arrows.forEach((ar, k) => { if (!ar || !isCurved(ar)) return; const pts = arrowPts(ar, 32);
+            for (let i = 1; i < pts.length; i++) { const A = pts[i - 1], B = pts[i], dx = B.x - A.x, dy = B.y - A.y, L2 = dx * dx + dy * dy || 1e-9;
+                const t = clamp(((p.x - A.x) * dx + (p.y - A.y) * dy) / L2, 0, 1), d = Math.hypot(A.x + t * dx - p.x, A.y + t * dy - p.y); if (d < bd) { bd = d; best = k; } } });
+        return best;
+    }
+    function seqClick(p) {
+        const k = seqHit(p); if (k < 0) return;
+        commit(); const ar = mol.arrows[k];
+        if (ar.seq > 0) delete ar.seq; else ar.seq = seqOrder().length + 1;
+        seqRenumber(); seqChipText(); render(); if (typeof afterChange === 'function') afterChange();
+    }
+    function seqOverlay(u) {      // numbered badges (blue) and empty rings (not yet in the sequence) beside every curved arrow
+        let s = '';
+        mol.arrows.forEach((ar, k) => { if (!ar || !isCurved(ar)) return;
+            const pts = arrowPts(ar, 24), m = pts[12], cx = (ar.x1 + ar.x2) / 2, cy = (ar.y1 + ar.y2) / 2;
+            let dx = m.x - cx, dy = m.y - cy, dl = Math.hypot(dx, dy); if (dl < 1e-4) { dx = -(ar.y2 - ar.y1); dy = ar.x2 - ar.x1; dl = Math.hypot(dx, dy) || 1; }
+            const bx = m.x + dx / dl * 13 * u, by = m.y + dy / dl * 13 * u, on = ar.seq > 0, hov = hover.arrow === k;
+            const line = pts.map((q, i) => (i ? 'L' : 'M') + q.x.toFixed(3) + ' ' + q.y.toFixed(3)).join(' ');
+            s += `<path d="${line}" fill="none" stroke="${on ? 'rgba(37,99,235,0.28)' : 'rgba(148,163,184,0.28)'}" stroke-width="${(hov ? 12 : 8) * u}" stroke-linecap="round" stroke-linejoin="round"/>`;
+            if (on) s += `<circle cx="${bx}" cy="${by}" r="${10 * u}" fill="#2563eb" stroke="#fff" stroke-width="${1.5 * u}"/><text x="${bx}" y="${by + 4.3 * u}" text-anchor="middle" font-size="${12 * u}" font-weight="800" font-family="system-ui, sans-serif" fill="#fff">${ar.seq}</text>`;
+            else s += `<circle cx="${bx}" cy="${by}" r="${8 * u}" fill="rgba(255,255,255,0.85)" stroke="#94a3b8" stroke-width="${1.3 * u}" stroke-dasharray="${2.5 * u} ${2 * u}"/>`;
+        });
+        return s;
+    }
+    seqBtn.addEventListener('click', () => { closeMenus(); setSeqMode(!tool.seqMode); });
+    seqClr.addEventListener('click', () => { if (!seqOrder().length) return; commit(); mol.arrows.forEach(ar => { if (ar) delete ar.seq; }); seqChipText(); render(); if (typeof afterChange === 'function') afterChange(); showMsg('Arrow numbers cleared'); });
+    movBtn.addEventListener('click', () => { closeMenus(); makeArrowMovie(); });
+
+    // ---- DRAW RESONANCE STRUCTURE: push the electrons of the numbered curved arrows, in order, on a copy drawn to the right
+    //      (lone pair → bond, bond → lone pair, bond → bond), with a resonance arrow between, formal charges recalculated
+    function arrowEnds(ar) {      // what a curved arrow starts on (a lone pair / atom, or a bond) and ends on (an atom, a bond, or between two atoms)
+        const near = (i, x, y, r) => mol.atoms[i] && Math.hypot(mol.atoms[i].x - x, mol.atoms[i].y - y) < r;
+        const bNear = (p, x, y, r) => p && mol.atoms[p[0]] && mol.atoms[p[1]] && Math.hypot((mol.atoms[p[0]].x + mol.atoms[p[1]].x) / 2 - x, (mol.atoms[p[0]].y + mol.atoms[p[1]].y) / 2 - y) < r;
+        const fromSnap = (q) => q.lp || q.atom ? { at: q.ai } : q.bond && mol.bonds[q.bk] ? { bd: [mol.bonds[q.bk].a, mol.bonds[q.bk].b] } : q.mid ? { bd: [q.i, q.j] } : null;
+        let src = null, dst = null;
+        if (ar.src && ar.src.at != null && near(ar.src.at, ar.x1, ar.y1, 1)) src = { at: ar.src.at };
+        else if (ar.src && ar.src.bd && bondBetween(ar.src.bd[0], ar.src.bd[1]) >= 0 && bNear(ar.src.bd, ar.x1, ar.y1, 1)) src = { bd: ar.src.bd.slice() };
+        if (!src) { src = fromSnap(snapCurve({ x: ar.x1, y: ar.y1 })); if (!src) { const ai = atomAt({ x: ar.x1, y: ar.y1 }, 0.55); if (ai >= 0) src = { at: ai }; } }
+        if (ar.dst && ar.dst.at != null && near(ar.dst.at, ar.x2, ar.y2, 1)) dst = { at: ar.dst.at };
+        else if (ar.dst && ar.dst.bd && bNear(ar.dst.bd, ar.x2, ar.y2, 1)) dst = { bd: ar.dst.bd.slice() };
+        else if (ar.mid && bNear(ar.mid, ar.x2, ar.y2, 1)) dst = { bd: ar.mid.slice() };
+        if (!dst && ar.toAtom) { let ti = -1, td = 0.7; mol.atoms.forEach((o, i) => { const d = Math.hypot(o.x - ar.x2, o.y - ar.y2); if (d < td) { td = d; ti = i; } }); if (ti >= 0) dst = { at: ti }; }
+        if (!dst && ar.toBond) { let bk = -1, bd = 0.7; mol.bonds.forEach((b, k) => { const d = Math.hypot((mol.atoms[b.a].x + mol.atoms[b.b].x) / 2 - ar.x2, (mol.atoms[b.a].y + mol.atoms[b.b].y) / 2 - ar.y2); if (d < bd) { bd = d; bk = k; } }); if (bk >= 0) dst = { bd: [mol.bonds[bk].a, mol.bonds[bk].b] }; }
+        if (!dst) dst = fromSnap(snapCurve({ x: ar.x2, y: ar.y2 }, true));
+        return { src, dst };
+    }
+
+    // the drawn extent of some atoms: label, H's in the label, lone pairs and charge circles (from the last render)
+    function visualBox(ids) {
+        const nb = neighbors(mol); let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+        const grow = (x, y, rx0, rx1, ry) => { x0 = Math.min(x0, x - rx0); x1 = Math.max(x1, x + rx1); y0 = Math.min(y0, y - ry); y1 = Math.max(y1, y + ry); };
+        ids.forEach(i => { const a = mol.atoms[i]; if (!a) return;
+            const shown = a.el !== 'C' || disp.carbons || a.charge || a.label || nb[i].length === 0, r = shown ? 0.32 : 0.05, h = shown ? implicitH(mol, i, nb) : 0;
+            grow(a.x, a.y, r, r + (h ? (h > 1 ? 0.62 : 0.45) : 0), r);
+            (lpCache[i] || []).forEach(q => grow(q.x, q.y, 0.12, 0.12, 0.12));
+            if (qCache[i]) grow(qCache[i].x, qCache[i].y, qCache[i].r + 0.02, qCache[i].r + 0.02, qCache[i].r + 0.02); });
+        return { x0, x1, y0, y1 };
+    }
+    // lone pairs of an atom spread VSEPR-style into the open angles between its bonds; an atom that just gained a pair gets
+    // its formal charge right beside that pair, clear of bonds, the label's H's and the other pairs
+    function tidyLonePairs(i, gained) {
+        const a = mol.atoms[i], nb = neighbors(mol), LC = lpCount(i, nb, implicitH(mol, i, nb));
+        const nP = lpShown(i) ? Math.max(0, LC.n - (a.lpHide || 0)) : 0;
+        if (!nP) return;
+        const occ = nb[i].map(x => Math.atan2(mol.atoms[x.j].y - a.y, mol.atoms[x.j].x - a.x));
+        const shown = a.el !== 'C' || disp.carbons || a.charge;
+        if (shown && implicitH(mol, i, nb) > 0) occ.push(occ.some(o => Math.abs(wrapAng(o)) < 1.1) ? Math.PI : 0);      // the H written beside the symbol
+        // centroid side: when gaps tie, a pair goes on the outside of the molecule
+        const fr = [...fragmentOf(i)], cx = fr.reduce((s2, j) => s2 + mol.atoms[j].x, 0) / fr.length, cy = fr.reduce((s2, j) => s2 + mol.atoms[j].y, 0) / fr.length;
+        const outA = Math.atan2(a.y - cy, a.x - cx);
+        let angs = [];
+        if (!occ.length) { for (let k = 0; k < nP; k++) angs.push(wrapAng(-Math.PI / 2 + k * 2 * Math.PI / nP)); }
+        else {
+            const o = occ.map(wrapAng).sort((p, q) => p - q), gaps = o.map((t, k) => ({ a: t, w: k + 1 < o.length ? o[k + 1] - t : o[0] + 2 * Math.PI - t, c: 0 }));
+            for (let k = 0; k < nP; k++) {
+                let best = null, bs = -1e9;
+                gaps.forEach(g => { const sc = g.w / (g.c + 1) - 0.02 * Math.abs(wrapAng(g.a + g.w / 2 - outA)); if (sc > bs + 1e-6) { bs = sc; best = g; } });
+                best.c++;
+            }
+            gaps.forEach(g => { for (let m = 1; m <= g.c; m++) angs.push(wrapAng(g.a + g.w * m / (g.c + 1))); });
+        }
+        if (!(gained && a.charge)) { a.lpAng = angs; delete a.qAng; delete a.qOut; return; }
+        // charge beside one of the pairs: the side with the most room (ties → upper right)
+        const room = (t, skip) => occ.concat(angs.filter((_, k) => k !== skip)).reduce((m, o2) => Math.min(m, Math.abs(wrapAng(t - o2))), Math.PI);
+        let pick = 0, ang = angs[0], rb = -1e9;
+        angs.forEach((t, k) => [t + 0.85, t - 0.85].forEach(c => { const r = Math.min(room(c, k), Math.abs(wrapAng(c - t))) - 0.05 * Math.abs(wrapAng(c + Math.PI / 4)); if (r > rb) { rb = r; pick = k; ang = c; } }));
+        a.lpAng = [angs[pick], ...angs.filter((_, k) => k !== pick)];
+        if (room(ang, pick) > 0.6) { a.qAng = wrapAng(ang); delete a.qOut; } else { a.qAng = angs[pick]; a.qOut = true; }
+    }
+    // on screen: the resonance arrow wipes in from left to right, then the new structure fades in
+    function playResonance(set, ak) {
+        resAnim = { set, ak, t0: performance.now() };
+        const tick = () => { if (!resAnim) return; const t = (performance.now() - resAnim.t0) / 1000;
+            if (t >= RES_WIPE + RES_FADE) { resAnim = null; render(); return; } render(); requestAnimationFrame(tick); };
+        requestAnimationFrame(tick);
+    }
+    function resWipe(id, ar, x, b) {      // a mask that shows an arrow from its left end up to fraction x, with a soft edge
+        const soft = 0.3, X0 = Math.min(ar.x1, ar.x2) - 0.2, X1 = Math.max(ar.x1, ar.x2) + 0.2, o2 = clamp(x * (1 + soft), 0, 1), o1 = clamp(x * (1 + soft) - soft, 0, 1);
+        return `<linearGradient id="${id}g" gradientUnits="userSpaceOnUse" x1="${X0}" y1="0" x2="${X1}" y2="0"><stop offset="${o1.toFixed(4)}" stop-color="#fff"/><stop offset="${Math.max(o2, o1 + 1e-4).toFixed(4)}" stop-color="#000"/></linearGradient>` +
+            `<mask id="${id}" maskUnits="userSpaceOnUse" x="${b.x0}" y="${b.y0}" width="${b.x1 - b.x0}" height="${b.y1 - b.y0}"><rect x="${b.x0}" y="${b.y0}" width="${b.x1 - b.x0}" height="${b.y1 - b.y0}" fill="url(#${id}g)"/></mask>`;
+    }
+    function drawResonance() {
+        const order = seqOrder();
+        if (!order.length) { showMsg('Number the arrows first (ANIMATE ▾ → ARROW SEQUENCING)'); return; }
+        const moves = [];
+        for (let n = 0; n < order.length; n++) { const ar = mol.arrows[order[n]], e = arrowEnds(ar);
+            if (!e.src) { showMsg(`Arrow ${n + 1} doesn't start on a lone pair, an atom or a bond — drag its tail onto one`); return; }
+            if (!e.dst) { showMsg(`Arrow ${n + 1} doesn't end on an atom, a bond or between two atoms — drag its head onto one`); return; }
+            moves.push({ ...e, e: ar.t === 'fish' ? 1 : 2 }); }
+        // the structures the arrows touch, copied whole
+        const frag = new Set(); moves.forEach(m => [m.src.at, ...(m.src.bd || []), m.dst.at, ...(m.dst.bd || [])].forEach(i => { if (i != null && mol.atoms[i]) fragmentOf(i).forEach(j => frag.add(j)); }));
+        const idx = [...frag].sort((a, b) => a - b), base = mol.atoms.length, map = new Map(idx.map((i, k) => [i, base + k]));
+        const bx = itemsBox({ atoms: idx, arrows: order }, 0), ab = itemsBox({ atoms: idx, arrows: [] }, 0), u = U();
+        const gap = 2.4 * u, dx = bx.x1 + gap - ab.x0, cy = (ab.y0 + ab.y1) / 2;
+        const nb0 = neighbors(mol), h0 = idx.map(i => implicitH(mol, i, nb0)), lp0 = idx.map(i => lpShown(i));
+        // electron bookkeeping on the copy: Δ(non-bonding electrons) and Δ(bonds) per atom; ΔFC = −Δnb − Δbonds
+        const rid = 1 + Math.max(0, ...mol.atoms.map(a => a.resGen || 0), ...mol.arrows.map(x => (x && x.resArrow) || 0));      // tags this step (the .mov fades it in)
+        const atoms = idx.map(i => { const a = { ...mol.atoms[i], x: mol.atoms[i].x + dx, resGen: rid }; delete a.grp; return a; });
+        const bonds = mol.bonds.filter(b => frag.has(b.a) && frag.has(b.b)).map(b => { const c = { ...b, a: map.get(b.a) - base, b: map.get(b.b) - base }; delete c.grp; return c; });
+        const L = (i) => map.get(i) - base, dNb = new Map(), dB = new Map(), add = (m2, k, v) => m2.set(k, (m2.get(k) || 0) + v);
+        const findB = (i, j) => bonds.findIndex(b => (b.a === i && b.b === j) || (b.a === j && b.b === i));
+        let warn = '';
+        moves.forEach((m, n) => {
+            const h = m.e / 2;
+            if (m.src.at != null) add(dNb, L(m.src.at), -m.e);
+            else { const i = L(m.src.bd[0]), j = L(m.src.bd[1]), k = findB(i, j);
+                if (k < 0) { warn = `arrow ${n + 1} starts on a bond that is already gone`; return; }
+                bonds[k].order = (bonds[k].order || 1) - h; add(dB, i, -h); add(dB, j, -h); }
+            if (m.dst.at != null) add(dNb, L(m.dst.at), m.e);
+            else { const i = L(m.dst.bd[0]), j = L(m.dst.bd[1]); let k = findB(i, j);
+                if (k < 0) { bonds.push({ a: i, b: j, order: 0 }); k = bonds.length - 1; }
+                bonds[k].order = (bonds[k].order || 0) + h; add(dB, i, h); add(dB, j, h); }
+        });
+        if (warn) { showMsg('Could not draw it: ' + warn); return; }
+        if (bonds.some(b => b.order % 1)) warn = ' (a fishhook pair looks incomplete, so a bond order was rounded)';
+        if (bonds.some(b => b.order > 3)) warn = ' (check it: a bond came out above triple)';
+        for (let k = bonds.length - 1; k >= 0; k--) { const b = bonds[k]; b.order = Math.min(3, Math.round(b.order));
+            if (b.order <= 0) bonds.splice(k, 1); else { if (b.order > 1) { delete b.wedge; delete b.style; } } }
+        const changed2 = new Set([...dNb.keys(), ...dB.keys()]);
+        commit();
+        atoms.forEach(a => mol.atoms.push(a)); bonds.forEach(b => mol.bonds.push({ ...b, a: b.a + base, b: b.b + base }));
+        const nb1 = neighbors(mol);
+        changed2.forEach(k => { const i = base + k, a = mol.atoms[i], orig = idx[k];
+            const q = Math.round((a.charge || 0) - (dNb.get(k) || 0) - (dB.get(k) || 0)); a.charge = clamp(q, -3, 3);
+            ['qAng', 'qOut', 'lpAng', 'radAng', 'lpHide'].forEach(p => delete a[p]);
+            if (mol.atoms[orig].hx == null) { a.hx = null; if (implicitH(mol, i, nb1) !== h0[k]) a.hx = h0[k]; }      // hydrogens stay where they were
+            const ve = VE[a.el];
+            if (ve != null && !a.pseudo) { const nonb = ve - a.charge - bondSum(mol, i, nb1) - implicitH(mol, i, nb1);
+                if (moves.some(m => m.e === 1) || a.rad) { if (nonb % 2) a.rad = 1; else delete a.rad; }
+                if (nonb >= 2 && (lp0[k] || a.el === 'C')) a.lp = true; } });
+        changed2.forEach(k => tidyLonePairs(base + k, (dNb.get(k) || 0) > 0));
+        // the resonance arrow, with a clear gap to the drawn edge of each structure (labels, lone pairs and charges included)
+        resAnim = null; render();      // lays out the lone pairs and charges, so their real extent can be measured
+        const newIds = atoms.map((_, k) => base + k), L0 = visualBox(idx), L1 = visualBox(newIds), m = 0.5 * u, alen = 1.6 * u;
+        const R0 = Math.max(L0.x1, bx.x1), ax0 = R0 + m, ax1 = ax0 + alen, shift = ax1 + m - L1.x0;
+        newIds.forEach(i => { mol.atoms[i].x += shift; });
+        const ya = (L0.y0 + L0.y1) / 2;
+        mol.arrows.push({ t: 'res', x1: ax0, y1: ya, x2: ax1, y2: ya, head: tool.head || 'barb', size: tool.arrowSize || 1, lw: tool.arrowLw || 1, resArrow: rid });
+        if (tool.seqMode) setSeqMode(false, true);
+        clearSel(); changed(); fitView();
+        playResonance(new Set(newIds), mol.arrows.length - 1);
+        showMsg('Resonance structure drawn' + warn);
+    }
+
+    // -- the movie: the still drawing is rendered once; each frame adds the numbered arrows, the current one revealed along its own path
+    let movBusy = false;
+    const svgImage = (s) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('could not render a frame of the drawing')); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s); });
+    const easeIO = (x) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    async function makeArrowMovie() {
+        if (movBusy) return;
+        const order = seqOrder();
+        if (!order.length) { showMsg('Number the arrows first (ANIMATE ▾ → ARROW SEQUENCING)'); return; }
+        movBusy = true; animBtn.disabled = true;
+        try {
+            const S = STYLES[disp.style], seqSet = new Set(order), fps = 30;
+            const b = itemsBox({ atoms: mol.atoms.map((_, i) => i), arrows: mol.arrows.map((_, k) => k) }, 0.9);
+            const wu = b.x1 - b.x0, hu = b.y1 - b.y0, sc = Math.min(1920 / wu, 1080 / hu, 110);
+            const W = Math.max(64, Math.round(wu * sc / 2) * 2), H = Math.max(64, Math.round(hu * sc / 2) * 2);
+            const head = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="${b.x0} ${b.y0} ${wu} ${hu}" preserveAspectRatio="none">`;
+            const layer = (str) => `<g stroke="#1e293b" stroke-width="${S.lw * 1.15}" stroke-linecap="round" stroke-linejoin="round" fill="none">${str}</g>`;
+            // resonance structures made by DRAW RESONANCE STRUCTURE: after the arrows, each resonance arrow wipes in, then its structure fades in
+            const rids = [...new Set(mol.atoms.map(a => a.resGen).filter(Boolean))].sort((p, q) => p - q);
+            const resAt = new Set(mol.atoms.map((a, i) => a.resGen ? i : -1).filter(i => i >= 0)), resAr = new Set(mol.arrows.map((x, k) => x && x.resArrow ? k : -1).filter(k => k >= 0));
+            const RS = rids.map(id => { const ak = mol.arrows.findIndex(x => x && x.resArrow === id), Q = drawParts(S, i => mol.atoms[i].resGen === id, k => k === ak, '#ffffff', false, 'xr' + id);
+                return { ak, defs: Q.defs, arrow: Q.r, struct: `<g>${Q.f}</g><g stroke="#1e293b" stroke-width="${S.lw}" stroke-linecap="round" fill="none">${Q.b}</g><g font-family='${S.fam}' font-size="${S.font}" font-weight="${S.weight}">${Q.a}</g>` }; });
+            const P = drawParts(S, (i) => !resAt.has(i), (k) => !seqSet.has(k) && !resAr.has(k), '#ffffff', false, 'x');
+            const base = await svgImage(head + `<defs>${P.defs}</defs><rect x="${b.x0}" y="${b.y0}" width="${wu}" height="${hu}" fill="#ffffff"/><g>${P.f}</g>` +
+                `<g stroke="#1e293b" stroke-width="${S.lw}" stroke-linecap="round" fill="none">${P.b}</g><g font-family='${S.fam}' font-size="${S.font}" font-weight="${S.weight}">${P.a}</g>${layer(P.r)}</svg>`);
+            // each numbered arrow: its finished drawing, and the centre line it is revealed along (curve, then straight into the head's tip)
+            const A = order.map(k => { const ar = mol.arrows[k]; lastCurveGeo = null; const full = arrowSVG(ar, S), G = lastCurveGeo || { g: arcOf(ar), uq: 1, tip: { x: ar.x2, y: ar.y2 } };
+                const pts = []; if (G.g) for (let i = 0; i <= 64; i++) pts.push(arcPt(G.g, G.uq * i / 64)); else pts.push({ x: ar.x1, y: ar.y1 });
+                pts.push(G.tip);
+                const ext = (P0, P1, e) => { const dx = P0.x - P1.x, dy = P0.y - P1.y, l = Math.hypot(dx, dy) || 1; return { x: P0.x + dx / l * e, y: P0.y + dy / l * e }; };
+                const e0 = S.lw * (ar.lw || 1); pts.unshift(ext(pts[0], pts[1], e0)); pts.push(ext(pts[pts.length - 1], pts[pts.length - 2], e0 + 0.02));
+                let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+                const mw = Math.max(0.14, S.lw * 3.2) * (ar.size || 1) * 1.15 + S.lw * (ar.lw || 1) * 1.6;
+                return { full, L, mw, d: pts.map((q, i) => (i ? 'L' : 'M') + q.x.toFixed(4) + ' ' + q.y.toFixed(4)).join(' ') }; });
+            // timeline: a short look at the start, each arrow in turn (with a breath between), a hold on the finished mechanism
+            const dur = tool.seqDur || 1, gap = 0.25, hold0 = 0.7, hold1 = 2;
+            const tArrows = hold0 + order.length * dur + (order.length - 1) * gap, rWipe = RES_WIPE, rFade = RES_FADE, rGap = 0.35;
+            const total = tArrows + RS.length * (rGap + rWipe + rFade) + hold1, nF = Math.max(2, Math.round(total * fps));
+            const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const cx = cv.getContext('2d');
+            let lastKey = null;
+            const drawFrame = async (fi) => {
+                const t = fi / fps; let key = '', body = '';
+                A.forEach((a, j) => { const t0 = hold0 + j * (dur + gap), x = clamp((t - t0) / dur, 0, 1); if (x <= 0) return;
+                    if (x >= 1) { body += layer(a.full); key += j + 'f,'; return; }
+                    const r = easeIO(x) * a.L; key += j + ':' + r.toFixed(4) + ',';
+                    body += `<mask id="mvm${j}" maskUnits="userSpaceOnUse" x="${b.x0}" y="${b.y0}" width="${wu}" height="${hu}"><path d="${a.d}" fill="none" stroke="#fff" stroke-width="${a.mw.toFixed(4)}" stroke-linecap="butt" stroke-linejoin="round" stroke-dasharray="${r.toFixed(4)} ${(a.L * 3).toFixed(4)}"/></mask><g mask="url(#mvm${j})">${layer(a.full)}</g>`; });
+                let defs = '';
+                RS.forEach((r, j) => { const t0 = tArrows + j * (rGap + rWipe + rFade) + rGap, xa = easeIO(clamp((t - t0) / rWipe, 0, 1)), os = easeIO(clamp((t - t0 - rWipe) / rFade, 0, 1));
+                    if (xa > 0 && r.ak >= 0) { key += 'w' + j + ':' + xa.toFixed(3) + ','; defs += resWipe('mrw' + j, mol.arrows[r.ak], xa, b); body += `<g mask="url(#mrw${j})">${layer(r.arrow)}</g>`; }
+                    if (os > 0) { key += 's' + j + ':' + os.toFixed(3) + ','; body += `<g opacity="${os.toFixed(3)}">${r.struct}</g>`; } });
+                if (defs || body.includes('opacity')) body = `<defs>${RS.map(r => r.defs).join('')}${defs}</defs>` + body;
+                if (key === lastKey) return; lastKey = key;
+                cx.fillStyle = '#fff'; cx.fillRect(0, 0, W, H); cx.drawImage(base, 0, 0, W, H);
+                if (body) cx.drawImage(await svgImage(head + body + '</svg>'), 0, 0, W, H);
+            };
+            const prog = (f) => { animBtn.textContent = 'RENDERING… ' + Math.round(f * 100) + '%'; };
+            const bytes = await encodeMov(cv, W, H, fps, nF, drawFrame, prog);
+            download(new Blob([bytes], { type: 'video/quicktime' }), 'curved-arrow-animation.mov');
+            showMsg(`Saved curved-arrow-animation.mov (${total.toFixed(1)} s)`);
+        } catch (err) { console.error(err); showMsg('Movie failed: ' + (err && err.message || err)); }
+        finally { movBusy = false; animBtn.disabled = false; animBtn.textContent = 'ANIMATE ▾'; }
+    }
+    // -- encoding: H.264 through WebCodecs when the browser has it, otherwise Photo-JPEG frames; both wrapped in a QuickTime .mov
+    async function encodeMov(cv, W, H, fps, nF, drawFrame, prog) {
+        let cfg = null;
+        if (typeof VideoEncoder !== 'undefined' && typeof VideoFrame !== 'undefined') {
+            for (const codec of ['avc1.640033', 'avc1.4d0033', 'avc1.42e033', 'avc1.640028', 'avc1.42e01f']) {
+                const c = { codec, width: W, height: H, bitrate: Math.round(Math.min(16e6, Math.max(2e6, W * H * fps * 0.12))), framerate: fps, avc: { format: 'avc' } };
+                try { const r = await VideoEncoder.isConfigSupported(c); if (r && r.supported) { cfg = c; break; } } catch (err) {}
+            }
+        }
+        const samples = []; let avcC = null;
+        if (cfg) {
+            let fail = null;
+            const enc = new VideoEncoder({ output: (ch, meta) => {
+                    if (!avcC && meta && meta.decoderConfig && meta.decoderConfig.description) { const d = meta.decoderConfig.description;
+                        avcC = d instanceof ArrayBuffer ? new Uint8Array(d.slice(0)) : new Uint8Array(d.buffer.slice(d.byteOffset, d.byteOffset + d.byteLength)); }
+                    const buf = new Uint8Array(ch.byteLength); ch.copyTo(buf); samples.push({ data: buf, key: ch.type === 'key', ts: ch.timestamp }); },
+                error: (e) => { fail = e; } });
+            enc.configure(cfg);
+            for (let i = 0; i < nF; i++) {
+                if (fail) throw fail;
+                await drawFrame(i);
+                const vf = new VideoFrame(cv, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round(1e6 / fps) });
+                enc.encode(vf, { keyFrame: i % (fps * 2) === 0 }); vf.close();
+                while (enc.encodeQueueSize > 4) await new Promise(r => setTimeout(r, 5));
+                prog(i / nF);
+            }
+            await enc.flush(); enc.close(); if (fail) throw fail;
+            if (!avcC) throw new Error('the video encoder gave no H.264 settings');
+            return movFile({ W, H, fps, samples, avcC, nTot: nF });
+        }
+        for (let i = 0; i < nF; i++) {      // fallback: Photo-JPEG (plays in QuickTime, Keynote, iMovie)
+            await drawFrame(i);
+            const bl = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.93)); if (!bl) throw new Error('could not encode a frame');
+            samples.push({ data: new Uint8Array(await bl.arrayBuffer()), key: true, ts: Math.round(i * 1e6 / fps) }); prog(i / nF);
+        }
+        return movFile({ W, H, fps, samples, avcC: null, nTot: nF });
+    }
+    function movFile({ W, H, fps, samples, avcC, nTot }) {
+        const cat = (parts) => { let n = 0; parts.forEach(p => { n += p.length; }); const o = new Uint8Array(n); let off = 0; parts.forEach(p => { o.set(p, off); off += p.length; }); return o; };
+        const u8 = (...v) => new Uint8Array(v), u16 = (v) => u8((v >>> 8) & 255, v & 255), u32 = (v) => u8((v >>> 24) & 255, (v >>> 16) & 255, (v >>> 8) & 255, v & 255);
+        const str = (s) => new Uint8Array([...s].map(c => c.charCodeAt(0) & 255)), zeros = (n) => new Uint8Array(n);
+        const box = (type, ...parts) => { const body = cat(parts); return cat([u32(body.length + 8), str(type), body]); };
+        const full = (type, ver, flags, ...parts) => box(type, u8(ver, (flags >>> 16) & 255, (flags >>> 8) & 255, flags & 255), ...parts);
+        const pstr = (s, len) => { const o = new Uint8Array(len || s.length + 1); o[0] = s.length; o.set(str(s), 1); return o; };
+        const matrix = cat([u32(0x10000), u32(0), u32(0), u32(0), u32(0x10000), u32(0), u32(0), u32(0), u32(0x40000000)]);
+        // timing comes from each frame's own timestamp (an encoder may skip a repeated frame, or reorder them), so the movie keeps its length
+        const TS = fps * 100, n = samples.length, mvTS = 1000, endT = Math.round(nTot * 1e6 / fps * TS / 1e6);
+        const pts = samples.map(x => Math.round(x.ts * TS / 1e6)), dts = pts.slice().sort((a, b) => a - b);
+        const durs = dts.map((d, i) => (i + 1 < n ? dts[i + 1] : endT) - d).map(v => Math.max(1, v)), durT = dts[0] + durs.reduce((a, v) => a + v, 0), durM = Math.round(durT / TS * mvTS);
+        const ftyp = box('ftyp', str('qt  '), u32(0x200), str('qt  '));
+        const mdatHead = cat([u32(8 + samples.reduce((s, x) => s + x.data.length, 0)), str('mdat')]);
+        const dataOff = ftyp.length + mdatHead.length;
+        const entry = avcC
+            ? box('avc1', zeros(6), u16(1), u16(0), u16(0), u32(0), u32(0), u32(0), u16(W), u16(H), u32(0x480000), u32(0x480000), u32(0), u16(1), pstr('H.264', 32), u16(24), u16(0xffff), box('avcC', avcC))
+            : box('jpeg', zeros(6), u16(1), u16(0), u16(0), str('appl'), u32(0), u32(512), u16(W), u16(H), u32(0x480000), u32(0x480000), u32(0), u16(1), pstr('Photo - JPEG', 32), u16(24), u16(0xffff));
+        // composition offsets, in case the encoder reordered frames (B-frames)
+        const offs = pts.map((v, i) => v - dts[i]);
+        let ctts = null;
+        if (offs.some(o => o)) { const runs = []; offs.forEach(o => { const r = runs[runs.length - 1]; if (r && r[1] === o) r[0]++; else runs.push([1, o]); });
+            ctts = full('ctts', 0, 0, u32(runs.length), ...runs.map(r => cat([u32(r[0]), u32(r[1])]))); }
+        const keys = samples.map((s, i) => s.key ? i + 1 : 0).filter(Boolean);
+        const stbl = box('stbl',
+            full('stsd', 0, 0, u32(1), entry),
+            (() => { const runs = []; durs.forEach(v => { const r = runs[runs.length - 1]; if (r && r[1] === v) r[0]++; else runs.push([1, v]); });
+                return full('stts', 0, 0, u32(runs.length), ...runs.map(r => cat([u32(r[0]), u32(r[1])]))); })(),
+            ...(ctts ? [ctts] : []),
+            ...(keys.length < n ? [full('stss', 0, 0, u32(keys.length), ...keys.map(k => u32(k)))] : []),
+            full('stsc', 0, 0, u32(1), u32(1), u32(n), u32(1)),
+            full('stsz', 0, 0, u32(0), u32(n), ...samples.map(s => u32(s.data.length))),
+            full('stco', 0, 0, u32(1), u32(dataOff)));
+        const minf = box('minf',
+            full('vmhd', 0, 1, u16(0x40), u16(0x8000), u16(0x8000), u16(0x8000)),
+            full('hdlr', 0, 0, str('dhlr'), str('alis'), u32(0), u32(0), u32(0), pstr('DataHandler')),
+            box('dinf', full('dref', 0, 0, u32(1), full('alis', 0, 1))),
+            stbl);
+        const mdia = box('mdia',
+            full('mdhd', 0, 0, u32(0), u32(0), u32(TS), u32(durT), u16(0), u16(0)),
+            full('hdlr', 0, 0, str('mhlr'), str('vide'), u32(0), u32(0), u32(0), pstr('VideoHandler')),
+            minf);
+        const trak = box('trak',
+            full('tkhd', 0, 3, u32(0), u32(0), u32(1), u32(0), u32(durM), zeros(8), u16(0), u16(0), u16(0), u16(0), matrix, u32(W * 65536), u32(H * 65536)),
+            mdia);
+        const moov = box('moov',
+            full('mvhd', 0, 0, u32(0), u32(0), u32(mvTS), u32(durM), u32(0x10000), u16(0x100), zeros(10), matrix, u32(0), u32(0), u32(0), u32(0), u32(0), u32(0), u32(2)),
+            trak);
+        return cat([ftyp, mdatHead, ...samples.map(s => s.data), moov]);
+    }
     tool.fillColor = PALETTE[5]; tool.fillStyle = 'glow';
     function swatchRow(box, cur, onPick, withNone) {
         PALETTE.forEach(c => { const b = document.createElement('button'); b.className = 'csw' + (c === cur ? ' active' : ''); b.style.background = c; b.title = c; b.setAttribute('aria-label', 'Color ' + c);
@@ -4944,10 +5355,11 @@ function autoMapAtoms(m, R, P) {
     { let lc = false; $('hl-glowr').addEventListener('input', (e) => { tool.hlGlowR = +e.target.value; if (!tool.hlGlow) return; if (!lc) { commit(); lc = true; } applyHlGlow(true); render(); });
       $('hl-glowr').addEventListener('change', () => { lc = false; changed(); }); }
     function updateSelBar() {
-        if (hasSel()) expandGroups();      // selecting any member selects its whole group
+        if (hasSel() && tool.kind !== 'arrow') expandGroups();      // selecting any member selects its whole group (not the arrow just drawn)
         const showFill = tool.kind === 'fill', showSel = hasSel(), selArrows = [...sel.arrows].some(k => isArrowT(mol.arrows[k]));
         const showArrow = (tool.kind === 'arrow' && tool.arrow !== 'plus') || selArrows;
         typeColRow.hidden = !(tool.kind === 'arrow' && tool.arrow !== 'plus');
+        { const cvT = tool.kind === 'arrow' && (tool.arrow === 'curve' || tool.arrow === 'fish'); if (!cvT && tool.seqMode) setSeqMode(false, true); if (!cvT && cPend) { cPend = null; preview = null; } seqRow.hidden = !cvT; if (!cvT && !$('anim-menu').hidden) closeMenus(); }
         ctxFill.hidden = !showFill; ctxSel.hidden = !showSel; ctxArrow.hidden = !showArrow;
         const shK = selShapes(), txK = selTexts(), qA = [...sel.atoms].filter(i => mol.atoms[i] && (mol.atoms[i].charge || mol.atoms[i].pq));
         ctxShape.hidden = !(tool.kind === 'shape' || shK.length); ctxText.hidden = !(tool.kind === 'text' || txK.length); ctxQ.hidden = !qA.length; ctxQd.hidden = !(tool.kind === 'charge' || tool.kind === 'pcharge');
@@ -5548,7 +5960,7 @@ function autoMapAtoms(m, R, P) {
             else if (hover.bond >= 0) { commit(); deleteBond(hover.bond); hover.bond = -1; changed(); }
             else if (hover.arrow >= 0) { commit(); mol.arrows.splice(hover.arrow, 1); hover.arrow = -1; changed(); }
             else setTool('erase');
-        } else if (e.key === 'Escape') { closeFlyout(); closeMenus(); closeTable(); closeName(); if (hasSel()) { clearSel(); render(); } }
+        } else if (e.key === 'Escape') { if (cPend) { cPend = null; preview = null; } if (tool.seqMode) setSeqMode(false); closeFlyout(); closeMenus(); closeTable(); closeName(); if (hasSel()) { clearSel(); render(); } }
     });
     window.addEventListener('keyup', (e) => { if (e.key === ' ') { spaceDown = false; svg.classList.toggle('move', isSelKind() || tool.kind === 'pan'); } });
 
