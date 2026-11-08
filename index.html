@@ -152,6 +152,26 @@
     .spec-thumb { height: 150px; margin: 6px 0 2px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; } .spec-thumb[hidden] { display: none; } .spec-thumb svg { display: block; width: 100%; height: 100%; }
     #ms-pane { position: absolute; inset: 0; z-index: 12; display: flex; flex-direction: column; background: #f8fafc; color: #1e293b; font: 15px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif; }
     #ms-pane[hidden] { display: none; }
+    .spec-pane { position: absolute; inset: 0; z-index: 12; display: flex; flex-direction: column; background: #f8fafc; color: #1e293b; font: 15px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif; } .spec-pane[hidden] { display: none; }
+    .spec-pane .nmr-subrow > div { font-size: 15px; color: #475569; margin-top: 2px; }
+    .spec-plot { flex: 1 1 auto; min-height: 240px; position: relative; overflow: hidden; user-select: none; cursor: pointer; } .spec-plot svg { position: absolute; left: 0; top: 0; }
+    .spec-bottom { flex: 0 0 32%; display: flex; gap: 10px; padding: 6px 12px 10px; border-top: 1px solid #e2e8f0; min-height: 0; }
+    .spec-card { flex: 0 0 34%; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; } .spec-card svg { display: block; width: 100%; height: 100%; }
+    .spec-tab { flex: 1 1 auto; overflow: auto; min-width: 0; font-size: 15px; } .spec-tab table { width: 100%; border-collapse: collapse; font-size: 15px; } .spec-tab th { text-align: left; font-size: 12.5px; letter-spacing: 0.06em; color: #64748b; padding: 3px 6px; }
+    .spec-tab td { padding: 3px 6px; border-top: 1px solid #f1f5f9; } .spec-tab tr.nmr-sig { cursor: pointer; } .spec-tab tr.nmr-sig:hover td { background: #eef2ff; } .spec-tab tr.on td { background: #fee2e2; }
+    .spec-i.spec-i-sm { width: 18px; height: 18px; margin: 0 6px 0 2px; font-size: 11px; }
+    .lit-main { flex: 1 1 auto; display: flex; gap: 12px; padding: 8px 12px 12px; min-height: 0; } .lit-main .spec-card { flex: 0 0 30%; max-height: 260px; } #lit-body { flex: 1 1 auto; overflow: auto; min-width: 0; }
+    .lit-row { margin-bottom: 8px; } .lit-row code { background: #e2e8f0; border-radius: 4px; padding: 1px 5px; word-break: break-all; } .lit-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+    .lit-h { font-weight: 800; margin-bottom: 4px; } .lit-h2 { font-weight: 700; color: #475569; margin: 6px 0 2px; font-size: 14px; } .lit-card ul { margin: 2px 0 0 18px; padding: 0; } .lit-card li { margin: 2px 0; }
+    .lit-t td { padding: 2px 8px 2px 0; vertical-align: top; } .lit-t td:first-child { color: #64748b; white-space: nowrap; } .lit-links { display: flex; flex-wrap: wrap; gap: 6px 14px; font-weight: 600; } .lit-busy { color: #2563eb; font-weight: 600; }
+    #props-box { position: absolute; top: 8px; right: 10px; z-index: 6; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; max-width: calc(100% - 20px); }
+    #props-box #props { background: rgba(15,23,42,0.88); border-radius: 8px; padding: 4px 8px; white-space: normal; flex-wrap: wrap; justify-content: flex-end; }
+    #val-warn { position: absolute; left: 10px; top: 8px; z-index: 6; max-width: 55%; background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; border-radius: 8px; padding: 4px 8px; font: 600 12.5px/1.35 system-ui, sans-serif; pointer-events: none; } #val-warn[hidden] { display: none; }
+    #cp-job .jrow { display: contents; } #cp-job .jrow[hidden] { display: none; } #job-bond b { color: #f8fafc; }
+    .fq-svg, .sc-svg { width: 100%; height: auto; display: block; margin: 4px 0; } .sc-svg { cursor: ew-resize; touch-action: none; }
+    .sc-ctl { display: flex; align-items: center; gap: 8px; margin: 2px 0 4px; } .sc-ctl input { flex: 1; } #sc-t { font-variant-numeric: tabular-nums; min-width: 180px; font-size: 0.8rem; }
+    .fq-row { cursor: pointer; } .fq-row:hover td { background: rgba(96,165,250,0.15); } .fq-row.on td { background: rgba(248,113,113,0.25); }
+    body.light #job-bond b { color: #0f172a; }
     #ms-sub { font-size: 15px; color: #475569; margin-top: 2px; }
     .ms-warn { margin-top: 6px; font-size: 13.5px; line-height: 1.35; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 5px 8px; }
     #ms-plot { flex: 1 1 auto; min-height: 220px; position: relative; overflow: hidden; user-select: none; cursor: crosshair; } #ms-plot svg { position: absolute; left: 0; top: 0; }
@@ -173,7 +193,8 @@
     #ir-info { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     #ir-sub { font-size: 15px; color: #475569; margin-top: 2px; } #ir-info { font-size: 15px; margin-top: 4px; min-height: 20px; color: #1e293b; } #ir-info b { color: #dc2626; } .ir-hint { color: #64748b; font-size: 14px; }
     #ir-plot { flex: 1 1 auto; min-height: 140px; position: relative; overflow: hidden; user-select: none; } #ir-plot svg { position: absolute; left: 0; top: 0; }
-    .ir-meth { border: 1px solid #cbd5e1; background: #fff; color: #1e293b; border-radius: 999px; padding: 3px 8px; font: 700 13px/1.2 system-ui, sans-serif; } .ir-meth[hidden] { display: none; }
+    .ir-nm { display: inline-flex; align-items: center; gap: 2px; padding-right: 4px !important; } .ir-meth { border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: 0.02em; padding: 0 2px; cursor: pointer; }
+    .ir-nm.on .ir-meth option { color: #1e293b; } .ir-nm:not(.on) .ir-meth { color: #2563eb; }
     .ir-busy { color: #2563eb; font-weight: 600; } .ir-warn { color: #b45309; font-weight: 600; } #ir-sub .nmr-tg, #nmr-geo .nmr-tg { padding: 2px 9px; font-size: 12px; }
     #nmr-geo { font-size: 14px; color: #475569; margin-top: 2px; } #nmr-geo:empty { display: none; }
     @media (max-width: 760px) { #topbar { grid-template-columns: minmax(0, 1fr); justify-items: center; padding: 6px 8px; } .tb-left, .tb-right { justify-content: center; flex-wrap: wrap; }
@@ -187,7 +208,10 @@
     .mo-split { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; } .mo-scroll { flex: 0 0 252px; max-height: 380px; overflow-y: auto; overflow-x: hidden; border: 1px solid #334155; border-radius: 8px; padding: 2px 4px; }
     .mo-view { flex: 1 1 240px; min-width: 220px; display: flex; flex-direction: column; } .mo-view canvas { width: 100%; height: 300px; display: block; border-radius: 8px; border: 1px solid #334155; background: radial-gradient(circle at 50% 40%, #1e293b, #0b1220); cursor: grab; touch-action: none; }
     body.light .mo-scroll, body.light .mo-view canvas { border-color: #cbd5e1; } body.light .mo-view canvas { background: radial-gradient(circle at 50% 40%, #ffffff, #e2e8f0); } .mo-lv { cursor: pointer; } .mo-lv:hover rect { fill: rgba(148,163,184,0.15); }
-    .mo-btns { display: flex; gap: 4px; } .mo-btns .btn { flex: 1; padding: 4px 0; font-size: 0.72rem; } .mo-btns .btn.mo-ar { flex: 0 0 30px; } .mo-btns .btn.mo-hide { flex: 0 0 58px; } .mo-btns .btn.mo-hide.active { background: #475569; color: #fff; } .mo-info { font-size: 0.8rem; color: #e2e8f0; margin: 2px 0 4px; } .mo-info b { color: #fde68a; }
+    #c13-plot { touch-action: pan-y; } #n2d-plot { touch-action: none; }
+    .spec-tab tr.nmr-sig.hot td { background: #eef2ff; font-weight: 700; } .nmr-chip.c13-chip { width: auto; min-width: 28px; padding: 0 7px; border-radius: 14px; font-size: 14px; }
+    #v-3d sup { font-size: 0.68em; line-height: 0; vertical-align: 0.45em; }
+    .mo-btns { display: flex; gap: 4px; } .mo-btns .btn { flex: 1; padding: 4px 0; font-size: 0.72rem; } .mo-btns .btn.mo-ar { flex: 0 0 30px; } .mo-btns .btn.mo-hide { flex: 0 0 58px; } .mo-btns .btn.active:not(.mo-hide) { background: #2563eb; border-color: #2563eb; color: #fff; } .mo-btns .btn.mo-hide.active { background: #475569; color: #fff; } .mo-info { font-size: 0.8rem; color: #e2e8f0; margin: 2px 0 4px; } .mo-info b { color: #fde68a; }
     .mo-sl { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #cbd5e1; margin: 2px 0; } .mo-sl input { flex: 1; }
     #esp-legend[hidden] { display: none; } #esp-legend .esp-t { font-weight: 700; } #esp-legend .esp-t span { font-weight: 400; color: #64748b; }
     #esp-legend .esp-bar { height: 10px; border-radius: 3px; margin: 4px 0 2px; background: linear-gradient(90deg, #db2626, #fa9a1a 25%, #f2e640 45%, #59cc59 55%, #33b3d9 75%, #264de6); }
@@ -516,6 +540,7 @@
     #esp-op[hidden] { display: none; } #esp-op input { width: 100%; } #esp-op label { display: flex; justify-content: space-between; }
     details.rd { border: 1px solid #334155; border-radius: 8px; background: #0f172a; margin: 0; min-width: 0; } details.rd > summary { cursor: pointer; list-style: none; padding: 6px 9px; font-weight: 800; font-size: 0.66rem; letter-spacing: 0.1em; color: #93c5fd; display: flex; gap: 6px; align-items: baseline; }
     details.rd > summary::-webkit-details-marker { display: none; } details.rd > summary::before { content: '▸'; color: #64748b; transition: transform 0.15s; display: inline-block; } details.rd[open] > summary::before { transform: rotate(90deg); }
+    .meas-clr { margin-left: auto; align-self: center; font: inherit; font-size: 0.62rem; letter-spacing: 0.08em; font-weight: 800; padding: 2px 8px; border-radius: 5px; border: 1px solid #475569; background: #1e293b; color: #e2e8f0; cursor: pointer; } .meas-clr:hover { background: #dc2626; border-color: #dc2626; color: #fff; } body.light .meas-clr { background: #fff; color: #334155; border-color: #cbd5e1; }
     details.rd > summary .src { font-weight: 400; letter-spacing: 0; color: #64748b; } details.rd > .rd-in { padding: 0 8px 7px; } details.rd .rt caption { display: none; } details.rd .rt-wrap { border: 0; padding: 0; background: transparent; max-height: 260px; }
     #mo-det { margin-top: 8px; } #mo-det #mo-box { padding: 0 9px 8px; }
     body.light #comp-res, body.light #comp-res .rt td { color: #1e293b; } body.light #comp-res b { color: #9a3412; } body.light details.rd { background: #f8fafc; border-color: #cbd5e1; } body.light details.rd > summary { color: #1d4ed8; }
@@ -535,8 +560,7 @@
         <div class="seg" role="group" aria-label="Panels">
             <button class="btn" id="v-2d" title="Show only the 2D editor">2D</button><button class="btn active" id="v-both" title="Show the 2D editor and the 3D model side by side">COMBO</button><button class="btn" id="v-3d" title="Show only the 3D model">3D</button><button class="btn" id="v-rmenu" title="Choose what the right-hand window shows: the 3D model or the predicted ¹H NMR spectrum" aria-haspopup="true">▾</button>
         </div>
-        <div class="tb-right"><span id="props" hidden><span id="formula"></span><span id="pct"></span></span>
-            <button class="btn" id="b-props" title="Show the formula, molar mass and percent composition">PROPERTIES</button>
+        <div class="tb-right">
             <span id="party-box"><button class="btn tg" id="b-party" title="Party Mode: neon structures on black, with a glow (dark mode only)">PARTY MODE</button><span id="party-cols" hidden></span></span>
             <button class="btn" id="b-theme" title="Switch between dark and light mode" aria-label="Switch between dark and light mode">☀</button></div>
     </div>
@@ -549,8 +573,10 @@
                     <feGaussianBlur in="SourceAlpha" stdDeviation="0.06" result="b1"/><feGaussianBlur in="SourceAlpha" stdDeviation="0.18" result="b2"/><feGaussianBlur in="SourceAlpha" stdDeviation="0.45" result="b3"/>
                     <feMerge result="bm"><feMergeNode in="b3"/><feMergeNode in="b2"/><feMergeNode in="b1"/></feMerge>
                     <feFlood id="neon-flood" flood-color="currentColor" flood-opacity="0.85" result="fl"/><feComposite in="fl" in2="bm" operator="in" result="glow"/>
-                    <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><defs id="fdefs"></defs><g id="view"><g id="g-fills"></g><g id="g-bonds" stroke="#1e293b" stroke-width="0.065" stroke-linecap="round" fill="none"></g><g id="g-atoms"></g><g id="g-arrows" stroke="#1e293b" stroke-linecap="round" stroke-linejoin="round" fill="none"></g><g id="g-over"></g></g></svg>
+                    </filter></defs><defs id="fdefs"></defs><g id="view"><g id="g-glow" pointer-events="none"></g><g id="g-fills"></g><g id="g-bonds" stroke="#1e293b" stroke-width="0.065" stroke-linecap="round" fill="none"></g><g id="g-atoms"></g><g id="g-arrows" stroke="#1e293b" stroke-linecap="round" stroke-linejoin="round" fill="none"></g><g id="g-over"></g></g></svg>
                 <div id="sketch-hint"></div>
+                <div id="props-box"><button class="btn" id="b-props" title="Show the formula, molar mass and percent composition">PROPERTIES</button><span id="props" hidden><span id="formula"></span><span id="pct"></span></span></div>
+                <div id="val-warn" hidden></div>
                 <button id="restore-bars" class="restore" hidden title="Show the hidden toolbars">☰ TOOLBARS</button>
             </div>
             <div class="dock" id="dock-right" data-side="right"></div>
@@ -577,12 +603,17 @@
                     </div>
                     <div class="cp-half" id="cp-job">
                         <div class="cp-sec">JOB</div>
-                        <div class="cp-seg" role="group" aria-label="Task"><button class="cp-task active" data-task="opt">Optimize geometry</button><button class="cp-task" data-task="sp">Single point energy</button></div>
                         <div class="job-grid">
-                            <label for="job-conv">Convergence <button class="cp-i" id="conv-i" title="What convergence means" aria-label="What convergence means">i</button></label><select id="job-conv"><option value="0.05">Loose</option><option value="0.01" selected>Normal</option><option value="0.002">Tight</option></select>
-                            <label for="job-max">Maximum steps</label><input id="job-max" type="number" min="10" max="2000" step="10" value="200">
-                            <label>Charge</label><span id="job-charge" title="The total charge, from the formal charges drawn on the structure">0</span>
-                            <label for="job-live">Live update</label><span><input id="job-live" type="checkbox" checked> <span class="hint-in">show each step</span></span>
+                            <label for="job-task">Job <button class="cp-i" id="task-i" title="What each job does" aria-label="What each job does">i</button></label><select id="job-task"><option value="opt">Geometry Optimization</option><option value="sp">Single Point Energy</option><option value="freq">Vibrational Frequencies</option><option value="scan">Coordinate Scan</option></select>
+                            <div class="jrow" data-jt="scan"><label>Bond to rotate</label><span id="job-bond"></span></div>
+                            <div class="jrow" data-jt="scan"><label for="job-scanmode">Scan type</label><select id="job-scanmode"><option value="rigid">Rigid: all other atoms fixed</option><option value="relaxed">Relaxed: optimize at each angle</option></select></div>
+                            <div class="jrow" data-jt="scan"><label for="job-step">Step</label><select id="job-step"><option value="1" selected>1° (360 points)</option><option value="5">5° (72 points)</option><option value="10">10° (36 points)</option><option value="15">15° (24 points)</option><option value="30">30° (12 points)</option></select></div>
+                            <div class="jrow" data-jt="freq"><label for="job-freqopt">Optimize first</label><span><input id="job-freqopt" type="checkbox" checked> <span class="hint-in">frequencies are only meaningful at a minimum</span></span></div>
+                            <div class="jrow" data-jt="freq"><label>Scale factor</label><span id="job-scale"></span></div>
+                            <div class="jrow" data-jt="opt freq scan"><label for="job-conv">Convergence <button class="cp-i" id="conv-i" title="What convergence means" aria-label="What convergence means">i</button></label><select id="job-conv"><option value="0.05">Loose</option><option value="0.01" selected>Normal</option><option value="0.002">Tight</option></select></div>
+                            <div class="jrow" data-jt="opt"><label for="job-max">Maximum steps</label><input id="job-max" type="number" min="10" max="2000" step="10" value="200"></div>
+                            <div class="jrow" data-jt="opt sp freq scan"><label>Charge</label><span id="job-charge" title="The total charge, from the formal charges drawn on the structure">0</span></div>
+                            <div class="jrow" data-jt="opt"><label for="job-live">Live update</label><span><input id="job-live" type="checkbox" checked> <span class="hint-in">show each step</span></span></div>
                         </div>
                         <div class="cp-row"><button class="btn primary" id="b-job" title="Run the job with these options">▶ SUBMIT JOB</button>
                             <button class="btn cp-ico" id="b-film" title="Replay the optimization: watch each step toward the energy minimum" aria-label="Replay the optimization" disabled><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3" y="2.5" width="18" height="19" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7.5 2.5v19M16.5 2.5v19" stroke="currentColor" stroke-width="1.6"/><path d="M3.8 6h2.6M3.8 10h2.6M3.8 14h2.6M3.8 18h2.6M17.6 6h2.6M17.6 10h2.6M17.6 14h2.6M17.6 18h2.6" stroke="currentColor" stroke-width="1.8"/><path d="M10.5 9l4 3-4 3z" fill="currentColor"/></svg></button>
@@ -593,6 +624,7 @@
                     <section class="cp-card cp-wide" id="cp-results">
                         <div class="cp-sec">RESULTS</div>
                         <div class="hint-sm" id="res-note">Submit a job to see the results here.</div>
+                        <div id="comp-scan"></div><div id="comp-freq"></div>
                         <div id="comp-res"></div>
                         <details class="rd" id="mo-det" data-k="mo"><summary>MOLECULAR ORBITALS <span class="src">energy ladder · HOMO / LUMO · lobes on the model</span></summary><button id="b-mo" hidden></button><div id="mo-box"></div></details>
                     </section>
@@ -681,7 +713,7 @@
                 <div class="tab-col"><button class="tab-btn" id="tab" aria-expanded="false">STYLE<span class="chev">▲</span></button></div>
             </div>
             <div id="busy" hidden>Building 3D model…</div>
-            <div id="v3bar"><button class="btn" id="center3d" title="Center the model in the window">⌖ CENTER</button><button class="btn tg" id="b-flex" title="Let the single bonds turn, so the molecule moves through its conformations (staggered, eclipsed, gauche, anti…)">SINGLE-BOND ROTATION: OFF</button><button class="btn tg" id="b-esp" title="Electrostatic potential energy map on the molecule's surface: red = electron-rich (δ−), blue = electron-poor (δ+)">ELECTROSTATIC POTENTIAL ENERGY MAP: OFF</button><button class="btn" id="b-clrlab" title="Clear the labels on the model (measurements, charges, bond orders, dipole). Double-clicking empty space does the same">✕ CLEAR LABELS</button></div>
+            <div id="v3bar"><button class="btn" id="center3d" title="Center the model in the window">⌖ CENTER</button><button class="btn tg" id="b-flex" title="Let the single bonds turn, so the molecule moves through its conformations (staggered, eclipsed, gauche, anti…)">SINGLE-BOND ROTATION: OFF</button><button class="btn tg" id="b-esp" title="Electrostatic potential energy map on the molecule's surface: red = electron-rich (δ−), blue = electron-poor (δ+)">ELECTROSTATIC POTENTIAL ENERGY MAP: OFF</button><button class="btn" id="b-clrlab" title="Clear the labels on the model (measurements, charges, bond orders, dipole). Measurements stay in the Measurements table until you press its CLEAR button">✕ CLEAR LABELS</button></div>
             <div id="esp-op" hidden><label for="s-espop">Surface opacity <span id="v-espop"></span></label><input id="s-espop" type="range" min="0.05" max="1" step="0.05" value="0.7"></div>
             <div id="bondpanel" hidden>
                 <span>Bond <b id="bp-name" style="min-width:0;text-align:left"></b></span>
@@ -4041,8 +4073,14 @@ function autoMapAtoms(m, R, P) {
         }
         { const cc = PARTY.on ? 'currentColor' : '#1e293b'; gB.setAttribute('stroke', cc); gR.setAttribute('stroke', cc); }
         // a steady neon aura around every line, label and arrow (an SVG glow filter on the drawing)
-        ['g-fills', 'g-bonds', 'g-atoms', 'g-arrows'].forEach(id => { const g = $(id); if (PARTY.on) g.setAttribute('filter', 'url(#neon-glow)'); else g.removeAttribute('filter'); });
+        // the glow is a blurred copy drawn UNDER the drawing (the crisp lines, labels and lone pairs are never filtered, so Safari/iPad always shows them)
         gB.innerHTML = P.b; gA.innerHTML = P.a; gR.innerHTML = P.r; $('g-fills').innerHTML = P.f; $('fdefs').innerHTML = P.defs;
+        gA.setAttribute('font-family', S.fam); gA.setAttribute('font-size', S.font); gA.setAttribute('font-weight', S.weight);
+        { const gg = $('g-glow');
+          if (PARTY.on) { const at = (g, ks) => ks.map(k => g.getAttribute(k) != null ? ` ${k}="${g.getAttribute(k)}"` : '').join('');
+              gg.setAttribute('filter', 'url(#neon-glow)');
+              gg.innerHTML = `<g>${P.f}</g><g${at(gB, ['stroke', 'stroke-width', 'stroke-linecap', 'fill'])}>${P.b}</g><g${at(gA, ['font-family', 'font-size', 'font-weight'])}>${P.a}</g><g${at(gR, ['stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'fill'])}>${P.r}</g>`.replace(/\sid="[^"]*"/g, '');
+          } else { gg.removeAttribute('filter'); gg.innerHTML = ''; } }
         if (PARTY.on) try {      // keep the glow filter and the halo mask just big enough for the drawing (very large regions make Safari render them at low resolution: lines vanish, only the glow is left)
             let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
             ['g-fills', 'g-bonds', 'g-atoms', 'g-arrows'].forEach(id => { const g = $(id); if (!g.firstChild) return; const b = g.getBBox(); if (!b.width && !b.height) return; x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.width); y1 = Math.max(y1, b.y + b.height); });
@@ -4051,6 +4089,9 @@ function autoMapAtoms(m, R, P) {
         gA.setAttribute('font-family', S.fam); gA.setAttribute('font-size', S.font); gA.setAttribute('font-weight', S.weight);
         drawHover(); updateSelBar();
         if (NMRS.mode === 'nmr' && sel.atoms.size && NMRS.ids) { const i = [...sel.atoms].find(j => mol.atoms[j] && mol.atoms[j].el !== 'H'); if (i != null && !NMRS.ids.includes(i)) { NMRS.focus = i; scheduleNMR(); } }
+        if (NMRS.mode === 'c13' && C13.R) { const key = [...sel.atoms].join();      // clicking a carbon in the 2D editor picks its environment
+            if (key !== C13.selKey) { C13.selKey = key; if (sel.atoms.size === 1) { const i = [...sel.atoms][0], k = C13.R.peaks.findIndex(q => q.atoms.includes(i)); if (k >= 0 && k !== C13.sel) { C13.sel = k; setTimeout(() => { drawC13(); render(); }, 0); } } } }
+        if (['c13', 'n2d', 'lit'].includes(NMRS.mode) && sel.atoms.size) { const i = [...sel.atoms].find(j => mol.atoms[j] && mol.atoms[j].el !== 'H'); const cur = NMRS.mode === 'c13' ? C13.ids : NMRS.mode === 'n2d' ? N2D.ids : null; if (i != null && cur && !cur.includes(i)) { NMRS.focus = i; scheduleExtra(); } }
         if (NMRS.mode === 'ms' && sel.atoms.size && MSS.ids) { const i = [...sel.atoms].find(j => mol.atoms[j] && mol.atoms[j].el !== 'H'); if (i != null && !MSS.ids.includes(i)) { NMRS.focus = i; scheduleMS(); } }
         if (NMRS.mode === 'ir' && sel.atoms.size && IRS.sig) { const i = [...sel.atoms].find(j => mol.atoms[j] && mol.atoms[j].el !== 'H'); if (i != null && i !== NMRS.focus && !(nmrFragment().includes(i))) { NMRS.focus = i; scheduleIR(); } }
         try { syncRect(); } catch (err) {}      // the selection bar may have just appeared/disappeared and moved the canvas
@@ -4176,6 +4217,9 @@ function autoMapAtoms(m, R, P) {
         if (tool.seqMode) s += seqOverlay(u);
         if (NMRS.mode === 'nmr') s += nmrOverlay(u);
         if (NMRS.mode === 'ir') s += irOverlay(u);
+        if (NMRS.mode === 'c13') s += c13Overlay(u);
+        if (NMRS.mode === 'n2d') s += n2dOverlay(u);
+        s += valenceOverlay(u);
         if (preview) s += preview;
         gO.innerHTML = s;
     }
@@ -4414,7 +4458,7 @@ function autoMapAtoms(m, R, P) {
         drag = { p0: p, moved: false, sx: e.clientX, sy: e.clientY, vt: { ...view }, shift: e.shiftKey };
         if (e.button === 1 || spaceDown || tool.kind === 'pan') { drag.pan = true; svg.classList.add('panning'); return; }
         { const fa = atomAt(p), fb = fa < 0 ? bondAt(p) : -1, f = fa >= 0 ? fa : fb >= 0 ? mol.bonds[fb].a : -1;      // the NMR shows the structure last clicked
-            if (f >= 0 && (NMRS.focus < 0 || !mol.atoms[NMRS.focus] || !fragmentOf(NMRS.focus).has(f))) { NMRS.focus = f; if (NMRS.mode === 'nmr') scheduleNMR(); if (NMRS.mode === 'ir') scheduleIR(); if (NMRS.mode === 'ms') scheduleMS(); } }
+            if (f >= 0 && (NMRS.focus < 0 || !mol.atoms[NMRS.focus] || !fragmentOf(NMRS.focus).has(f))) { NMRS.focus = f; if (NMRS.mode === 'nmr') scheduleNMR(); if (NMRS.mode === 'ir') scheduleIR(); if (NMRS.mode === 'ms') scheduleMS(); if (['c13', 'n2d', 'lit'].includes(NMRS.mode)) scheduleExtra(); } }
         if (tool.seqMode && e.button === 0) { drag = null; seqClick(p); return; }      // ARROW SEQUENCING: a click numbers (or un-numbers) a curved arrow
         if (cPend && e.button === 0) {      // the second click of a curved arrow: its end (snapped to an atom, a bond, or between two atoms, as when dragging)
             drag = null; const c = cPend; cPend = null; preview = null;
@@ -4535,6 +4579,7 @@ function autoMapAtoms(m, R, P) {
             if (ar >= 0) aHold = ar;
             else if (aHold != null) { const A = mol.arrows[aHold]; const b = A && itemsBox({ atoms: [], arrows: [aHold] }, 0.6); if (!b || p.x < b.x0 || p.x > b.x1 || p.y < b.y0 || p.y > b.y1) aHold = null; }
             if (NMRS.mode === 'nmr') setNmrHot(nmrHotAt(p));
+            else if (NMRS.mode === 'c13') c13SetHot(c13HotAt(p));
             if (cPend) { if (tool.kind === 'arrow' && (tool.arrow === 'curve' || tool.arrow === 'fish')) { const S = STYLES[disp.style]; cPend.path.push(p); if (cPend.path.length > 60) cPend.path.shift();
                     preview = `<g opacity="0.55" stroke-width="${S.lw * 1.15}" stroke-linecap="round">${arrowSVG(curvedFrom(cPend.p0, p, pathSide(cPend, p), tool.arrow), S)}</g>`; svg.style.cursor = 'crosshair'; drawHover(); return; }
                 cPend = null; preview = null; }
@@ -4633,7 +4678,7 @@ function autoMapAtoms(m, R, P) {
             preview = `<g opacity="0.55" stroke-width="${S.lw * 1.15}" stroke-linecap="round">${arrowSVG(ar, S)}</g>`; drawHover();
         }
     });
-    svg.addEventListener('pointerleave', () => { if (NMRS.mode === 'nmr' && NMRS.hi != null) setNmrHot(null); });
+    svg.addEventListener('pointerleave', () => { if (NMRS.mode === 'nmr' && NMRS.hi != null) setNmrHot(null); if (NMRS.mode === 'c13' && C13.hot != null) c13SetHot(null); });
     svg.addEventListener('pointerup', (e) => {
         if (!drag) return;
         const d = drag; drag = null; preview = null; svg.classList.remove('panning'); svg.classList.remove('pen-sel');
@@ -6523,6 +6568,7 @@ function autoMapAtoms(m, R, P) {
         NMRS.nAtoms = mol.atoms.length;
         if (NMRS.mode === 'nmr') scheduleNMR();
         if (NMRS.mode === 'ms') scheduleMS();
+        if (['c13', 'n2d', 'lit'].includes(NMRS.mode)) scheduleExtra();
         buildTimer = setTimeout(() => { rebuild3D(fit3D); $('busy').hidden = true; }, 250);
     }
 
@@ -7935,12 +7981,12 @@ function autoMapAtoms(m, R, P) {
         if (IRS.src === 'calc') { const C = IRS.calc, ok = C && M3 && C.key === structKey(M3.g) && C.meth === IRS.meth;
             sub.innerHTML = IRS.busy ? `${F}<span class="ir-busy">calculating · ${IRS.prog || ''}</span> <button class="nmr-tg" id="ir-cancel">CANCEL</button>`
                 : IRS.calcMsg ? `${F}<span class="ir-warn">${escX(IRS.calcMsg)}</span>`
-                : ok ? `${F}normal modes: ${IR_METH[C.meth].name}-optimized geometry, harmonic frequencies × ${IR_METH[C.meth].scale}, intensities from ${C.muSrc || 'dipole derivatives'}${C.modes.some(m => m.nu < -30) ? ` · <span class="ir-warn">${C.modes.filter(m => m.nu < -30).length} imaginary frequency: not a true minimum</span>` : ''}`
+                : ok ? `${F}normal modes: ${IR_METH[C.meth].name}-optimized geometry, harmonic frequencies × ${IR_METH[C.meth].scale}, intensities from ${C.muSrc || 'dipole derivatives'}${C.modes.some(m => m.nu < -30) ? ` · <span class="ir-warn" title="An imaginary frequency means the energy goes DOWN along that vibration: the geometry sits on a ridge (a saddle point), not in a valley (a true minimum). Its 'band' is not a real absorption. Usually the optimization stopped a little early or got stuck on a symmetric, eclipsed or planar form; re-optimizing from a slightly twisted structure normally removes it.">${C.modes.filter(m => m.nu < -30).length} imaginary frequenc${C.modes.filter(m => m.nu < -30).length > 1 ? 'ies' : 'y'}: a saddle point, not a true minimum (hover for details)</span>` : ''}`
                 : `${F}<button class="nmr-tg" id="ir-run">▶ RUN THE NORMAL-MODE CALCULATION</button> <span class="ir-hint">(optimizes, then computes every vibration; ${M3 && M3.g.atoms.length > 25 ? 'about a minute' : 'a few seconds'})</span>`;
             const c = $('ir-cancel'); if (c) c.onclick = () => { irCalcStop(); IRS.calcMsg = 'Cancelled.'; updateIR(); };
             const rb = $('ir-run'); if (rb) rb.onclick = () => irCalcStart();
         } else sub.innerHTML = ids.length ? `${F}predicted from group frequencies` : 'Draw a structure in the 2D editor';
-        $('ir-src-g').classList.toggle('on', IRS.src !== 'calc'); $('ir-src-c').classList.toggle('on', IRS.src === 'calc'); $('ir-meth').hidden = IRS.src !== 'calc';
+        $('ir-src-g').classList.toggle('on', IRS.src !== 'calc'); $('ir-src-c').classList.toggle('on', IRS.src === 'calc'); 
     }
 
     // =====================================================================
@@ -8090,8 +8136,438 @@ function autoMapAtoms(m, R, P) {
         let s = ''; MSS.sel.set.forEach(i => { const a = mol.atoms[i]; if (a) s += `<circle cx="${a.x}" cy="${a.y}" r="0.34" fill="#2563eb" fill-opacity="0.16"/>`; });
         return s + msCutsSVG(MSS.sel.cuts, u);
     }
+    // =====================================================================
+    //  Predicted ¹³C NMR: additivity rules (Grant–Paul alkyl increments with Pretsch substituent increments for sp³ carbons,
+    //  alkene and benzene substituent increments, base values for carbonyl, nitrile, alkyne and heteroaromatic carbons).
+    //  Carbons equivalent by symmetry share one peak.
+    // =====================================================================
+    function c13Predict(m, ids) {
+        const nb = neighbors(m), A = (i) => m.atoms[i], isH = (i) => A(i).el === 'H', inF = new Set(ids);
+        const heavy = ids.filter(i => !isH(i) && !A(i).pseudo);
+        const hc = {}, hvy = {}; heavy.forEach(i => { hvy[i] = nb[i].filter(y => !isH(y.j) && !(m.bonds[y.k] && m.bonds[y.k].style && NONCOV.has(m.bonds[y.k].style))); hc[i] = implicitH(m, i, nb) + nb[i].filter(y => isH(y.j)).length; });
+        const el = (i) => A(i).el, bo = (i, j) => { const y = (hvy[i] || []).find(z => z.j === j); return y ? y.o || 1 : 0; };
+        // rings and aromaticity (as for ¹H)
+        const rings = [], seen = new Set();
+        m.bonds.forEach(b => { if (!inF.has(b.a) || !inF.has(b.b) || isH(b.a) || isH(b.b) || (b.style && NONCOV.has(b.style))) return;
+            const prev = new Map([[b.a, -1]]), q = [b.a];
+            while (q.length) { const x = q.shift(); if (x === b.b) break; for (const y of (hvy[x] || [])) { if ((x === b.a && y.j === b.b) || prev.has(y.j)) continue; prev.set(y.j, x); q.push(y.j); } }
+            if (!prev.has(b.b)) return; const cyc = []; for (let x = b.b; x !== -1; x = prev.get(x)) cyc.push(x);
+            if (cyc.length > 8) return; const key = cyc.slice().sort((p, r) => p - r).join(','); if (!seen.has(key)) { seen.add(key); rings.push(cyc); } });
+        const arom = new Set(), aRings = [];
+        for (let pass = 0; pass < 4; pass++) rings.forEach(r => { if (aRings.includes(r) || r.length < 5 || r.length > 7) return;
+            let e = 0; for (const x of r) { const dIn = hvy[x].some(y => y.o === 2 && r.includes(y.j)), dEx = hvy[x].some(y => y.o === 2 && !r.includes(y.j) && arom.has(y.j));
+                if (dIn || dEx) e += 1; else if (['N', 'O', 'S'].includes(el(x)) && !hvy[x].some(y => y.o >= 2)) e += 2; else if (el(x) === 'C' && A(x).charge === -1) e += 2; else if (el(x) === 'C' && A(x).charge === 1) e += 0; else { e = -99; break; } }
+            if (e > 0 && (e - 2) % 4 === 0) { aRings.push(r); r.forEach(x => arom.add(x)); } });
+        const ringSize = (x) => Math.min(99, ...rings.filter(r => r.includes(x)).map(r => r.length));
+        const isCO = (j) => el(j) === 'C' && hvy[j].some(y => y.o === 2 && el(y.j) === 'O');
+        const sp = (j) => hvy[j].some(y => y.o === 3) ? 1 : (hvy[j].some(y => y.o === 2) || arom.has(j)) ? 2 : 3;
+        // what substituent j is, seen from `from`
+        function sub(j, from) {
+            const a = A(j), oth = hvy[j].filter(y => y.j !== from), has = (f) => oth.some(f);
+            if (a.pseudo || ['R', 'X', '*'].includes(a.el)) return 'R';
+            if (a.el === 'C') {
+                if (arom.has(j)) return 'Ar';
+                if (has(y => y.o === 2 && el(y.j) === 'O')) { if (has(y => el(y.j) === 'O' && y.o === 1 && A(y.j).charge < 0)) return 'COO-'; if ((hc[j] || 0) > 0) return 'CHO'; if (has(y => y.o === 1 && el(y.j) === 'O')) return hvy[oth.find(y => y.o === 1 && el(y.j) === 'O').j].length > 1 ? 'COOR' : 'COOH'; if (has(y => el(y.j) === 'N')) return 'CONR'; if (has(y => el(y.j) === 'Cl')) return 'COCl'; return 'COR'; }
+                if (has(y => y.o === 3 && el(y.j) === 'N')) return 'CN';
+                if (has(y => y.o === 3)) return 'C#C';
+                if (has(y => y.o === 2 && el(y.j) === 'N')) return 'C=N';
+                if (has(y => y.o === 2)) return 'C=C';
+                if (oth.filter(y => el(y.j) === 'F').length >= 2) return 'CF3';
+                return 'alkyl';
+            }
+            if (a.el === 'O') { if (a.charge < 0) return 'O-'; const c = oth[0]; if (!c) return 'OH'; if (isCO(c.j)) return 'OCOR'; if (arom.has(c.j)) return 'OAr'; return 'OR'; }
+            if (a.el === 'N') { const nO = oth.filter(y => el(y.j) === 'O').length; if (nO >= 2 || has(y => el(y.j) === 'O' && y.o === 2)) return 'NO2'; if (a.charge > 0) return 'N+'; if (has(y => isCO(y.j))) return 'NHCO'; if (has(y => arom.has(y.j))) return 'NAr';
+                const nC = oth.length; return nC === 0 ? 'NH2' : nC === 1 ? 'NHR' : 'NR2'; }
+            if (a.el === 'S') return has(y => el(y.j) === 'O' && y.o === 2) ? 'SO2' : (hc[j] ? 'SH' : 'SR');
+            return a.el;
+        }
+        const T3 = { OH: [47, 10, -6], OR: [58, 7, -4], OAr: [57, 7, -4], OCOR: [54, 6, -6], 'O-': [45, 10, -6], NH2: [29, 11, -5], NHR: [37, 8, -4], NR2: [42, 6, -3], NHCO: [28, 7, -5], NAr: [32, 8, -5], 'N+': [30, 5, -7], NO2: [63, 4, -4],
+            SH: [11, 12, -4], SR: [20, 7, -3], SO2: [45, 1, -3], F: [68, 9, -4], Cl: [31, 11, -4], Br: [20, 11, -3], I: [-6, 11, -1], COOH: [21, 3, -2], COOR: [20, 3, -2], 'COO-': [24, 4, -3], CONR: [22, 2.5, -3],
+            COR: [30, 1, -2], CHO: [31, 0, -2], COCl: [33, 2, -3], CN: [3, 2, -3], 'C=C': [20, 6, -0.5], 'C=N': [20, 3, -2], 'C#C': [4.5, 5.5, -3.5], Ar: [23, 9, -2], CF3: [20, 3, -2], Si: [2, 3, -1], P: [15, 2, -2], B: [10, 4, -2], Se: [8, 10, -3], R: [9.1, 9.4, -2.5] };
+        const TA = { alkyl: [9.3, 0.7, -0.1, -2.9], OH: [26.9, -12.8, 1.4, -7.4], 'O-': [39.6, -8.2, 1.9, -13.6], OR: [31.4, -14.4, 1.0, -7.7], OAr: [27.6, -11.2, -0.3, -6.9], OCOR: [22.4, -7.1, 0.4, -3.2], NH2: [18.2, -13.4, 0.8, -10.0], NHR: [21.0, -16.2, 0.8, -12.6],
+            NR2: [22.5, -15.7, 0.8, -11.8], NAr: [14.7, -10.6, 0.9, -7.6], NHCO: [9.7, -8.1, 0.2, -4.4], 'N+': [19.0, -8.0, 1.5, 1.5], NO2: [19.9, -4.9, 0.9, 6.1], CN: [-15.7, 3.6, 0.7, 4.3], CHO: [8.2, 1.2, 0.5, 5.8], COR: [8.9, 0.1, -0.1, 4.4],
+            COOH: [2.1, 1.6, -0.1, 5.2], 'COO-': [7.6, 0.8, 0.0, 2.8], COOR: [2.0, 1.2, -0.1, 4.3], CONR: [5.0, -1.2, 0.1, 3.4], COCl: [4.6, 2.9, 0.6, 7.0], F: [35.1, -14.3, 0.9, -4.5], Cl: [6.4, 0.2, 1.0, -2.0], Br: [-5.4, 3.4, 2.2, -1.0],
+            I: [-32.2, 9.9, 2.6, -7.3], Ar: [13.1, -1.1, 0.5, -1.1], 'C=C': [9.1, -2.4, 0.2, -0.5], 'C=N': [7.0, -1.0, 0.3, 2.0], 'C#C': [-6.2, 3.6, -0.4, -0.3], SH: [2.1, 0.7, 0.3, -3.2], SR: [10.2, -1.8, 0.4, -3.6], SO2: [12.3, -1.4, 0.8, 5.1],
+            CF3: [2.6, -3.1, 0.4, 3.4], Si: [11.6, 4.9, -0.7, 0.4], P: [9.0, 5.0, 0.0, 1.0], B: [9.0, 6.0, -1.0, 2.0], R: [9.3, 0.7, -0.1, -2.9] };
+        const TE = { alkyl: [10.6, -7.9], OH: [29, -39], OR: [29, -39], OAr: [24, -33], OCOR: [18, -27], 'O-': [25, -35], COR: [14, 5], CHO: [15, 14], COOH: [5, 9], 'COO-': [9, 4], COOR: [6, 7], CONR: [9, 4], COCl: [8, 14], CN: [-16, 15],
+            Cl: [3, -6], Br: [-8, -1], I: [-38, 7], F: [25, -34], Ar: [12.5, -11], 'C=C': [13.6, -7], 'C#C': [-6, 5], 'C=N': [10, 2], NR2: [28, -32], NHR: [28, -32], NH2: [28, -32], NAr: [23, -27], NHCO: [7, -21], 'N+': [20, -6], NO2: [22, -1],
+            SR: [19, -16], SH: [8, -10], SO2: [14, 4], CF3: [4, 5], Si: [16, 7], P: [10, 2], B: [12, 8], R: [10.6, -7.9] };
+        const out = {};
+        function shift(i) {
+            const a = A(i), H = hc[i] || 0, S = sp(i);
+            if (arom.has(i)) {
+                const r = aRings.filter(r2 => r2.includes(i)).sort((p, q) => q.length - p.length)[0], n = r.length, k0 = r.indexOf(i), dist = (j) => { const d = Math.abs(r.indexOf(j) - k0); return Math.min(d, n - d); };
+                const het = r.filter(x => el(x) !== 'C'), fused = aRings.some(r2 => r2 !== r && r2.includes(i));
+                let d0 = 128.5;
+                if (n === 6 && het.length) { const dn = Math.min(...het.map(dist)); d0 = dn === 1 ? 150 : dn === 2 ? 124 : 136; if (het.length > 1) d0 += dn === 1 ? 5 : 0; }
+                else if (n === 5) { const X = het.length ? het.reduce((p, x) => dist(x) < dist(p) ? x : p) : null, dx = X == null ? 2 : dist(X), xe = X == null ? 'C' : el(X), pyN = het.some(x => el(x) === 'N' && hvy[x].some(y => y.o === 2));
+                    const Tb = xe === 'O' ? [143, 110] : xe === 'S' ? [125, 127] : xe === 'N' ? (pyN ? [136, 122] : [118, 108]) : [120, 108]; d0 = dx <= 1 ? Tb[0] : Tb[1]; if (het.length > 1 && dx <= 1 && het.filter(x => dist(x) === 1).length > 1) d0 += 12; }
+                if (fused) d0 = n === 6 && !het.length ? 133.5 : d0 + 4;
+                let inc = 0; const w = n === 6 && !het.length ? 1 : 0.7;
+                r.forEach(y => { const d = dist(y); hvy[y].forEach(s => { if (r.includes(s.j) || aRings.some(r2 => r2.includes(s.j) && r2.includes(y))) return; const t = TA[sub(s.j, y)] || TA.alkyl;
+                    inc += w * (d === 0 ? t[0] : d === 1 ? t[1] : d === 2 ? t[2] : d === 3 ? t[3] : 0); }); });
+                return { d: d0 + inc, t: H ? 'CH' : 'C' };
+            }
+            if (a.el !== 'C') return null;
+            const dbl = hvy[i].find(y => y.o === 2), trip = hvy[i].find(y => y.o === 3);
+            if (dbl && el(dbl.j) === 'O') {      // carbonyl
+                const oth = hvy[i].filter(y => y !== dbl), Os = oth.filter(y => el(y.j) === 'O'), Ns = oth.filter(y => el(y.j) === 'N'), conj = oth.some(y => el(y.j) === 'C' && (arom.has(y.j) || hvy[y.j].some(z => z.o >= 2 && z.j !== i)));
+                const ar = oth.some(y => arom.has(y.j)), rs = ringSize(i);
+                let d;
+                if (Os.length >= 2) d = 155; else if (Ns.length >= 2) d = 158; else if (Os.length && Ns.length) d = 156;
+                else if (Os.length) { const o = Os[0].j; d = A(o).charge < 0 ? 181 : hvy[o].length < 2 ? (conj ? 172 : 178) : hvy[o].some(z => z.j !== i && isCO(z.j)) ? 167 : (rs === 5 ? 177 : conj ? 167 : 172); }
+                else if (Ns.length) d = conj ? 168 : 172;
+                else if (oth.some(y => el(y.j) === 'Cl')) d = 170;
+                else if (H) d = ar ? 192 : conj ? 194 : 201;
+                else d = rs === 5 ? 219 : rs === 4 ? 208 : rs === 6 ? 211 : ar ? 198 : conj ? 199 : 208;
+                return { d, t: H ? 'CH' : 'C' };
+            }
+            if (trip) { if (el(trip.j) === 'N') return { d: hvy[i].some(y => arom.has(y.j)) ? 119 : 118, t: 'C' };
+                const other = hvy[trip.j].find(y => y.j !== i), mine = hvy[i].find(y => y.j !== trip.j);
+                let d = H ? 68 : 80; if (mine && arom.has(mine.j)) d += 9; if (other && (arom.has(other.j) || isCO(other.j))) d += H ? 9 : 3; if (!H && !(other)) d = 84; return { d, t: H ? 'CH' : 'C' }; }
+            if (dbl && el(dbl.j) === 'N') return { d: 162, t: H ? 'CH' : 'C' };
+            if (dbl && el(dbl.j) === 'C') {      // alkene
+                const p = dbl.j; if (hvy[p].some(y => y.o === 2 && y.j !== i) || hvy[i].filter(y => y.o === 2).length > 1) return { d: hvy[i].filter(y => y.o === 2).length > 1 ? 210 : 77, t: H ? 'CH' : 'C' };      // allene
+                let d = 123.3;
+                hvy[i].forEach(y => { if (y.j === p) return; const t = sub(y.j, i); if (t === 'alkyl') { d += 10.6; const nb2 = hvy[y.j].filter(z => z.j !== i).length; d += 7.2 * nb2; } else d += (TE[t] || TE.alkyl)[0]; });
+                hvy[p].forEach(y => { if (y.j === i) return; const t = sub(y.j, p); if (t === 'alkyl') { d -= 7.9; const nb2 = hvy[y.j].filter(z => z.j !== p).length; d -= 1.8 * nb2; } else d += (TE[t] || TE.alkyl)[1]; });
+                return { d, t: H === 2 ? 'CH₂' : H ? 'CH' : 'C' };
+            }
+            // sp³ carbon: −2.3 + α/β/γ increments
+            let d = -2.3; const dist = new Map([[i, 0]]), q = [i];
+            while (q.length) { const x = q.shift(), dx = dist.get(x); if (dx >= 3) continue;
+                for (const y of hvy[x]) { if (dist.has(y.j)) continue; dist.set(y.j, dx + 1);
+                    const t = sub(y.j, x);
+                    if (t === 'alkyl') { d += [9.1, 9.4, -2.5][dx]; q.push(y.j); }
+                    else d += (T3[t] || T3[el(y.j)] || T3.R)[dx] || 0; } }
+            const deg = (j) => hvy[j].length, di = deg(i);
+            hvy[i].forEach(y => { if (sub(y.j, i) !== 'alkyl') return; const dj = deg(y.j);
+                const C = { 1: { 3: -1.1, 4: -3.4 }, 2: { 3: -2.5, 4: -7.2 }, 3: { 2: -3.7, 3: -9.5, 4: -15 }, 4: { 1: -1.5, 2: -8.4, 3: -15, 4: -25 } }[di]; if (C && C[dj]) d += C[dj]; });
+            const rs = ringSize(i); if (rs === 3) d -= 28; else if (rs === 4) d -= 4; else if (rs === 5) d -= 8; else if (rs === 6) d -= 4.5;
+            return { d: clamp(d, -10, 95), t: H === 3 ? 'CH₃' : H === 2 ? 'CH₂' : H === 1 ? 'CH' : 'C' };
+        }
+        // equivalence (Morgan ranks over the heavy atoms)
+        let rk = Object.fromEntries(heavy.map(i => [i, [el(i), A(i).charge || 0, hc[i], hvy[i].length, arom.has(i) ? 1 : 0, hvy[i].map(y => y.o).sort().join('')].join('/')]));
+        const comp = (keys) => { const u = [...new Set(Object.values(keys))].sort(); const r = {}; Object.keys(keys).forEach(i => { r[i] = u.indexOf(keys[i]); }); return [r, u.length]; };
+        let [rank, nC] = comp(rk);
+        for (let it = 0; it < 30; it++) { const k2 = {}; heavy.forEach(i => { k2[i] = rank[i] + '(' + hvy[i].map(y => rank[y.j] + ':' + (arom.has(i) && arom.has(y.j) ? 'a' : y.o)).sort().join(',') + ')'; }); const [r2, n2] = comp(k2); rank = r2; if (n2 === nC) break; nC = n2; }
+        const Cs = heavy.filter(i => el(i) === 'C'), num = new Map(Cs.map((i, k) => [i, k + 1]));
+        const cls = new Map();
+        Cs.forEach(i => { const s = shift(i); if (!s) return; const H = hc[i] || 0, key = rank[i];
+            const eneg = hvy[i].filter(y => ['O', 'N', 'F', 'Cl', 'Br'].includes(el(y.j))).length, s1 = sp(i);
+            const J1 = H ? (s1 === 1 ? 250 : arom.has(i) ? 160 : (hvy[i].some(y => y.o === 2 && el(y.j) === 'O') ? 172 : s1 === 2 ? 156 : 125 + 10 * eneg + (ringSize(i) === 3 ? 35 : 0))) : 0;
+            if (!cls.has(key)) cls.set(key, { atoms: [], d: 0, nH: H, t: s.t.replace(/^C$/, H ? s.t : 'C'), J1 });
+            const c = cls.get(key); c.atoms.push(i); c.d += s.d; });
+        const peaks = [...cls.values()].map(c => ({ ...c, d: c.d / c.atoms.length, n: c.atoms.length, type: c.nH === 3 ? 'CH₃' : c.nH === 2 ? 'CH₂' : c.nH === 1 ? 'CH' : 'C', nums: c.atoms.map(i => num.get(i)) })).sort((p, q) => q.d - p.d);
+        return { peaks, num, nC: Cs.length };
+    }
+    // =====================================================================
+    //  ¹³C NMR window: broadband ¹H-decoupled (default), ¹H-coupled, and decoupled with DEPT-90 / DEPT-135
+    // =====================================================================
+    const C13 = { mode: 'bb', R: null, ids: null, sel: -1, hot: null, H: null, view: null, bEd: [], bCard: [] };
+    function c13Lines(p, mode) {      // [{x (ppm), h}] for one carbon environment
+        const base = p.n * (p.nH ? 1 : 0.35);      // the NOE makes protonated carbons stronger; quaternary carbons are weak
+        if (mode !== 'coupled' || !p.nH) return [{ x: p.d, h: base }];
+        const n = p.nH, J = p.J1 / 100, out = []; for (let k = 0; k <= n; k++) { const c = [1, 1, 2, 6, 24][n] / ([1, 1, 2, 6, 24][k] * [1, 1, 2, 6, 24][n - k]); out.push({ x: p.d + (k - n / 2) * J, h: base * c / Math.pow(2, n) * 1.6 }); }
+        return out;
+    }
+    function updateC13() {
+        if (NMRS.mode !== 'c13') return;
+        const ids = nmrFragment(); if (!C13.ids || C13.ids.join() !== ids.join()) { C13.sel = -1; C13.hot = null; C13.view = null; } C13.ids = ids;
+        try { C13.R = ids.some(i => mol.atoms[i].el === 'C') ? c13Predict(mol, ids) : null; } catch (err) { console.error(err); C13.R = null; }
+        $('c13-sub').innerHTML = C13.R ? `${nmrFormula(ids)} · ${C13.R.nC} carbon${C13.R.nC > 1 ? 's' : ''}, ${C13.R.peaks.length} environment${C13.R.peaks.length > 1 ? 's' : ''} · predicted, 100 MHz, CDCl<sub>3</sub>` : (ids.length ? 'No carbon atoms in this structure' : 'Draw a structure in the 2D editor');
+        document.querySelectorAll('[data-c13]').forEach(b => b.classList.toggle('on', b.dataset.c13 === C13.mode));
+        drawC13(); render();
+    }
+    function drawC13() {
+        const wrap = $('c13-plot'), R = C13.R; if (!wrap) return;
+        if (!R) { wrap.innerHTML = `<div class="nmr-empty">${C13.ids && C13.ids.length ? 'No carbons' : 'No structure yet'}</div>`; $('c13-table').innerHTML = ''; $('c13-struct').innerHTML = ''; return; }
+        R.peaks.forEach((p, k) => { p.color = NMR_COLORS[k % NMR_COLORS.length]; });      // each carbon environment gets a colour, like the ¹H environments
+        const act = C13.hot != null ? C13.hot : C13.sel;
+        const W = Math.max(320, wrap.clientWidth), H = Math.max(220, wrap.clientHeight), ml = 22, mr = 22, top = 16, bot = 46, pw = W - ml - mr;
+        const fullHi = Math.max(220, Math.ceil(Math.max(...R.peaks.map(p => p.d)) / 10) * 10 + 10), fullLo = Math.min(0, Math.floor(Math.min(...R.peaks.map(p => p.d)) / 10) * 10 - 5);
+        const hi = C13.view ? C13.view.hi : fullHi, lo = C13.view ? C13.view.lo : fullLo, inR = (d) => d <= hi + 1e-9 && d >= lo - 1e-9;
+        const X = (d) => ml + (hi - d) / (hi - lo) * pw, mode = C13.mode;
+        C13.scale = { ml, pw, hi, lo, top, bot: H - bot + 8 }; $('c13-full').hidden = !C13.view;
+        const panels = mode === 'dept' ? [{ k: 'bb', name: 'Broadband ¹H-decoupled' }, { k: 'd90', name: 'DEPT-90 (CH only)' }, { k: 'd135', name: 'DEPT-135 (CH, CH₃ up · CH₂ down)' }] : [{ k: mode, name: mode === 'coupled' ? '¹H-coupled' : 'Broadband ¹H-decoupled' }];
+        const ph = (H - top - bot) / panels.length;
+        let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">`;
+        const lines = [];
+        panels.forEach((P, pi) => {
+            const y0 = top + pi * ph, dept = P.k === 'd90' || P.k === 'd135';
+            let rows = 0; const lab = []; if (pi === 0) R.peaks.map((p, k) => ({ p, k })).filter(({ p }) => inR(p.d)).sort((a, b) => b.p.d - a.p.d).forEach(({ p, k }) => { const x = X(p.d); let row = 0; while (lab.some(u => u.row === row && Math.abs(u.x - x) < 44)) row++; lab.push({ x, row, p, k }); rows = Math.max(rows, row + 1); });
+            const band = pi === 0 ? 22 + rows * 15 : 22, base = P.k === 'd135' ? y0 + band + (ph - band) * 0.55 : y0 + ph - 18, amp = P.k === 'd135' ? (ph - band) * 0.5 : ph - 18 - band - 4;
+            s += `<line x1="${ml}" y1="${base}" x2="${W - mr}" y2="${base}" stroke="#94a3b8" stroke-width="1"/>`;
+            s += `<text x="${ml + 4}" y="${y0 + 14}" font-size="${SPEC_FS.small}" font-weight="700" fill="#475569">${P.name}</text>`;
+            const all = []; R.peaks.forEach((p, k) => {
+                let ls;
+                if (P.k === 'd90') ls = p.nH === 1 ? [{ x: p.d, h: p.n }] : [];
+                else if (P.k === 'd135') ls = p.nH ? [{ x: p.d, h: p.n * (p.nH === 2 ? -1 : 1) }] : [];
+                else ls = c13Lines(p, P.k);
+                ls.forEach(l => all.push({ ...l, k })); });
+            if (!dept) [[77.48, 1], [77.16, 1], [76.84, 1]].forEach(([x, h]) => all.push({ x, h: h * 0.7, k: -2 }));
+            const mx = Math.max(0.01, ...all.map(l => Math.abs(l.h)));
+            all.forEach(l => { if (!inR(l.x)) return; const x = X(l.x), y = base - l.h / mx * amp, on = l.k === act, col = l.k === -2 ? '#94a3b8' : R.peaks[l.k].color;
+                if (on) s += `<line x1="${x.toFixed(1)}" y1="${base}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${col}" stroke-opacity="0.25" stroke-width="9" stroke-linecap="round"/>`;
+                s += `<line x1="${x.toFixed(1)}" y1="${base}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${col}" stroke-width="${on ? 2.8 : 1.6}"/>`;
+                if (l.k >= 0) lines.push({ x, k: l.k });
+                if (l.k === -2 && l.x === 77.16) s += `<text x="${x}" y="${y - 5}" font-size="11" text-anchor="middle" fill="#94a3b8">CDCl₃</text>`; });
+            // labels: δ above each environment (top or only panel), staggered when crowded
+            lab.forEach(({ x, row, p, k }) => { s += `<text x="${x}" y="${y0 + 30 + row * 15}" font-size="${SPEC_FS.small}" text-anchor="middle" font-weight="${k === act ? 800 : 600}" fill="${p.color}">${p.d.toFixed(1)}</text>`; });
+        });
+        // axis
+        const ay = H - bot + 8; s += `<line x1="${ml}" y1="${ay}" x2="${W - mr}" y2="${ay}" stroke="#334155"/>`;
+        { const st = [0.1, 0.2, 0.5, 1, 2, 5, 10].find(v => (hi - lo) / v <= 24) || 10, dp = st < 1 ? 1 : 0;
+          for (let n = Math.ceil(lo / st - 1e-9); n * st <= hi + 1e-9; n++) { const t = n * st, x = X(t), big = n % 2 === 0; s += `<line x1="${x}" y1="${ay}" x2="${x}" y2="${ay + (big ? 6 : 3.5)}" stroke="#334155"/>`; if (big) s += `<text x="${x}" y="${ay + 21}" font-size="${SPEC_FS.tick}" text-anchor="middle" fill="#334155">${t.toFixed(dp)}</text>`; } }
+        s += `<text x="${W - mr}" y="${H - 4}" font-size="${SPEC_FS.axis}" text-anchor="end" fill="#64748b">${C13.view ? 'zoomed · double-click for the full spectrum · ' : ''}δ (ppm)</text>`;
+        s += `<rect id="c13-band" x="0" y="${top}" width="0" height="${ay - top}" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb" stroke-opacity="0.5" visibility="hidden"/></svg>`;
+        wrap.innerHTML = s; C13.hit = lines;
+        const M = { 3: 'q', 2: 't', 1: 'd', 0: 's' };
+        $('c13-table').innerHTML = `<table><thead><tr><th></th><th>δ (ppm)</th><th>Carbon</th><th>Type</th><th>¹H-coupled</th><th>DEPT-90</th><th>DEPT-135</th></tr></thead><tbody>${R.peaks.map((p, k) =>
+            `<tr class="nmr-sig${k === C13.sel ? ' on' : ''}${k === C13.hot ? ' hot' : ''}" data-k="${k}"><td><span class="nmr-chip c13-chip" style="background:${p.color}">${p.nums.join(',')}</span></td><td><b>${p.d.toFixed(1)}</b></td><td>C${p.nums.join(', C')}${p.n > 1 ? ` <span class="ir-hint">(${p.n} equivalent)</span>` : ''}</td><td>${p.type}</td><td>${M[p.nH]}${p.nH ? `, ¹J ≈ ${p.J1} Hz` : ''}</td><td>${p.nH === 1 ? 'up' : '—'}</td><td>${p.nH === 2 ? 'down' : p.nH ? 'up' : '—'}</td></tr>`).join('')}</tbody></table>
+            <div class="nmr-note">Click a peak or a row to find the carbon. Shifts are typically within ±5 ppm (often better); peak heights are only roughly predicted. The grey 1 : 1 : 1 triplet at 77.2 ppm is the CDCl₃ solvent.</div>`;
+        $('c13-table').querySelectorAll('.nmr-sig').forEach(tr => { tr.addEventListener('click', () => { C13.sel = C13.sel === +tr.dataset.k ? -1 : +tr.dataset.k; drawC13(); render(); });
+            tr.addEventListener('mouseenter', () => c13SetHot(+tr.dataset.k, true)); tr.addEventListener('mouseleave', () => c13SetHot(null, true)); });
+        const card = $('c13-struct'); card.innerHTML = structThumb(C13.ids, Math.max(160, card.clientWidth), Math.max(130, card.clientHeight), (u) => c13Overlay(u, true));
+    }
+    // where a round label badge goes next to atom i (the same rule as the ¹H NMR letters): in the widest open space
+    // around the atom, its edge a fixed gap from the atom (or its element symbol); 'extra' = more directions to keep clear
+    function badgeSpot(i, u, extra) {
+        const nb = neighbors(mol), rb = 13.5 * u, gapPx = 5 * u, S = STYLES[disp.style], a = mol.atoms[i];
+        const shown = a.el !== 'C' || disp.carbons || a.charge || a.label || nb[i].length === 0, hL = shown ? implicitH(mol, i, nb) : 0;
+        const occ = nb[i].map(y => Math.atan2(mol.atoms[y.j].y - a.y, mol.atoms[y.j].x - a.x));
+        const hDir = hL ? (occ.some(o => Math.abs(wrapAng(o)) < 1.1) ? Math.PI : 0) : null;
+        if (hDir != null) occ.push(hDir);
+        (lpCache[i] || []).forEach(q => occ.push(Math.atan2(q.y - a.y, q.x - a.x)));
+        if (qCache[i]) occ.push(Math.atan2(qCache[i].y - a.y, qCache[i].x - a.x));
+        (extra || []).forEach(t => occ.push(t));
+        let ang = -Math.PI / 4, gap = 2 * Math.PI;
+        if (occ.length) { const o = occ.map(wrapAng).sort((p, q) => p - q); gap = -1;
+            o.forEach((t, n) => { const w = n + 1 < o.length ? o[n + 1] - t : o[0] + 2 * Math.PI - t; if (w > gap + 1e-6) { gap = w; ang = t + w / 2; } }); }
+        let dist;
+        if (shown) {
+            const symR = (S.font || 0.5) * (a.fs || 1) * 0.42, towardH = hDir != null && Math.abs(wrapAng(ang - hDir)) < 1.0;
+            const ring = Math.max(symR, ...(lpCache[i] || []).map(q => Math.hypot(q.x - a.x, q.y - a.y) + 0.06));
+            dist = (towardH ? symR + 0.3 : ring) + gapPx + rb;
+        } else {
+            const half = Math.min(gap / 2, Math.PI / 3);
+            dist = Math.max(rb + gapPx + 2 * u, (rb + gapPx) / Math.sin(half));
+        }
+        return { x: a.x + Math.cos(ang) * dist, y: a.y + Math.sin(ang) * dist, ang, rb, shown };
+    }
+    // the badge itself: a filled disc with a white label, like the ¹H NMR environment letters
+    function badgeSVG(b, col, txt, on, u) {
+        const t = String(txt), fs = (t.length > 2 ? 12 : t.length > 1 ? 14.5 : 17) * (on ? 19 / 17 : 1) * u;
+        return `<circle cx="${b.x}" cy="${b.y}" r="${on ? b.rb * 1.15 : b.rb}" fill="${col}" stroke="#fff" stroke-width="${1.5 * u}"${on ? ` style="filter:drop-shadow(0 0 ${3 * u}px ${col})"` : ''}/>` +
+            `<text x="${b.x}" y="${b.y}" dy="0.35em" text-anchor="middle" font-size="${fs}" font-weight="800" font-family="system-ui, sans-serif" fill="#fff">${t}</text>`;
+    }
+    function atomRing(i, col, u) { const a = mol.atoms[i]; if (!a) return ''; const nb = neighbors(mol)[i] || [], shown = a.el !== 'C' || disp.carbons || a.charge || a.label || nb.length === 0;
+        return `<circle cx="${a.x}" cy="${a.y}" r="${shown ? 0.4 : 0.34}" fill="${col}" fill-opacity="0.28" stroke="${col}" stroke-width="${2.5 * u}"/>`; }
+    function outLabel(i, r, rot) {      // a point r from atom i, pointing away from its bonds (turned by rot radians)
+        const a = mol.atoms[i], nb = neighbors(mol)[i] || []; let dx = 0, dy = 0; nb.forEach(y => { const b = mol.atoms[y.j]; const L = Math.hypot(b.x - a.x, b.y - a.y) || 1; dx += (b.x - a.x) / L; dy += (b.y - a.y) / L; });
+        let ang = (dx || dy) ? Math.atan2(-dy, -dx) : -Math.PI / 4; if (nb.length === 2 && Math.hypot(dx, dy) < 0.3) ang = Math.atan2(-(mol.atoms[nb[0].j].x - a.x), mol.atoms[nb[0].j].y - a.y); ang += rot || 0;
+        return { x: a.x + r * Math.cos(ang), y: a.y + r * Math.sin(ang) };
+    }
+    function c13Overlay(u, card) {      // carbon numbers (and the selected environment) on the 2D drawing / the structure card, styled like the ¹H letters
+        if (NMRS.mode !== 'c13' || !C13.R) return '';
+        let s = '', t = ''; const env = new Map(); C13.R.peaks.forEach((p, k) => p.atoms.forEach(i => env.set(i, k)));
+        const act = C13.hot != null ? C13.hot : C13.sel, B = card ? (C13.bCard = []) : (C13.bEd = []);
+        C13.R.num.forEach((n, i) => { if (!mol.atoms[i]) return; const k = env.get(i), p = C13.R.peaks[k], col = (p && p.color) || '#2563eb', on = k != null && k === act;
+            if (on) s += atomRing(i, col, u);
+            const b = badgeSpot(i, u); B.push({ x: b.x, y: b.y, r: b.rb, k }); t += badgeSVG(b, col, n, on, u); });
+        return s + t;
+    }
+    // hovering a carbon (or its number) in the 2D editor or on the structure card lights up its peak and table row
+    function c13SetHot(k, fromTable) { if (k === undefined) k = null; if (k === C13.hot) return; C13.hot = k; drawC13(); render();
+        if (k != null && !fromTable) { const tr = document.querySelector('#c13-table tr.hot'), box = $('c13-table'); if (tr && box) { const r = tr.getBoundingClientRect(), b = box.getBoundingClientRect(); if (r.top < b.top + 24 || r.bottom > b.bottom) box.scrollTop += r.top < b.top + 24 ? r.top - b.top - 28 : r.bottom - b.bottom + 4; } } }
+    function c13HotAt(p, card) {
+        if (NMRS.mode !== 'c13' || !C13.R) return null;
+        for (const b of (card ? C13.bCard : C13.bEd) || []) if (b.k != null && Math.hypot(p.x - b.x, p.y - b.y) <= b.r) return b.k;
+        let best = null, bd = 0.42; C13.R.peaks.forEach((q, k) => q.atoms.forEach(i => { const a = mol.atoms[i]; if (!a) return; const d = Math.hypot(a.x - p.x, a.y - p.y); if (d < bd) { bd = d; best = k; } }));
+        return best;
+    }
+    // =====================================================================
+    //  2D NMR window: COSY, HSQC (multiplicity-edited) and HMBC, built from the ¹H and ¹³C predictions
+    // =====================================================================
+    const N2D = { mode: 'cosy', ids: null, H: null, C: null, peaks: [], sel: -1, view: null, vmode: '' };
+    function updateN2D() {
+        if (NMRS.mode !== 'n2d') return;
+        const ids = nmrFragment(); if (!N2D.ids || N2D.ids.join() !== ids.join() || N2D.vmode !== N2D.mode) { N2D.sel = -1; N2D.view = null; } N2D.ids = ids; N2D.vmode = N2D.mode;
+        try { N2D.H = ids.some(i => mol.atoms[i].el !== 'H') ? nmrPredict(mol, ids, false) : null; } catch (err) { console.error(err); N2D.H = null; }
+        try { N2D.C = ids.some(i => mol.atoms[i].el === 'C') ? c13Predict(mol, ids) : null; } catch (err) { N2D.C = null; }
+        document.querySelectorAll('[data-n2d]').forEach(b => b.classList.toggle('on', b.dataset.n2d === N2D.mode));
+        n2dPeaks();
+        $('n2d-sub').innerHTML = N2D.H ? `${nmrFormula(ids)} · predicted ${N2D.mode === 'cosy' ? '¹H–¹H COSY' : N2D.mode === 'hsqc' ? '¹H–¹³C HSQC (multiplicity-edited)' : '¹H–¹³C HMBC'} · ${N2D.peaks.filter(p => !p.diag).length} cross peak${N2D.peaks.filter(p => !p.diag).length === 1 ? '' : 's'}` : 'Draw a structure in the 2D editor';
+        drawN2D(); render();
+    }
+    function n2dPeaks() {
+        const H = N2D.H, C = N2D.C, out = []; N2D.peaks = out; if (!H) return;
+        const sigs = H.filter(s => !s.exch), byKey = new Map(sigs.map(s => [s.key, s]));
+        const cOf = new Map(); if (C) C.peaks.forEach((p, k) => p.atoms.forEach(i => cOf.set(i, k)));
+        if (N2D.mode === 'cosy') {
+            sigs.forEach(s => out.push({ x: s.d, y: s.d, diag: true, a: s, w: s.n }));
+            sigs.forEach(s => s.groups.forEach(g => { if (g.J < 2) return; g.who.forEach(k => { const t = byKey.get(k); if (!t || t === s) return; if (!out.some(p => p.a === s && p.b === t)) out.push({ x: s.d, y: t.d, a: s, b: t, J: g.J, w: 1 }); }); }));
+        } else if (C) {
+            const nb = neighbors(mol);
+            sigs.forEach(s => s.heavy.forEach(i => {
+                if (N2D.mode === 'hsqc') { const k = cOf.get(i); if (k == null) return; const p = C.peaks[k]; if (!out.some(q => q.a === s && q.c === k)) out.push({ x: s.d, y: p.d, a: s, c: k, n: 1, neg: p.nH === 2 }); return; }
+                const dist = new Map([[i, 0]]), q = [i];
+                while (q.length) { const x = q.shift(); if (dist.get(x) >= 2) continue; nb[x].forEach(y => { if (mol.atoms[y.j].el === 'H' || dist.has(y.j)) return; dist.set(y.j, dist.get(x) + 1); q.push(y.j); }); }
+                dist.forEach((dd, c) => { if (!dd) return; const k = cOf.get(c); if (k == null) return; const ex = out.find(r => r.a === s && r.c === k); const nJ = dd + 1;
+                    if (ex) { ex.nJ = Math.min(ex.nJ, nJ); return; } out.push({ x: s.d, y: C.peaks[k].d, a: s, c: k, nJ, path: c }); }); }));
+        }
+    }
+    function drawN2D() {
+        const wrap = $('n2d-plot'); if (!wrap) return; const H = N2D.H, C = N2D.C;
+        if (!H || !H.length) { wrap.innerHTML = `<div class="nmr-empty">${N2D.ids && N2D.ids.length ? 'No hydrogens' : 'No structure yet'}</div>`; $('n2d-info').innerHTML = ''; $('n2d-struct').innerHTML = ''; return; }
+        const cosy = N2D.mode === 'cosy'; if (!cosy && !C) { wrap.innerHTML = '<div class="nmr-empty">No carbons</div>'; return; }
+        const W = Math.max(320, wrap.clientWidth), Hh = Math.max(260, wrap.clientHeight), proj = 70, ml = 56 + proj, mr = 18, top = 10 + proj, bot = 46, pw = W - ml - mr, ph = Hh - top - bot;
+        const sigs = H.filter(s => !s.exch), hd = sigs.map(s => s.d), cd = C ? C.peaks.map(p => p.d) : [];
+        let xh = Math.max(...hd) + 0.6, xl = Math.min(...hd) - 0.6; if (xh - xl < 4) { const m = (xh + xl) / 2; xh = m + 2; xl = m - 2; }
+        let yh = xh, yl = xl; if (!cosy) { yh = Math.max(...cd) + 10; yl = Math.min(...cd) - 10; if (yh - yl < 40) { const m = (yh + yl) / 2; yh = m + 20; yl = m - 20; } }
+        if (N2D.view) ({ xh, xl, yh, yl } = N2D.view);
+        const X = (d) => ml + (xh - d) / (xh - xl) * pw, Y = (d) => top + (d - yl) / (yh - yl) * ph;      // δ grows downward on the vertical axis, as on real 2D plots
+        const inX = (d) => d <= xh + 1e-9 && d >= xl - 1e-9, inY = (d) => d <= yh + 1e-9 && d >= yl - 1e-9;
+        N2D.scale = { ml, pw, top, ph, xh, xl, yh, yl }; $('n2d-full').hidden = !N2D.view;
+        let s = `<svg width="${W}" height="${Hh}" viewBox="0 0 ${W} ${Hh}" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">`;
+        s += `<rect x="${ml}" y="${top}" width="${pw}" height="${ph}" fill="#fff" stroke="#334155"/>`;
+        // grid ticks
+        const tick = (a, b, n) => { const st = [0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50].find(v => (a - b) / v <= n) || 50, out = []; for (let m = Math.ceil(b / st - 1e-9); m * st <= a + 1e-9; m++) out.push(+(m * st).toFixed(2)); return out; };
+        s += `<defs><clipPath id="n2d-clip"><rect x="${ml}" y="${top}" width="${pw}" height="${ph}"/></clipPath></defs>`;
+        tick(xh, xl, 9).forEach(t => { const x = X(t); s += `<line x1="${x}" y1="${top}" x2="${x}" y2="${top + ph}" stroke="#f1f5f9"/><line x1="${x}" y1="${top + ph}" x2="${x}" y2="${top + ph + 5}" stroke="#334155"/><text x="${x}" y="${top + ph + 20}" font-size="${SPEC_FS.tick}" text-anchor="middle" fill="#334155">${t}</text>`; });
+        tick(yh, yl, 8).forEach(t => { const y = Y(t); s += `<line x1="${ml}" y1="${y}" x2="${ml + pw}" y2="${y}" stroke="#f1f5f9"/><line x1="${ml - 5}" y1="${y}" x2="${ml}" y2="${y}" stroke="#334155"/><text x="${ml - 8}" y="${y + 5}" font-size="${SPEC_FS.tick}" text-anchor="end" fill="#334155">${t}</text>`; });
+        s += `<text x="${ml + pw}" y="${Hh - 4}" font-size="${SPEC_FS.axis}" text-anchor="end" fill="#64748b">${N2D.view ? 'zoomed · double-click for the full view · ' : ''}δ ¹H (ppm)</text><text x="16" y="${top + ph / 2}" font-size="${SPEC_FS.axis}" fill="#64748b" text-anchor="middle" transform="rotate(-90 16 ${top + ph / 2})">δ ${cosy ? '¹H' : '¹³C'} (ppm)</text>`;
+        // projections: ¹H along the top, ¹H or ¹³C down the left
+        const hmax = Math.max(...sigs.map(q => q.n));
+        sigs.forEach(q => { if (!inX(q.d)) return; const x = X(q.d), h = (proj - 12) * q.n / hmax; s += `<line x1="${x}" y1="${top - 4}" x2="${x}" y2="${top - 4 - h}" stroke="#1e293b" stroke-width="1.6"/><text x="${x}" y="${top - 8 - h}" font-size="11" text-anchor="middle" fill="${q.color}" font-weight="700">${q.letter}</text>`; });
+        const px0 = ml - 48;      // the left projection sits outside the tick labels
+        if (cosy) sigs.forEach(q => { if (!inY(q.d)) return; const y = Y(q.d), h = (proj - 22) * q.n / hmax; s += `<line x1="${px0}" y1="${y}" x2="${px0 - h}" y2="${y}" stroke="#1e293b" stroke-width="1.6"/><text x="${px0 - h - 3}" y="${y + 4}" font-size="11" text-anchor="end" fill="${q.color}" font-weight="700">${q.letter}</text>`; });
+        else { const cm = Math.max(...C.peaks.map(p => p.n)), used = []; C.peaks.forEach(p => { if (!inY(p.d)) return; const y = Y(p.d), h = (proj - 34) * p.n / cm; s += `<line x1="${px0}" y1="${y}" x2="${px0 - h}" y2="${y}" stroke="#1e293b" stroke-width="1.6"/>`;
+            if (!used.some(v => Math.abs(v - y) < 11)) { used.push(y); s += `<text x="${px0 - h - 3}" y="${y + 4}" font-size="10.5" text-anchor="end" fill="#2563eb" font-weight="700">C${p.nums.join(',')}</text>`; } }); }
+        // cross peaks: a few nested contours
+        const sel = N2D.peaks[N2D.sel]; s += '<g clip-path="url(#n2d-clip)">';
+        N2D.peaks.forEach((p, k) => { const x = X(p.x), y = Y(p.y), on = k === N2D.sel;
+            const col = cosy ? (p.diag ? '#64748b' : '#2563eb') : N2D.mode === 'hsqc' ? (p.neg ? '#dc2626' : '#2563eb') : (p.nJ === 2 ? '#a855f7' : '#7c3aed');
+            if (sel && on) s += `<line x1="${x}" y1="${top}" x2="${x}" y2="${y}" stroke="#dc2626" stroke-dasharray="3 3"/><line x1="${ml}" y1="${y}" x2="${x}" y2="${y}" stroke="#dc2626" stroke-dasharray="3 3"/>`;
+            const rx = cosy && !p.diag ? 7 : 8, ry = cosy ? 7 : 6;
+            [1, 0.66, 0.33].forEach((f, j) => { s += `<ellipse cx="${x}" cy="${y}" rx="${rx * f + 1}" ry="${ry * f + 1}" fill="${j === 2 ? col : 'none'}" stroke="${on ? '#dc2626' : col}" stroke-width="${on ? 2 : 1.2}" opacity="${0.55 + 0.15 * j}"/>`; }); });
+        s += `</g><rect id="n2d-band" x="0" y="0" width="0" height="0" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb" stroke-opacity="0.5" visibility="hidden"/></svg>`; wrap.innerHTML = s;
+        N2D.geo = { X, Y, inX, inY };
+        const p = sel, Hn = (q) => `H<sub>${q.letter}</sub> (δ ${q.d.toFixed(2)})`, Cn = (k) => `C${C.peaks[k].nums.join('/C')} (δ ${C.peaks[k].d.toFixed(1)}, ${C.peaks[k].type})`;
+        $('n2d-info').innerHTML = !p ? `<span class="ir-hint">Click a cross peak to see which nuclei it connects.${N2D.mode === 'hsqc' ? ' Blue: CH and CH₃; red: CH₂ (multiplicity-edited HSQC).' : N2D.mode === 'hmbc' ? ' Light purple: two-bond (²J<sub>CH</sub>); dark purple: three-bond (³J<sub>CH</sub>) correlations.' : ' Diagonal peaks (grey) are each signal with itself; off-diagonal (blue) peaks join coupled protons.'}</span>`
+            : p.diag ? `<b>${Hn(p.a)}</b> on the diagonal: every ¹H signal appears here, so the diagonal looks like the 1D spectrum.`
+            : cosy ? `<b>${Hn(p.a)} ↔ ${Hn(p.b)}</b>: these protons are coupled (J ≈ ${p.J.toFixed(1)} Hz), normally because they are on neighbouring atoms (H–C–C–H, ³J).`
+            : N2D.mode === 'hsqc' ? `<b>${Hn(p.a)} ↔ ${Cn(p.c)}</b>: this carbon carries these protons (one bond, ¹J<sub>CH</sub>)${p.neg ? ' — a CH₂, so the peak has the opposite phase (red)' : ''}.`
+            : `<b>${Hn(p.a)} ↔ ${Cn(p.c)}</b>: ${p.nJ === 2 ? 'two' : 'three'} bonds apart (${p.nJ === 2 ? '²' : '³'}J<sub>CH</sub>). HMBC suppresses the one-bond peaks and shows these long-range ones, which link fragments across quaternary carbons and heteroatoms.`;
+        const card = $('n2d-struct'); card.innerHTML = structThumb(N2D.ids, Math.max(160, card.clientWidth), Math.max(130, card.clientHeight), (u) => n2dOverlay(u));
+    }
+    function n2dOverlay(u) {      // ¹H letters (and, for HSQC/HMBC, carbon numbers) as badges like the ¹H NMR ones
+        if (NMRS.mode !== 'n2d' || !N2D.H) return '';
+        let s = '', t = ''; const p = N2D.peaks[N2D.sel], hOn = new Set(), cOn = new Set();
+        if (p) { (p.a ? p.a.heavy : []).forEach(i => hOn.add(i)); if (p.b) p.b.heavy.forEach(i => hOn.add(i)); if (p.c != null && N2D.C) N2D.C.peaks[p.c].atoms.forEach(i => cOn.add(i)); }
+        hOn.forEach(i => { if (!cOn.has(i)) s += atomRing(i, '#2563eb', u); }); cOn.forEach(i => { s += atomRing(i, '#dc2626', u); });
+        const per = {};      // every label for an atom: its proton letter(s), then (HSQC / HMBC) its carbon number; drawn side by side
+        N2D.H.forEach(q => { if (q.exch) return; q.heavy.forEach(i => { if (mol.atoms[i]) (per[i] = per[i] || []).push([q.color, q.letter, hOn.has(i) && p && (p.a === q || p.b === q)]); }); });
+        if (N2D.C && N2D.mode !== 'cosy') N2D.C.num.forEach((n, i) => { if (mol.atoms[i]) (per[i] = per[i] || []).push([cOn.has(i) ? '#dc2626' : '#475569', n, cOn.has(i)]); });
+        Object.keys(per).forEach(i => { const L = per[i], b = badgeSpot(+i, u);
+            if (L.length === 1) { t += badgeSVG(b, ...L[0], u); return; }
+            const a = mol.atoms[i], d0 = Math.hypot(b.x - a.x, b.y - a.y) - b.rb * 0.14, d = d0 + b.rb * 0.2 * (L.length - 1), step = 2 * Math.asin(Math.min(0.95, (b.rb * 0.86 + 0.8 * u) / d));
+            L.forEach((it, n) => { const ang = b.ang + (n - (L.length - 1) / 2) * step; t += badgeSVG({ x: a.x + Math.cos(ang) * d, y: a.y + Math.sin(ang) * d, rb: b.rb * 0.86 }, ...it, u * 0.86); }); });
+        return s + t;
+    }
+    // =====================================================================
+    //  Literature & database cross-referencing (PubChem PUG REST / PUG-View; links out to PubChem and CAS Common Chemistry)
+    // =====================================================================
+    const LIT = { key: '', busy: false, data: null, err: '', cache: new Map() };
+    function fragSMILES(ids) { const set = new Set(ids); try { return toSMILES(chemView(subMol(set))); } catch (err) { try { return toSMILES(subMol(set)); } catch (e2) { return ''; } } }
+    const casOK = (c) => { const d = c.replace(/-/g, ''), body = d.slice(0, -1); let s = 0; for (let k = 0; k < body.length; k++) s += (body.length - k) * +body[k]; return s % 10 === +d.slice(-1); };
+    function pugView(cid, heading) {
+        return fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/${cid}/JSON?heading=${encodeURIComponent(heading)}`).then(r => r.ok ? r.json() : null).then(j => {
+            const out = []; const walk = (sec) => { (sec.Section || []).forEach(walk); (sec.Information || []).forEach(inf => { const v = inf.Value || {}; (v.StringWithMarkup || []).forEach(sw => { if (sw.String) out.push(sw.String); }); }); };
+            if (j && j.Record) walk(j.Record); return [...new Set(out)]; }).catch(() => []);
+    }
+    function litSearch() {
+        const ids = nmrFragment(); if (!ids.some(i => mol.atoms[i].el !== 'H')) { LIT.data = null; LIT.err = ''; drawLit(); return; }
+        const smi = fragSMILES(ids); if (!smi) { LIT.err = 'Could not write a SMILES for this structure.'; drawLit(); return; }
+        LIT.key = smi; if (LIT.cache.has(smi)) { LIT.data = LIT.cache.get(smi); LIT.err = ''; drawLit(); return; }
+        LIT.busy = true; LIT.err = ''; LIT.data = null; drawLit();
+        const PUG = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug', form = (o) => ({ method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(o).toString() });
+        const done = (d) => { if (LIT.key !== smi) return; LIT.busy = false; LIT.cache.set(smi, d); LIT.data = d; drawLit(); };
+        fetch(`${PUG}/compound/smiles/cids/JSON`, form({ smiles: smi })).then(r => r.json()).then(j => {
+            const cid = j && j.IdentifierList && j.IdentifierList.CID ? j.IdentifierList.CID[0] : 0;
+            if (!cid) {      // not in PubChem: show the closest known compounds instead
+                return fetch(`${PUG}/compound/fastsimilarity_2d/smiles/cids/JSON?Threshold=90&MaxRecords=6`, form({ smiles: smi })).then(r => r.ok ? r.json() : null).then(j2 => {
+                    const cids = j2 && j2.IdentifierList ? j2.IdentifierList.CID.slice(0, 6) : [];
+                    if (!cids.length) return done({ smi, cid: 0, similar: [] });
+                    return fetch(`${PUG}/compound/cid/${cids.join(',')}/property/Title,MolecularFormula/JSON`).then(r => r.json()).then(p => done({ smi, cid: 0, similar: (p.PropertyTable.Properties || []) })); });
+            }
+            return Promise.all([
+                fetch(`${PUG}/compound/cid/${cid}/property/Title,IUPACName,MolecularFormula,MolecularWeight,InChIKey/JSON`).then(r => r.json()).then(p => p.PropertyTable.Properties[0]).catch(() => ({})),
+                fetch(`${PUG}/compound/cid/${cid}/synonyms/JSON`).then(r => r.json()).then(p => p.InformationList.Information[0].Synonym || []).catch(() => []),
+                pugView(cid, 'Methods of Manufacturing'), pugView(cid, 'Synthesis References'),
+            ]).then(([prop, syn, mfg, synth]) => done({ smi, cid, prop, cas: [...new Set(syn.filter(x => /^\d{2,7}-\d\d-\d$/.test(x) && casOK(x)))].slice(0, 3), names: syn.filter(x => !/^\d{2,7}-\d\d-\d$/.test(x)).slice(0, 8), mfg: mfg.slice(0, 6), synth: synth.slice(0, 6) }));
+        }).catch(err => { if (LIT.key !== smi) return; LIT.busy = false; LIT.err = 'Could not reach PubChem (' + (err.message || err) + '). This needs an internet connection.'; drawLit(); });
+    }
+    let litTimer = 0;
+    function updateLit() { if (NMRS.mode !== 'lit') return; clearTimeout(litTimer); litTimer = setTimeout(litSearch, 500); const ids = nmrFragment(); $('lit-sub').innerHTML = ids.length ? nmrFormula(ids) + ' · the structure last clicked in the 2D editor' : 'Draw a structure in the 2D editor'; drawLitCard(); }
+    function drawLitCard() { const card = $('lit-struct'); if (!card) return; const ids = nmrFragment(); card.innerHTML = ids.length ? structThumb(ids, Math.max(160, card.clientWidth), Math.max(130, card.clientHeight)) : ''; }
+    function drawLit() {
+        const box = $('lit-body'); if (!box) return; drawLitCard();
+        const D = LIT.data, esc = (t) => escX(String(t)), link = (u, t) => `<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
+        if (LIT.busy) { box.innerHTML = '<div class="lit-busy">Searching PubChem…</div>'; return; }
+        if (LIT.err) { box.innerHTML = `<div class="ir-warn">${esc(LIT.err)}</div>`; return; }
+        if (!D) { box.innerHTML = '<div class="ir-hint">Draw a structure, then click it, to look it up.</div>'; return; }
+        const q = encodeURIComponent(D.smi), copy = `<button class="nmr-tg" id="lit-copy" title="Copy the SMILES string">COPY SMILES</button>`;
+        let h = `<div class="lit-row"><b>SMILES</b> <code>${esc(D.smi)}</code> ${copy}</div>`;
+        if (!D.cid) {
+            h += `<div class="lit-card"><div class="lit-h">Not found in PubChem</div><div>No exact match for this structure (as drawn, including stereochemistry and charges) among PubChem's ~120 million compounds. It may be unknown, or recorded under another form (salt, tautomer, stereoisomer).</div>`
+                + (D.similar && D.similar.length ? `<div class="lit-h2">Closest known compounds (≥ 90% similar)</div><ul>${D.similar.map(p => `<li>${link('https://pubchem.ncbi.nlm.nih.gov/compound/' + p.CID, esc(p.Title || 'CID ' + p.CID))} · ${esc(p.MolecularFormula || '')}</li>`).join('')}</ul>` : '') + '</div>';
+        } else {
+            const P = D.prop || {};
+            h += `<div class="lit-card"><div class="lit-h">Known compound: ${esc(P.Title || 'PubChem CID ' + D.cid)}</div><table class="lit-t">
+                <tr><td>PubChem CID</td><td>${link('https://pubchem.ncbi.nlm.nih.gov/compound/' + D.cid, D.cid)}</td></tr>
+                <tr><td>CAS Registry Number</td><td>${D.cas.length ? D.cas.map(c => link('https://commonchemistry.cas.org/detail?cas_rn=' + c, c)).join(', ') : '<span class="ir-hint">none listed in PubChem</span>'}</td></tr>
+                ${P.IUPACName ? `<tr><td>IUPAC name</td><td>${esc(P.IUPACName)}</td></tr>` : ''}<tr><td>Formula · M</td><td>${esc(P.MolecularFormula || '')} · ${P.MolecularWeight ? (+P.MolecularWeight).toFixed(2) + ' g/mol' : ''}</td></tr>
+                ${P.InChIKey ? `<tr><td>InChIKey</td><td><code>${esc(P.InChIKey)}</code></td></tr>` : ''}${D.names.length ? `<tr><td>Other names</td><td>${D.names.map(esc).join(' · ')}</td></tr>` : ''}</table></div>`;
+            h += `<div class="lit-card"><div class="lit-h">How it is made: known precursors and routes</div>`
+                + (D.mfg.length || D.synth.length ? (D.mfg.length ? `<div class="lit-h2">Methods of manufacturing (PubChem / HSDB)</div><ul>${D.mfg.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '') + (D.synth.length ? `<div class="lit-h2">Synthesis references</div><ul>${D.synth.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '')
+                    : '<div class="ir-hint">PubChem has no manufacturing or synthesis notes for this compound.</div>')
+                + `</div>`;
+        }
+        h += `<div class="lit-links">${D.cid ? link('https://pubchem.ncbi.nlm.nih.gov/compound/' + D.cid + '#section=Literature', 'PubChem literature & patents') : link('https://pubchem.ncbi.nlm.nih.gov/#query=' + q, 'Search PubChem')}
+            ${D.cas && D.cas.length ? link('https://commonchemistry.cas.org/detail?cas_rn=' + D.cas[0], 'CAS Common Chemistry') : link('https://commonchemistry.cas.org/', 'CAS Common Chemistry')}</div>`;
+        box.innerHTML = h;
+        const cb = $('lit-copy'); if (cb) cb.onclick = () => { try { navigator.clipboard.writeText(D.smi); cb.textContent = 'COPIED'; setTimeout(() => { cb.textContent = 'COPY SMILES'; }, 1200); } catch (err) {} };
+    }
+    // =====================================================================
+    //  Chemical intuition: atoms whose bonding is impossible (more valence electrons than the shell holds, or more bonds than electrons)
+    // =====================================================================
+    const VAL_E = { H: 1, B: 3, C: 4, N: 5, O: 6, F: 7, Si: 4, P: 5, S: 6, Cl: 7, As: 5, Se: 6, Br: 7, I: 7 };
+    const VAL_MAX = { H: 2, B: 8, C: 8, N: 8, O: 8, F: 8, Si: 12, P: 12, S: 12, As: 12, Se: 12, Cl: 14, Br: 14, I: 14 };
+    function valenceProblems(m) {
+        const out = new Map(), nb = neighbors(m);
+        m.atoms.forEach((a, i) => {
+            if (!a || a.pseudo || !(a.el in VAL_E) || a.label || a.abbr) return;
+            const bonds = nb[i].filter(y => { const b = m.bonds[y.k]; return !(b && b.style && NONCOV.has(b.style)); });
+            let B = bonds.reduce((t, y) => t + (y.o || 1), 0); try { B += implicitH(m, i, nb); } catch (err) {}
+            const q = a.charge || 0, NB = VAL_E[a.el] - q - B, tot = 2 * B + Math.max(0, NB), mx = VAL_MAX[a.el];
+            if (NB < 0 && 2 * B > mx) out.set(i, `${a.el} has ${B} bonds = ${2 * B} electrons around it; ${mx === 8 ? 'a second-row atom holds at most 8 (octet)' : mx === 2 ? 'H holds at most 2' : 'more than this atom can hold'}`);
+            else if (NB < 0) out.set(i, `${a.el}${q ? (q > 0 ? '⁺' : '⁻') : ''} has ${B} bond${B > 1 ? 's' : ''} but only ${VAL_E[a.el] - q} valence electron${VAL_E[a.el] - q === 1 ? '' : 's'} to share`);
+            else if (tot > mx) out.set(i, `${a.el} would have ${tot} electrons around it (${B} bond${B > 1 ? 's' : ''}${NB ? ' + ' + NB + ' non-bonding' : ''}); ${mx === 8 ? 'second-row atoms hold at most 8 (octet)' : mx === 2 ? 'H holds at most 2' : 'more than this atom can hold'}`);
+        });
+        return out;
+    }
+    function valenceOverlay(u) {
+        let s = ''; let P; try { P = valenceProblems(mol); } catch (err) { return ''; }
+        P.forEach((msg, i) => { const a = mol.atoms[i]; if (a) s += `<circle cx="${a.x}" cy="${a.y}" r="0.42" fill="#ef4444" fill-opacity="0.22" stroke="#dc2626" stroke-width="${2 * u}"><title>${escX(msg)}</title></circle>`; });
+        const w = $('val-warn'); if (w) { const L = [...P.entries()]; w.hidden = !L.length; w.innerHTML = L.length ? `⚠ ${L.slice(0, 2).map(([i, m2]) => escX(m2)).join('<br>⚠ ')}${L.length > 2 ? `<br>… and ${L.length - 2} more` : ''}` : ''; }
+        return s;
+    }
     let msTimer = 0;
     function scheduleMS() { clearTimeout(msTimer); msTimer = setTimeout(updateMS, 120); }
+    let xTimer = 0;
+    function updateExtra() { if (NMRS.mode === 'c13') updateC13(); else if (NMRS.mode === 'n2d') updateN2D(); else if (NMRS.mode === 'lit') updateLit(); }
+    function scheduleExtra() { clearTimeout(xTimer); xTimer = setTimeout(updateExtra, 140); }
     function updateMS() {
         if (NMRS.mode !== 'ms') return;
         const ids = nmrFragment(); if (!MSS.ids || MSS.ids.join() !== ids.join()) { MSS.view = null; MSS.miSel = null; } MSS.ids = ids; MSS.sel = null;
@@ -8254,6 +8730,36 @@ function autoMapAtoms(m, R, P) {
             <li>The group-frequency spectrum is <b>not</b> a quantum-mechanical frequency calculation: positions are typical values (often ± 10–30 cm<sup>−1</sup>), intensities and widths are approximate, and the fingerprint region (below ~1500 cm<sup>−1</sup>) shows only the main assignable bands, not every skeletal vibration.</li>
             <li>Assumes a condensed-phase sample (neat liquid / KBr): hydrogen-bonded O–H and N–H are drawn broad. Overtones, combination bands and most Fermi resonances (except the aldehyde C–H pair) are not included.</li>
             <li><b>The animated vibrations</b> show which atoms move, and in which directions, for that group's mode. They are simplified local motions, not true normal modes of the whole molecule, and are slowed down so they can be seen.</li></ul>`,
+        c13: `<h4>Predicted <sup>13</sup>C NMR — how it is made and its limits</h4><ul>
+            <li><b>Shifts</b> come from additivity rules: sp³ carbons start at −2.3 ppm and add Grant–Paul increments for every carbon α (+9.1), β (+9.4) and γ (−2.5) to them, with substituent increments for heteroatoms and functional groups (e.g. α-OH +47, α-Cl +31, α-C=O +30) and branching corrections; alkene carbons start at 123.3 ppm with substituent increments for both ends of the C=C; benzene carbons at 128.5 ppm with <i>ipso / ortho / meta / para</i> increments; carbonyl, nitrile, alkyne and heteroaromatic carbons from typical base values (ketone ≈ 208, aldehyde ≈ 200, acid ≈ 178, ester / amide ≈ 172, conjugation lowers these).</li>
+            <li>Typically within ±5 ppm (often ±2); crowded, strained or highly conjugated molecules can be further off.</li>
+            <li>Carbons related by symmetry give one peak; the table shows how many carbons each peak represents. Peak heights are rough: quaternary carbons are drawn weak (no attached H, so no NOE enhancement and slow relaxation), as they are in real spectra.</li>
+            <li>Assumes CDCl<sub>3</sub> (its carbon gives the grey 1 : 1 : 1 triplet at 77.16 ppm, split by deuterium) and a 100 MHz <sup>13</sup>C frequency (a 400 MHz instrument). TMS is 0 ppm.</li></ul>`,
+        c13bb: `<h4>Broadband <sup>1</sup>H-decoupled <sup>13</sup>C NMR</h4>
+            <h5>HOW IT IS DONE</h5><ul><li>While the <sup>13</sup>C signal is recorded, the whole <sup>1</sup>H range is irradiated continuously (a broadband decoupling sequence such as WALTZ-16), which flips the protons so fast that their couplings to carbon average to zero.</li><li>The decoupler is also on between scans, which builds up the nuclear Overhauser effect (NOE): carbons carrying H's get up to about 3× stronger.</li><li>Because only 1.1% of carbon is <sup>13</sup>C and it is a weak nucleus, hundreds to thousands of scans are averaged.</li></ul>
+            <h5>WHAT IT TELLS YOU</h5><ul><li><b>One line per carbon environment</b>: the number of peaks is the number of non-equivalent carbons (symmetry shows up as fewer peaks).</li><li><b>The shift</b> identifies the kind of carbon: sp³ (0–90), C–O / C–N (40–90), alkyne (65–90), alkene and aromatic (100–160), C=O (160–220).</li><li><b>Not quantitative</b>: NOE and slow relaxation make peak heights unequal (quaternary C weak), so carbons are not counted by integration.</li></ul>`,
+        c13cpl: `<h4><sup>1</sup>H-coupled <sup>13</sup>C NMR</h4>
+            <h5>HOW IT IS DONE</h5><ul><li>The proton decoupler is switched off while the <sup>13</sup>C signal is acquired (often "gated": on between scans to keep the NOE, off during acquisition), so every <sup>13</sup>C–<sup>1</sup>H coupling survives.</li></ul>
+            <h5>WHAT IT TELLS YOU</h5><ul><li>Each carbon is split by the protons <b>directly attached</b> to it by the one-bond coupling <sup>1</sup>J<sub>CH</sub> (125 Hz for sp³, ~160 Hz for alkene / aromatic, ~170 Hz for aldehyde, ~250 Hz for ≡C–H), following the n + 1 rule: CH<sub>3</sub> quartet, CH<sub>2</sub> triplet, CH doublet, quaternary C singlet. So it tells how many H's each carbon carries.</li><li>The size of <sup>1</sup>J<sub>CH</sub> reflects hybridization (more s character → larger J) and electronegative substituents (each raises it by ~10 Hz).</li><li>In practice the multiplets overlap badly and the spectrum takes much longer to record, which is why DEPT is used instead. (Smaller two- and three-bond couplings, 0–10 Hz, are left out here.)</li></ul>`,
+        c13dept: `<h4>DEPT-90 and DEPT-135</h4>
+            <h5>HOW IT IS DONE</h5><ul><li>DEPT (Distortionless Enhancement by Polarization Transfer) starts on the protons and transfers their larger polarization to the carbons they are bonded to, with a sequence of 90° and 180° pulses on both nuclei separated by delays of 1/(2J<sub>CH</sub>).</li><li>The last proton pulse has a chosen angle θ; the signal of a CH<sub>n</sub> group then depends on θ: CH ∝ sin θ, CH<sub>2</sub> ∝ sin 2θ, CH<sub>3</sub> ∝ sin θ·cos²θ (roughly). Quaternary carbons have no attached H to transfer from, so they never appear.</li></ul>
+            <h5>WHAT IT TELLS YOU</h5><ul><li><b>DEPT-90</b> (θ = 90°): <b>only CH</b> carbons.</li><li><b>DEPT-135</b> (θ = 135°): CH and CH<sub>3</sub> <b>up</b>, CH<sub>2</sub> <b>down</b> (negative).</li><li>Together with the broadband spectrum every carbon is classified: in all three = CH; up in 135 only = CH<sub>3</sub>; down in 135 = CH<sub>2</sub>; only in the broadband spectrum = quaternary C. It is faster and cleaner than the coupled spectrum.</li></ul>`,
+        n2d: `<h4>Predicted 2D NMR — how it is made</h4><ul><li>Built from the app's <sup>1</sup>H prediction (shifts, the coupling network) and <sup>13</sup>C prediction, so peak positions carry the same uncertainty as those (≈ 0.2–0.3 ppm for <sup>1</sup>H, ≈ ±5 ppm for <sup>13</sup>C).</li><li>Cross peaks are drawn as simple contours of equal size; real intensities vary with the coupling constants, relaxation and experiment settings.</li><li>O–H and N–H protons (exchanging) are left out.</li><li>The <sup>1</sup>H spectrum is projected along the top; the <sup>1</sup>H (COSY) or <sup>13</sup>C spectrum down the left side. Shifts grow toward the left and downward, as on real 2D plots.</li></ul>`,
+        cosy: `<h4>COSY (COrrelation SpectroscopY)</h4>
+            <h5>HOW IT IS DONE</h5><ul><li>Two 90° proton pulses separated by a delay t<sub>1</sub> that is increased step by step over hundreds of experiments; during t<sub>1</sub> magnetization evolves at one proton's frequency and, through the J coupling, is transferred to its coupling partner by the second pulse. Fourier transformation in both time dimensions gives a map with <sup>1</sup>H shifts on both axes.</li></ul>
+            <h5>WHAT IT TELLS YOU</h5><ul><li><b>Diagonal peaks</b>: every proton signal with itself (the 1D spectrum along the diagonal).</li><li><b>Cross peaks</b> (off the diagonal, in symmetric pairs): two protons that are spin-coupled, usually on neighbouring carbons (H–C–C–H, ³J ≈ 2–12 Hz), sometimes geminal or long-range.</li><li>Walking from cross peak to cross peak traces the chain of connected CH<sub>n</sub> groups, i.e. the H–C–C–H skeleton; the walk stops at carbonyls, heteroatoms and quaternary carbons.</li></ul>`,
+        hsqc: `<h4>HSQC (Heteronuclear Single-Quantum Coherence)</h4>
+            <h5>HOW IT IS DONE</h5><ul><li>Proton magnetization is transferred to the directly bonded <sup>13</sup>C (INEPT, using <sup>1</sup>J<sub>CH</sub> ≈ 145 Hz), evolves at the carbon frequency during t<sub>1</sub>, and is transferred back to the proton for detection (sensitive, because protons are detected). Axes: <sup>1</sup>H shift horizontally, <sup>13</sup>C vertically.</li><li>The <b>multiplicity-edited</b> version (shown) adds a delay that gives CH<sub>2</sub> peaks the opposite sign from CH and CH<sub>3</sub>: red vs blue here, like DEPT-135.</li></ul>
+            <h5>WHAT IT TELLS YOU</h5><ul><li><b>Which carbon each proton is attached to</b> (one bond only): a peak at (δ<sub>H</sub>, δ<sub>C</sub>) for every C–H.</li><li>Assigns carbons from known proton signals (or vice versa), resolves overlapping <sup>1</sup>H multiplets by spreading them along the carbon axis, and shows diastereotopic CH<sub>2</sub> protons (two H shifts on one carbon). Quaternary carbons and O–H / N–H give no peak.</li></ul>`,
+        hmbc: `<h4>HMBC (Heteronuclear Multiple-Bond Correlation)</h4>
+            <h5>HOW IT IS DONE</h5><ul><li>Like HSQC but the transfer delay is tuned to small long-range couplings (<sup>n</sup>J<sub>CH</sub> ≈ 8 Hz, delay ≈ 60 ms), and a low-pass filter removes the one-bond (<sup>1</sup>J<sub>CH</sub>) correlations.</li></ul>
+            <h5>WHAT IT TELLS YOU</h5><ul><li>Correlations between a proton and carbons <b>two and three bonds away</b> (H–C–C and H–C–C–C, also across O, N and quaternary carbons). Four-bond peaks are usually weak or absent.</li><li>It connects the pieces that COSY cannot: e.g. the CH<sub>3</sub> protons of an acetyl group correlate with the C=O carbon; protons next to an ester oxygen correlate with the carbonyl carbon across the O; aromatic substitution patterns and quaternary carbons are placed.</li><li>Two- and three-bond peaks cannot be told apart from the spectrum alone (here they are coloured differently to teach the idea).</li></ul>`,
+        lit: `<h4>Literature &amp; Databases</h4><ul>
+            <li>The structure last clicked in the 2D editor is written as a SMILES string and sent to <b>PubChem</b> (the free NIH database of ~120 million compounds) through its public PUG-REST service. An exact match (same connectivity, stereochemistry and charges) means the compound is already known.</li>
+            <li>For a known compound it shows the PubChem CID, the <b>CAS Registry Number</b> (from PubChem's synonyms, check-digit validated; linked to CAS Common Chemistry), the IUPAC name, formula, InChIKey and common names, and PubChem's <b>Methods of Manufacturing</b> (from the Hazardous Substances Data Bank) and <b>Synthesis References</b> sections when it has them: these name the industrial precursors and routes.</li>
+            <li>If there is no exact match it lists the closest known compounds (≥ 90% fingerprint similarity).</li>
+            <li>Links open the compound's PubChem literature &amp; patent section and its CAS Common Chemistry record.</li>
+            <li>Needs an internet connection; nothing is sent except the SMILES.</li></ul>`,
         ms: `<h4>Predicted EI mass spectrum (70 eV) — how it is made and its limits</h4><ul>
             <li><b>Molecular ion and isotope peaks</b> (M, M+1, M+2, M+4 …) are calculated exactly from the molecular formula and natural isotope abundances, so the isotope pattern is reliable.</li>
             <li><b>Fragments</b> are predicted with rules, in the spirit of ACD/MS Fragmenter and CFM-ID (but not those programs): simple cleavage of each acyclic single bond, scored by how stable the cation formed is (acylium, iminium / oxonium, benzylic → tropylium, allylic, 3° > 2° > 1°) and by the radical lost; the McLafferty rearrangement; and loss of H•, H<sub>2</sub>O, HX and CO.</li>
@@ -8263,7 +8769,7 @@ function autoMapAtoms(m, R, P) {
     };
     document.addEventListener('click', (e) => {
         const b = e.target.closest && e.target.closest('.spec-i'), open = document.querySelector('.spec-pop');
-        if (b) { const pane = b.closest('#nmr-pane, #ir-pane, #ms-pane'); const same = open && open.dataset.info === b.dataset.info; if (open) open.remove(); if (same) return;
+        if (b) { const pane = b.closest('#nmr-pane, #ir-pane, #ms-pane, .spec-pane'); const same = open && open.dataset.info === b.dataset.info; if (open) open.remove(); if (same) return;
             const pop = document.createElement('div'); pop.className = 'spec-pop'; pop.dataset.info = b.dataset.info;
             pop.innerHTML = `<button class="spec-pop-x" aria-label="Close">✕</button>${SPEC_INFO[b.dataset.info]}`;
             pane.appendChild(pop); pop.querySelector('.spec-pop-x').addEventListener('click', () => pop.remove()); return; }
@@ -8302,6 +8808,29 @@ function autoMapAtoms(m, R, P) {
     }
     // drag the structure overlay / the molecular-ion box around a spectrum (positions remembered per box)
     const DRAGPOS = {};
+    function specZoom(plot, St, bandId, box, redraw) {      // St.scale: { ml, pw, top, (ph), hi/lo | xh/xl/yh/yl }; sets St.view
+        let zd = null; const band = () => document.getElementById(bandId);
+        const pX = (S, x) => { const a = box ? S.xh : S.hi, b = box ? S.xl : S.lo; return a - (x - S.ml) / S.pw * (a - b); }, pY = (S, y) => S.yl + (y - S.top) / S.ph * (S.yh - S.yl);
+        plot.addEventListener('pointerdown', (e) => { const S = St.scale; if (!S || e.button !== 0) return; const r = plot.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+            if (x < S.ml - 4 || x > S.ml + S.pw + 4 || y < S.top - 4 || y > (box ? S.top + S.ph + 4 : S.bot)) return;
+            zd = { x0: clamp(x, S.ml, S.ml + S.pw), y0: box ? clamp(y, S.top, S.top + S.ph) : 0 }; try { plot.setPointerCapture(e.pointerId); } catch (err) {} });
+        plot.addEventListener('pointermove', (e) => { if (!zd) return; const S = St.scale, r = plot.getBoundingClientRect(), b = band(); zd.x1 = clamp(e.clientX - r.left, S.ml, S.ml + S.pw); if (box) zd.y1 = clamp(e.clientY - r.top, S.top, S.top + S.ph);
+            const w = Math.abs(zd.x1 - zd.x0), h = box ? Math.abs(zd.y1 - zd.y0) : 0, big = w > 3 || h > 3; if (!b) return;
+            b.setAttribute('x', Math.min(zd.x0, zd.x1)); b.setAttribute('width', box && w < 6 ? S.pw : w); if (box && w < 6) b.setAttribute('x', S.ml);
+            if (box) { const hh = h < 6 ? S.ph : h; b.setAttribute('y', h < 6 ? S.top : Math.min(zd.y0, zd.y1)); b.setAttribute('height', hh); }
+            b.setAttribute('visibility', big ? 'visible' : 'hidden'); });
+        const end = () => { if (!zd) return; const S = St.scale, d = zd; zd = null; const b = band(); if (b) b.setAttribute('visibility', 'hidden');
+            const w = d.x1 == null ? 0 : Math.abs(d.x1 - d.x0), h = box && d.y1 != null ? Math.abs(d.y1 - d.y0) : 0; if (w < 6 && h < 6) return;
+            St.zt = performance.now();
+            if (!box) { let a = pX(S, d.x0), c = pX(S, d.x1), hi = Math.max(a, c), lo = Math.min(a, c); if (hi - lo < 0.05) { const m = (hi + lo) / 2; hi = m + 0.025; lo = m - 0.025; } St.view = { hi, lo }; }
+            else { let xh = S.xh, xl = S.xl, yh = S.yh, yl = S.yl;
+                if (w >= 6) { const a = pX(S, d.x0), c = pX(S, d.x1); xh = Math.max(a, c); xl = Math.min(a, c); if (xh - xl < 0.02) { const m = (xh + xl) / 2; xh = m + 0.01; xl = m - 0.01; } }
+                if (h >= 6) { const a = pY(S, d.y0), c = pY(S, d.y1); yh = Math.max(a, c); yl = Math.min(a, c); const mn = (S.yh - S.yl) > 30 ? 0.2 : 0.02; if (yh - yl < mn) { const m = (yh + yl) / 2; yh = m + mn / 2; yl = m - mn / 2; } }
+                St.view = { xh, xl, yh, yl }; }
+            redraw(); };
+        plot.addEventListener('pointerup', end); plot.addEventListener('pointercancel', () => { zd = null; const b = band(); if (b) b.setAttribute('visibility', 'hidden'); });
+        plot.addEventListener('dblclick', () => { if (St.view) { St.view = null; redraw(); } });
+    }
     function enableOverlayDrag(plot, redraw) {
         let d = null;
         plot.addEventListener('pointerdown', (e) => { const el = e.target.closest && e.target.closest('.drag-ov'); if (!el || e.button !== 0) return;
@@ -8374,7 +8903,7 @@ function autoMapAtoms(m, R, P) {
             '<div class="nmr-subrow"><div id="nmr-sub"></div><button class="nmr-tg nmr-full" id="nmr-full" hidden title="Back to the full spectrum (or double-click the spectrum)">FULL VIEW</button></div><div id="nmr-geo"></div></div><div id="nmr-plot"></div><div class="nmr-bottom"><div id="nmr-struct" class="spec-struct" hidden></div><div id="nmr-table"></div></div>';
         $('viewer').appendChild(pane);
         const irp = document.createElement('div'); irp.id = 'ir-pane'; irp.hidden = true;
-        irp.innerHTML = '<div class="nmr-head"><div class="nmr-hrow"><div class="nmr-title">IR <span>predicted spectrum</span><button class="spec-i" data-info="ir" title="How this spectrum is predicted (assumptions and limits)">i</button></div><div class="nmr-tools"><span class="nmr-tl">SPECTRUM</span><button class="nmr-tg on" id="ir-src-g" title="Bands placed at the typical positions of the functional groups found in the structure (instant)">GROUP FREQUENCIES</button><button class="nmr-tg" id="ir-src-c" title="Optimize the geometry, then calculate every vibration of the molecule (harmonic normal modes, scaled) and its IR intensity">NORMAL-MODE CALCULATION</button><select id="ir-meth" class="ir-meth" hidden title="Level of theory for the normal-mode calculation"><option value="AIMNET2">AIMNet2</option><option value="ANI2X">ANI-2x</option><option value="AM1">AM1</option><option value="PM3">PM3</option></select><button class="nmr-tg on" id="ir-3d" title="Show or hide the 3D model under the spectrum">3D MODEL: SHOWN</button></div></div><div id="ir-sub"></div><div id="ir-info"></div></div><div id="ir-plot"></div>';
+        irp.innerHTML = '<div class="nmr-head"><div class="nmr-hrow"><div class="nmr-title">IR <span>predicted spectrum</span><button class="spec-i" data-info="ir" title="How this spectrum is predicted (assumptions and limits)">i</button></div><div class="nmr-tools"><span class="nmr-tl">SPECTRUM</span><button class="nmr-tg on" id="ir-src-g" title="Bands placed at the typical positions of the functional groups found in the structure (instant)">GROUP FREQUENCIES</button><span class="nmr-tg ir-nm" id="ir-src-c" role="button" tabindex="0" title="Optimize the geometry, then calculate every vibration of the molecule (harmonic normal modes, scaled) and its IR intensity, at the level of theory chosen here">NORMAL-MODE CALCULATION ·<select id="ir-meth" class="ir-meth" title="Level of theory for the normal-mode calculation"><option value="AIMNET2">AIMNet2</option><option value="ANI2X">ANI-2x</option><option value="AM1">AM1</option><option value="PM3">PM3</option></select></span><button class="nmr-tg on" id="ir-3d" title="Show or hide the 3D model under the spectrum">3D MODEL: SHOWN</button></div></div><div id="ir-sub"></div><div id="ir-info"></div></div><div id="ir-plot"></div>';
         $('viewer').appendChild(irp);
         const irs = document.createElement('div'); irs.id = 'ir-struct'; irs.className = 'spec-struct'; irs.hidden = true; $('viewer').appendChild(irs);
         const ird = document.createElement('div'); ird.id = 'ir-div'; ird.title = 'Drag to resize the spectrum and the models below (double-click to reset)'; $('viewer').appendChild(ird);
@@ -8390,6 +8919,32 @@ function autoMapAtoms(m, R, P) {
             '<div class="nmr-subrow"><div id="ms-sub"></div><button class="nmr-tg nmr-full" id="ms-full" hidden title="Back to the full spectrum (or double-click the spectrum)">FULL VIEW</button></div></div>' +
             '<div class="ms-main"><div id="ms-plot"></div><div id="ms-mi" hidden></div></div><div class="ms-bottom"><div id="ms-struct"></div><div class="ms-side"><div id="ms-info"></div><div id="ms-list"></div></div></div>';
         $('viewer').appendChild(msp);
+        const mk = (id, html) => { const p = document.createElement('div'); p.id = id; p.className = 'spec-pane'; p.hidden = true; p.innerHTML = html; $('viewer').appendChild(p); return p; };
+        const c13p = mk('c13-pane', '<div class="nmr-head"><div class="nmr-hrow"><div class="nmr-title"><sup>13</sup>C NMR <span>predicted spectrum</span><button class="spec-i" data-info="c13" title="How this spectrum is predicted">i</button></div><div class="nmr-tools"><span class="nmr-tl">EXPERIMENT</span>' +
+            '<button class="nmr-tg" data-c13="coupled" title="Every carbon split by the protons attached to it">¹H-COUPLED</button><button class="spec-i spec-i-sm" data-info="c13cpl" title="About the ¹H-coupled spectrum">i</button>' +
+            '<button class="nmr-tg on" data-c13="bb" title="One line per carbon environment (the usual ¹³C spectrum)">BROADBAND ¹H-DECOUPLED</button><button class="spec-i spec-i-sm" data-info="c13bb" title="About broadband decoupling">i</button>' +
+            '<button class="nmr-tg" data-c13="dept" title="The decoupled spectrum with DEPT-90 and DEPT-135 below it">DECOUPLED + DEPT-90 / DEPT-135</button><button class="spec-i spec-i-sm" data-info="c13dept" title="About DEPT">i</button></div></div>' +
+            '<div class="nmr-subrow"><div id="c13-sub"></div><button class="nmr-tg nmr-full" id="c13-full" hidden title="Back to the full spectrum (or double-click the spectrum)">FULL VIEW</button></div></div><div id="c13-plot" class="spec-plot"></div><div class="spec-bottom"><div id="c13-struct" class="spec-card"></div><div id="c13-table" class="spec-tab"></div></div>');
+        const n2dp = mk('n2d-pane', '<div class="nmr-head"><div class="nmr-hrow"><div class="nmr-title">2D NMR <span>predicted spectra</span><button class="spec-i" data-info="n2d" title="How these spectra are predicted">i</button></div><div class="nmr-tools"><span class="nmr-tl">EXPERIMENT</span>' +
+            '<button class="nmr-tg on" data-n2d="cosy" title="¹H–¹H correlation: which protons are coupled to each other">COSY</button><button class="spec-i spec-i-sm" data-info="cosy" title="About COSY">i</button>' +
+            '<button class="nmr-tg" data-n2d="hsqc" title="¹H–¹³C one-bond correlation: which carbon each proton is on">HSQC</button><button class="spec-i spec-i-sm" data-info="hsqc" title="About HSQC">i</button>' +
+            '<button class="nmr-tg" data-n2d="hmbc" title="¹H–¹³C long-range correlation: carbons two and three bonds from each proton">HMBC</button><button class="spec-i spec-i-sm" data-info="hmbc" title="About HMBC">i</button></div></div>' +
+            '<div class="nmr-subrow"><div id="n2d-sub"></div><button class="nmr-tg nmr-full" id="n2d-full" hidden title="Back to the full spectrum (or double-click the spectrum)">FULL VIEW</button></div></div><div id="n2d-plot" class="spec-plot"></div><div class="spec-bottom"><div id="n2d-struct" class="spec-card"></div><div id="n2d-info" class="spec-tab"></div></div>');
+        const litp = mk('lit-pane', '<div class="nmr-head"><div class="nmr-hrow"><div class="nmr-title">Literature &amp; Databases <span>is it known?</span><button class="spec-i" data-info="lit" title="What is searched, and how">i</button></div><button class="nmr-tg" id="lit-go" title="Search again">↻ SEARCH AGAIN</button></div>' +
+            '<div class="nmr-subrow"><div id="lit-sub"></div></div></div><div class="lit-main"><div id="lit-struct" class="spec-card"></div><div id="lit-body"></div></div>');
+        c13p.querySelectorAll('[data-c13]').forEach(b => b.addEventListener('click', () => { C13.mode = b.dataset.c13; updateC13(); }));
+        n2dp.querySelectorAll('[data-n2d]').forEach(b => b.addEventListener('click', () => { N2D.mode = b.dataset.n2d; N2D.sel = -1; updateN2D(); }));
+        $('lit-go').addEventListener('click', () => { LIT.cache.delete(LIT.key); litSearch(); });
+        $('c13-plot').addEventListener('click', (e) => { if (performance.now() - (C13.zt || 0) < 350) return; const r = $('c13-plot').getBoundingClientRect(), x = e.clientX - r.left; let best = -1, bd = 10; (C13.hit || []).forEach(h => { const d = Math.abs(h.x - x); if (d < bd) { bd = d; best = h.k; } }); C13.sel = best === C13.sel ? -1 : best; drawC13(); render(); });
+        // drag across the ¹³C spectrum to zoom into that stretch; drag a box on a 2D spectrum to zoom into it; double-click (or FULL VIEW) for the whole spectrum
+        specZoom($('c13-plot'), C13, 'c13-band', false, drawC13);
+        { const card = $('c13-struct'), at = (e) => { const sv = card.querySelector('svg'); if (!sv || !sv.getScreenCTM()) return null; const pt = sv.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const q = pt.matrixTransform(sv.getScreenCTM().inverse()); return c13HotAt({ x: q.x, y: q.y }, true); };
+          card.addEventListener('pointermove', (e) => { const k = at(e); card.style.cursor = k != null ? 'pointer' : ''; c13SetHot(k); });
+          card.addEventListener('pointerleave', () => c13SetHot(null));
+          card.addEventListener('click', (e) => { const k = at(e); if (k == null) return; C13.sel = C13.sel === k ? -1 : k; drawC13(); render(); }); } specZoom($('n2d-plot'), N2D, 'n2d-band', true, drawN2D);
+        $('c13-full').addEventListener('click', () => { C13.view = null; drawC13(); }); $('n2d-full').addEventListener('click', () => { N2D.view = null; drawN2D(); });
+        $('n2d-plot').addEventListener('click', (e) => { if (!N2D.geo || performance.now() - (N2D.zt || 0) < 350) return; const r = $('n2d-plot').getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; let best = -1, bd = 14; N2D.peaks.forEach((p, k) => { if (!N2D.geo.inX(p.x) || !N2D.geo.inY(p.y)) return; const d = Math.hypot(N2D.geo.X(p.x) - x, N2D.geo.Y(p.y) - y); if (d < bd) { bd = d; best = k; } }); N2D.sel = best === N2D.sel ? -1 : best; drawN2D(); render(); });
+        if (window.ResizeObserver) new ResizeObserver(() => { if (NMRS.mode === 'c13') drawC13(); if (NMRS.mode === 'n2d') drawN2D(); if (NMRS.mode === 'lit') drawLitCard(); }).observe($('viewer'));
         msp.querySelector('#ms-mi-tg').addEventListener('click', (e) => { const on = $('ms-mi').hidden; $('ms-mi').hidden = !on; e.currentTarget.classList.toggle('on', on); requestAnimationFrame(drawMS); });
         const msPlot = msp.querySelector('#ms-plot'); enableOverlayDrag(msPlot, () => drawMS());
         $('ms-full').addEventListener('click', () => { MSS.view = null; drawMS(); });
@@ -8407,8 +8962,9 @@ function autoMapAtoms(m, R, P) {
         if (window.ResizeObserver) new ResizeObserver(() => { if (NMRS.mode === 'ms') drawMS(); }).observe(msp);
         const irPlot = irp.querySelector('#ir-plot'); enableOverlayDrag(irPlot, () => drawIR());
         $('ir-src-g').addEventListener('click', () => { IRS.src = 'group'; irCalcStop(); IRS.calcMsg = ''; updateIR(); });
+        $('ir-meth').addEventListener('click', (e) => e.stopPropagation());
         $('ir-src-c').addEventListener('click', () => { IRS.src = 'calc'; IRS.calcMsg = ''; const C = IRS.calc; if (!IRS.busy && !(C && M3 && C.key === structKey(M3.g) && C.meth === IRS.meth)) irCalcStart(); else updateIR(); });
-        $('ir-meth').addEventListener('change', (e) => { IRS.meth = e.target.value; IRS.calcMsg = ''; if (IRS.src === 'calc') irCalcStart(); });
+        $('ir-meth').addEventListener('change', (e) => { IRS.meth = e.target.value; IRS.calcMsg = ''; IRS.src = 'calc'; const C = IRS.calc; if (C && M3 && C.key === structKey(M3.g) && C.meth === IRS.meth) updateIR(); else irCalcStart(); });
         irp.querySelector('#ir-3d').addEventListener('click', (e) => { const hide = !$('viewer').classList.contains('no3d'); $('viewer').classList.toggle('no3d', hide);
             e.currentTarget.classList.toggle('on', !hide); e.currentTarget.textContent = hide ? '3D MODEL: HIDDEN' : '3D MODEL: SHOWN'; requestAnimationFrame(drawIR); });
         irPlot.addEventListener('click', (e) => { const r = irPlot.getBoundingClientRect(), k = irPick(e.clientX - r.left); irSelect(k === IRS.sel ? -1 : k); });
@@ -8439,7 +8995,7 @@ function autoMapAtoms(m, R, P) {
         plot.addEventListener('dblclick', () => { if (NMRS.view) { NMRS.view = null; drawNMR(); } });
         plot.addEventListener('click', (e) => { const t = e.target.closest && e.target.closest('.nmr-bhit'); if (t && NMRS.tree && NMRS.sig) nmrTree(NMRS.sig[+t.dataset.k]); });
         const menu = document.createElement('div'); menu.className = 'menu'; menu.id = 'right-menu'; menu.hidden = true; menu.style.width = '250px';
-        menu.innerHTML = '<div class="dm-head" style="margin-top:0;border-top:none;padding-top:0">RIGHT WINDOW SHOWS</div><button class="mi" data-m="3d">3D MODEL<span id="rm-3d">✓</span></button><button class="mi" data-m="nmr"><span style="color:inherit;font-size:inherit;font-weight:inherit"><sup>1</sup>H NMR SPECTRUM</span><span id="rm-nmr"></span></button><button class="mi" data-m="ir">IR SPECTRUM + 3D<span id="rm-ir"></span></button><button class="mi" data-m="ms">MASS SPECTRUM (EI)<span id="rm-ms"></span></button>';
+        menu.innerHTML = '<div class="dm-head" style="margin-top:0;border-top:none;padding-top:0">RIGHT WINDOW SHOWS</div><button class="mi" data-m="3d">3D MODEL<span id="rm-3d">✓</span></button><button class="mi" data-m="ir">IR SPECTRUM + 3D<span id="rm-ir"></span></button><button class="mi" data-m="ms">MASS SPECTRUM (EI)<span id="rm-ms"></span></button><button class="mi" data-m="nmr"><span style="color:inherit;font-size:inherit;font-weight:inherit"><sup>1</sup>H NMR SPECTRUM</span><span id="rm-nmr"></span></button><button class="mi" data-m="c13"><span style="color:inherit;font-size:inherit;font-weight:inherit"><sup>13</sup>C NMR SPECTRUM</span><span id="rm-c13"></span></button><button class="mi" data-m="n2d">2D NMR (COSY · HSQC · HMBC)<span id="rm-n2d"></span></button><button class="mi" data-m="lit">LITERATURE &amp; DATABASES<span id="rm-lit"></span></button>';
         document.body.appendChild(menu); MENUS.push('right-menu');
         const caret = $('v-rmenu');
         caret.addEventListener('pointerdown', (e) => e.stopPropagation());
@@ -8451,23 +9007,24 @@ function autoMapAtoms(m, R, P) {
     })();
     function setRightMode(m, quiet) {
         const prev = NMRS.mode;
-        NMRS.mode = ['nmr', 'ir', 'ms'].includes(m) ? m : '3d';
+        NMRS.mode = ['nmr', 'ir', 'ms', 'c13', 'n2d', 'lit'].includes(m) ? m : '3d';
         try { localStorage.setItem('zms-right', NMRS.mode); } catch (err) {}
-        const nmr = NMRS.mode === 'nmr', ir = NMRS.mode === 'ir', ms = NMRS.mode === 'ms';
+        const nmr = NMRS.mode === 'nmr', ir = NMRS.mode === 'ir', ms = NMRS.mode === 'ms', c13 = NMRS.mode === 'c13', n2d = NMRS.mode === 'n2d', lit = NMRS.mode === 'lit', xp = c13 || n2d || lit;
         if (prev === 'ir' && !ir) { irStop(); IRS.sel = -1; }
         if (prev === 'ms' && !ms) MSS.sel = null;
-        $('nmr-pane').hidden = !nmr; $('ir-pane').hidden = !ir; $('ms-pane').hidden = !ms;
-        $('viewer').classList.toggle('nmr', nmr || ms); $('viewer').classList.toggle('ir', ir);
-        const name = nmr ? 'NMR' : ir ? 'IR' : ms ? 'MS' : '3D';
-        $('v-3d').textContent = name;
-        $('v-3d').title = 'Show only the ' + (nmr ? 'NMR spectrum' : ir ? 'IR spectrum and 3D model' : ms ? 'mass spectrum' : '3D model') + ' (the structure is shown there too)';
-        $('v-both').title = 'Show the 2D editor and the ' + (nmr ? 'NMR spectrum' : ir ? 'IR spectrum with the 3D model' : ms ? 'mass spectrum' : '3D model') + ' side by side';
-        $('rm-3d').textContent = NMRS.mode === '3d' ? '✓' : ''; $('rm-nmr').textContent = nmr ? '✓' : ''; $('rm-ir').textContent = ir ? '✓' : ''; $('rm-ms').textContent = ms ? '✓' : '';
+        $('nmr-pane').hidden = !nmr; $('ir-pane').hidden = !ir; $('ms-pane').hidden = !ms; $('c13-pane').hidden = !c13; $('n2d-pane').hidden = !n2d; $('lit-pane').hidden = !lit;
+        $('viewer').classList.toggle('nmr', nmr || ms || xp); $('viewer').classList.toggle('ir', ir);
+        const name = nmr ? 'NMR' : ir ? 'IR' : ms ? 'MS' : c13 ? '¹³C' : n2d ? '2D NMR' : lit ? 'LIT' : '3D';
+        $('v-3d').innerHTML = nmr ? '<sup>1</sup>H NMR' : c13 ? '<sup>13</sup>C NMR' : name;
+        const what = nmr ? 'NMR spectrum' : ir ? 'IR spectrum and 3D model' : ms ? 'mass spectrum' : c13 ? '¹³C NMR spectrum' : n2d ? '2D NMR spectra' : lit ? 'literature and database search' : '3D model';
+        $('v-3d').title = 'Show only the ' + what + ' (the structure is shown there too)';
+        $('v-both').title = 'Show the 2D editor and the ' + what + ' side by side';
+        ['3d', 'nmr', 'ir', 'ms', 'c13', 'n2d', 'lit'].forEach(k => { $('rm-' + k).textContent = NMRS.mode === k ? '✓' : ''; });
         set3DAvailable(raw3D);
         if (prev !== NMRS.mode) { resize3D(); if (M3 && typeof animFit === 'function') animFit(0.4); }
         if (!quiet && layoutMode === '2d' && NMRS.mode !== '3d') layoutTo('both');
         if (nmr) { $('busy').hidden = true; updateNMR(); }
-        else { NMRS.sig = null; NMRS.hi = null; if (ir) updateIR(); if (ms) { $('busy').hidden = true; updateMS(); } render(); }
+        else { NMRS.sig = null; NMRS.hi = null; if (ir) updateIR(); if (ms) { $('busy').hidden = true; updateMS(); } if (xp) { $('busy').hidden = true; updateExtra(); } render(); }
         refreshThumbs(); if (typeof comp2D === 'function') comp2D();
     }
 
@@ -9728,7 +10285,7 @@ function autoMapAtoms(m, R, P) {
     //  COMPUTATIONS (the left-hand window): level of theory, jobs (optimize / single point), results tables,
     //  measurements, a replay of the optimization, and the math behind it
     // =====================================================================
-    var COMP = { optimized: false, lot: '', method: '', task: 'opt', props: null, pending: false, show: { pq: false, bo: false, dip: false }, measure: false, picks: [], meas: [], job: null, traj: [], opt: null };
+    var COMP = { optimized: false, lot: '', method: '', task: 'opt', props: null, pending: false, show: { pq: false, bo: false, dip: false }, measure: false, picks: [], meas: [], vis: -1, mn: 0, job: null, traj: [], opt: null };
     var MSEL = null;      // a molecule selected (double-click) in a 3D window holding several: { atoms: [...] }
     var LOT = 'AM1';
     const NDDO = ['MNDO', 'AM1', 'PM3', 'RM1', 'PM7'];
@@ -9785,11 +10342,16 @@ function autoMapAtoms(m, R, P) {
     function lotUI() {
         document.querySelectorAll('.lot').forEach(b => { const on = b.dataset.lot === LOT; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
         const L = LOTS[LOT]; $('lot-sum').innerHTML = `<span class="k">Method</span><span>${L.name} — ${L.kind}</span><span class="k">Speed</span>${meter(L.speed)}<span class="k">Accuracy</span>${meter(L.acc)}`;
-        const opt = $('comp-pane').querySelector('[data-task=opt]'); opt.disabled = !L.opt; if (!L.opt) COMP.task = 'sp';
-        document.querySelectorAll('.cp-task').forEach(b => b.classList.toggle('active', b.dataset.task === COMP.task));
-        ['job-conv', 'job-max', 'job-live'].forEach(id => { $(id).disabled = COMP.task !== 'opt'; });
+        const sel = $('job-task'); [...sel.options].forEach(o => { o.disabled = !JOB_OK[o.value](LOT); }); if (!JOB_OK[COMP.task] || !JOB_OK[COMP.task](LOT)) COMP.task = L.opt ? 'opt' : 'sp'; sel.value = COMP.task;
+        document.querySelectorAll('#cp-job .jrow').forEach(r => { r.hidden = !r.dataset.jt.split(' ').includes(COMP.task); });
+        $('job-bond').innerHTML = scanBondText(); $('job-scale').textContent = FREQ_SCALE[LOT] ? (FREQ_SCALE[LOT] === 1 ? 'none (no standard factor for ' + L.name + ')' : '× ' + FREQ_SCALE[LOT] + ' (corrects harmonic frequencies)') : '—';
         if (!$('lot-pop').hidden && infoKey === 'lot') lotInfo(true, 'lot');
     }
+    const TASK_INFO = `<h4>Jobs</h4><ul>
+        <li><b>Geometry Optimization</b>: moves the atoms downhill in energy until the forces vanish: the nearest energy minimum (one conformation). Reports the optimized structure and its properties.</li>
+        <li><b>Single Point Energy</b>: the energy, charges, dipole and orbitals of the structure exactly as it is now, without moving any atom.</li>
+        <li><b>Vibrational Frequencies</b>: optimizes (optional), then displaces every atom in turn to get the force constants (the Hessian), and diagonalizes the mass-weighted Hessian into the 3N − 6 normal modes. Gives every vibrational frequency, its IR intensity and an animation; an imaginary frequency means the structure is a saddle point (e.g. a transition state), not a minimum. Needs a quantum or machine-learned level.</li>
+        <li><b>Coordinate Scan</b>: rotates one bond through 360° in steps and computes the energy at each angle, giving the torsional energy profile (eclipsed maxima, staggered / gauche / anti minima, rotational barriers). <i>Rigid</i>: only the rotating group moves (quick; exaggerates barriers because nothing can relax). <i>Relaxed</i>: at each angle the dihedral is held fixed and everything else is optimized (slower; the realistic profile). Click the bond in the 3D model first.</li></ul>`;
     const CONV_INFO = `<h4>Convergence: when is the optimization finished?</h4><p>An optimization moves the atoms downhill in energy, step by step. At a true energy minimum the <b>force</b> on every atom (the slope of the energy) is zero. In practice the steps get smaller and smaller, so the program stops once the forces are small enough. The convergence setting is how small "small enough" is.</p>
         <h5>THE THREE SETTINGS</h5><ul><li><b>Loose</b>: largest force below 0.05 eV/Å (about 1.2 kcal/mol per Å). Quick; the geometry is close but bond lengths can still be off by ~0.01 Å and angles by a degree or so. Good for a first look or big molecules.</li>
         <li><b>Normal</b> (default): largest force below 0.01 eV/Å (about 0.23 kcal/mol per Å). Bond lengths settle to about 0.001 Å; right for almost everything here.</li>
@@ -9798,28 +10360,31 @@ function autoMapAtoms(m, R, P) {
         <li><b>Maximum steps</b> is a safety stop: if the limit is not reached by then, the job ends and says it is not fully converged. Molecular Mechanics takes many tiny steps, so it is allowed 30 times as many.</li>
         <li>Converged means a minimum <i>near the starting shape</i>: a different starting conformation can converge to a different (possibly lower) minimum.</li></ul>`;
     let infoKey = null;
-    function lotInfo(show, key) { const pop = $('lot-pop'); key = key || 'lot'; $('lot-i').classList.remove('on'); $('conv-i').classList.remove('on');
+    function lotInfo(show, key) { const pop = $('lot-pop'); key = key || 'lot'; $('lot-i').classList.remove('on'); $('conv-i').classList.remove('on'); $('task-i').classList.remove('on');
         if (!show) { pop.hidden = true; infoKey = null; return; } infoKey = key;
-        pop.innerHTML = `<button class="x" aria-label="Close">✕</button>${key === 'conv' ? CONV_INFO : LOT_INFO[LOT]}`; pop.hidden = false; $(key === 'conv' ? 'conv-i' : 'lot-i').classList.add('on');
+        pop.innerHTML = `<button class="x" aria-label="Close">✕</button>${key === 'conv' ? CONV_INFO : key === 'task' ? TASK_INFO : LOT_INFO[LOT]}`; pop.hidden = false; $(key === 'conv' ? 'conv-i' : key === 'task' ? 'task-i' : 'lot-i').classList.add('on');
         pop.querySelector('.x').addEventListener('click', () => lotInfo(false)); }
     document.querySelectorAll('.lot').forEach(b => b.addEventListener('click', () => { LOT = b.dataset.lot; COMP.task = LOTS[LOT].opt ? 'opt' : 'sp'; try { localStorage.setItem('zms-lot', LOT); } catch (e) {} lotUI(); }));
     $('conv-i').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); lotInfo(infoKey !== 'conv', 'conv'); });
     $('lot-i').addEventListener('click', (e) => { e.stopPropagation(); lotInfo(infoKey !== 'lot', 'lot'); });
-    $('comp-pane').addEventListener('click', (e) => { if (!$('lot-pop').hidden && !e.target.closest('#lot-pop, #lot-i, #conv-i')) lotInfo(false); });
-    document.querySelectorAll('.cp-task').forEach(b => b.addEventListener('click', () => { if (b.disabled) return; COMP.task = b.dataset.task; lotUI(); }));
+    $('comp-pane').addEventListener('click', (e) => { if (!$('lot-pop').hidden && !e.target.closest('#lot-pop, #lot-i, #conv-i, #task-i')) lotInfo(false); });
+    $('job-task').addEventListener('change', (e) => { COMP.task = e.target.value;
+        if (COMP.task === 'scan' && LOTS.MM && LOT !== 'MM') { LOT = 'MM'; try { localStorage.setItem('zms-lot', LOT); } catch (err) {} }      // scans default to molecular mechanics (fast enough for 360 points)
+        lotUI(); if (COMP.task === 'scan' && !COMP.scanBond) $('mm-out').textContent = 'Click the bond to rotate in the 3D model.'; });
+    $('task-i').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); lotInfo(infoKey !== 'task', 'task'); });
     try { const s = localStorage.getItem('zms-lot'); if (LOTS[s]) LOT = s; } catch (e) {}
 
-    const jobRunning = () => !!(mm.running || qm.worker || qm.timer);
+    const jobRunning = () => !!(mm.running || qm.worker || qm.timer || COMP.worker || (COMP.job && (COMP.job.task === 'freq' || COMP.job.task === 'scan')));
     function syncJob() { const r = jobRunning(); $('b-job').textContent = r ? '■ STOP JOB' : '▶ SUBMIT JOB'; $('b-job').classList.toggle('primary', !r); $('b-film').disabled = r || COMP.traj.length < 2; }
     const totCharge = () => M3 ? M3.g.atoms.reduce((t, a) => t + (a.charge || 0), 0) : 0;
     function compRefresh() {
         if (M3) $('job-charge').textContent = (q => q > 0 ? '+' + q : q < 0 ? '−' + (-q) : '0')(totCharge());
         const ok = COMP.optimized && !!M3;
-        $('res-note').textContent = ok ? `${COMP.method} · ${COMP.task === 'opt' ? 'optimized geometry' : 'single point (geometry as it was)'}. Measurements follow the model as it changes.` : 'Submit a job to see the results here.';
-        lotUI(); syncJob(); compResults(); comp2D();
+        $('res-note').textContent = ok ? `${COMP.method} · ${{ opt: 'optimized geometry', sp: 'single point (geometry as it was)', freq: 'vibrational frequencies (properties at that geometry)', scan: 'coordinate scan (properties at the point shown)' }[COMP.task] || ''}. Measurements follow the model as it changes.` : 'Submit a job to see the results here.';
+        lotUI(); syncJob(); compResults(); comp2D(); freqRender(); scanRender();
     }
     function compReset() {      // a new / rebuilt model: the results belong to the old one
-        COMP.optimized = false; COMP.props = null; COMP.pending = false; COMP.meas = []; COMP.picks = []; COMP.show = { pq: false, bo: false, dip: false }; COMP.traj = []; COMP.opt = null;
+        COMP.optimized = false; COMP.props = null; COMP.pending = false; COMP.vis = -1; COMP.picks = []; COMP.show = { pq: false, bo: false, dip: false }; COMP.traj = []; COMP.opt = null;
         if (typeof filmStop === 'function') filmStop(true);
         MSEL = null; COMP.job = null; if (typeof MO !== 'undefined' && MO) { MO.on = false; moReset(); if ($('b-mo')) $('b-mo').classList.remove('active'); if ($('mo-det')) $('mo-det').open = false; }
         if (typeof M3 !== 'undefined' && M3) M3.lay2d = null;
@@ -9831,11 +10396,14 @@ function autoMapAtoms(m, R, P) {
         const n = coords.length, x = new Float32Array(3 * n); coords.forEach((p, i) => { x[3 * i] = p.x ?? p[0]; x[3 * i + 1] = p.y ?? p[1]; x[3 * i + 2] = p.z ?? p[2]; });
         COMP.traj.push({ E, x }); if (COMP.traj.length > 4000) COMP.traj = COMP.traj.filter((f, i) => i % 2 === 0 || i === COMP.traj.length - 1); }
     $('b-job').addEventListener('click', () => {
-        if (jobRunning()) { COMP.job = null; if (mm.running) mmStop('Stopped at ' + mm.E.toFixed(1) + ' kcal/mol'); if (qm.worker || qm.timer) qmStop('Optimization stopped (the model keeps the last geometry).'); syncJob(); return; }
+        if (jobRunning()) { if (COMP.worker) { COMP.worker.terminate(); COMP.worker = null; } if (COMP.job && (COMP.job.task === 'freq' || COMP.job.task === 'scan')) { COMP.job = null; $('mm-out').textContent = 'Stopped.'; syncJob(); if (COMP.scan) { COMP.scan.done = true; scanRender(); } return; }
+            COMP.job = null; if (mm.running) mmStop('Stopped at ' + mm.E.toFixed(1) + ' kcal/mol'); if (qm.worker || qm.timer) qmStop('Optimization stopped (the model keeps the last geometry).'); syncJob(); return; }
         if (!M3) { $('mm-out').textContent = 'Draw a structure first.'; return; }
         if (LOT === 'ANI2X' || LOT === 'AIMNET2') { const why = mlCheck(LOT, M3.g); if (why) { $('mm-out').textContent = why; return; }
             if (!mlReady(LOT)) { const b = $('b-job'), lot = LOT; b.disabled = true; $('mm-out').textContent = `Unpacking the ${LOTS[lot].name} network…`;
                 mlLoad(lot).then(() => { b.disabled = false; b.click(); }).catch(err => { b.disabled = false; aniFail(err, lot); }); return; } }
+        if (COMP.task === 'freq' && JOB_OK.freq(LOT)) { filmStop(true); freqStart(); return; }
+        if (COMP.task === 'scan' && JOB_OK.scan(LOT)) { filmStop(true); scanStart(); return; }
         filmStop(true); MO.on && moClear();
         const lot = LOT, task = LOTS[lot].opt ? COMP.task : 'sp', opt = { method: lot, gtol: +$('job-conv').value, maxSteps: clamp(+$('job-max').value || 200, 10, 2000), live: $('job-live').checked };
         COMP.props = null; COMP.job = { lot, task, t: performance.now() }; COMP.opt = null;
@@ -9865,6 +10433,223 @@ function autoMapAtoms(m, R, P) {
         for (const [i, j, rm, e] of T.pairs) { const r = Math.max(d.copy(P[i]).sub(P[j]).length(), 0.72 * rm), x6 = (rm / r) ** 6; c.vdw += e * (x6 * x6 - 2 * x6); }
         return { ...c, total: c.stretch + c.bend + c.torsion + c.planar + c.vdw, n: { stretch: T.bonds.length, bend: T.angles.length, torsion: T.tors.length, planar: T.imps.length, vdw: T.pairs.length } };
     }
+    // =====================================================================
+    //  Jobs beyond optimization: vibrational frequencies and coordinate (dihedral) scans
+    // =====================================================================
+    const JOB_OK = { opt: (L) => LOTS[L].opt, sp: () => true, freq: (L) => L !== 'MM' && L !== 'HUCKEL', scan: (L) => L !== 'HUCKEL' };
+    const FREQ_SCALE = { AIMNET2: 0.960, ANI2X: 0.945, AM1: 0.9532, PM3: 0.9761, MNDO: 1, RM1: 1, PM7: 1 };
+    function dihedGrad(P, a, b, c, d) {      // φ (rad) and dφ/dx for four atoms; P: [[x,y,z]…]
+        const sub = (u, v) => [u[0] - v[0], u[1] - v[1], u[2] - v[2]], cr = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]], dt = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+        const b1 = sub(P[b], P[a]), b2 = sub(P[c], P[b]), b3 = sub(P[d], P[c]), n1 = cr(b1, b2), n2 = cr(b2, b3), L2 = Math.sqrt(dt(b2, b2));
+        const phi = Math.atan2(L2 * dt(b1, n2), dt(n1, n2)), n1s = dt(n1, n1) || 1e-12, n2s = dt(n2, n2) || 1e-12;
+        const ga = n1.map(v => -L2 * v / n1s), gd = n2.map(v => L2 * v / n2s), f1 = dt(b1, b2) / (L2 * L2), f3 = dt(b3, b2) / (L2 * L2);
+        const gb = ga.map((v, k) => (f1 - 1) * v - f3 * gd[k]), gc = gd.map((v, k) => (f3 - 1) * v - f1 * ga[k]);
+        return { phi, g: [ga, gb, gc, gd] };
+    }
+    // the generic constrained optimizer (worker): BFGS with a stiff harmonic restraint on one dihedral
+    function scanCore(eg) {      // eg(atoms) → { E (eV), grad }
+        function optR(atomsIn, dih, target, gtol, maxSteps) {
+            const atoms = atomsIn.map(a => ({ ...a })), N = 3 * atoms.length, K = 25;      // eV/rad² (≈ 580 kcal/mol/rad²): holds the dihedral within ~1°
+            const eval1 = () => { const r = eg(atoms), P = atoms.map(a => [a.x, a.y, a.z]), D = dihedGrad(P, ...dih); let dp = D.phi - target; dp = Math.atan2(Math.sin(dp), Math.cos(dp));
+                const g = Float64Array.from(r.grad); dih.forEach((i, k) => { for (let c = 0; c < 3; c++) g[3 * i + c] += 2 * K * dp * D.g[k][c]; }); return { E: r.E + K * dp * dp, E0: r.E, grad: g }; };
+            const x = new Float64Array(N); atoms.forEach((a, i) => { x[3 * i] = a.x; x[3 * i + 1] = a.y; x[3 * i + 2] = a.z; });
+            const set = (v) => atoms.forEach((a, i) => { a.x = v[3 * i]; a.y = v[3 * i + 1]; a.z = v[3 * i + 2]; });
+            const reset = () => { const H = new Float64Array(N * N); for (let i = 0; i < N; i++) H[i * N + i] = 1 / 25; return H; };
+            let Hinv = reset(), r = eval1(), trust = 0.12;
+            for (let step = 0; step < maxSteps; step++) {
+                let gmax = 0; for (let i = 0; i < N; i++) gmax = Math.max(gmax, Math.abs(r.grad[i])); if (gmax < gtol) break;
+                const dx = new Float64Array(N); for (let i = 0; i < N; i++) { let s = 0; for (let j = 0; j < N; j++) s -= Hinv[i * N + j] * r.grad[j]; dx[i] = s; }
+                let L = 0; for (let i = 0; i < N; i++) L = Math.max(L, Math.abs(dx[i])); if (L > trust) for (let i = 0; i < N; i++) dx[i] *= trust / L;
+                const xn = x.map((v, i) => v + dx[i]); set(xn); const rn = eval1();
+                if (rn.E > r.E + 1e-6) { set(x); trust = Math.max(1e-4, 0.4 * Math.min(L, trust)); Hinv = reset(); continue; }
+                const y = rn.grad.map((gg, i) => gg - r.grad[i]); let sy = 0; for (let i = 0; i < N; i++) sy += dx[i] * y[i];
+                if (sy > 1e-10) { const Hy = new Float64Array(N); for (let i = 0; i < N; i++) { let t = 0; for (let j = 0; j < N; j++) t += Hinv[i * N + j] * y[j]; Hy[i] = t; }
+                    let yHy = 0; for (let i = 0; i < N; i++) yHy += y[i] * Hy[i];
+                    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) Hinv[i * N + j] += (sy + yHy) * dx[i] * dx[j] / (sy * sy) - (Hy[i] * dx[j] + dx[i] * Hy[j]) / sy; }
+                for (let i = 0; i < N; i++) x[i] = xn[i]; r = rn; trust = Math.min(0.3, trust * 1.2);
+            }
+            return { E: r.E0, atoms };
+        }
+        return { optR };
+    }
+    function jobEngSrc() { return am1Engine.toString() + aniEngine.toString() + aimEngine.toString() + vibCore.toString() + vibEng.toString() + dihedGrad.toString() + scanCore.toString(); }
+    function jobWorker(onMsg) { const w = new Worker(URL.createObjectURL(new Blob([jobEngSrc() + `
+        self.onmessage = (e) => { const d = e.data; try {
+            const E = vibEng(d.method, d.charge, d.W, d.Waim);
+            if (d.kind === 'freq') { let last = 0; const r = vibCore(d.noOpt ? { ...E, opt: (a) => ({ coords: a.map(x => [x.x, x.y, x.z]), E: E.grad(a).E, converged: true, steps: 0 }) } : E).run(d.atoms, (p) => { const t = Date.now(); if (t - last > 150) { last = t; self.postMessage({ type: 'prog', p }); } });
+                r.muSrc = typeof E.muSrc === 'function' ? E.muSrc(d.atoms) : E.muSrc; self.postMessage({ type: 'done', r }); return; }
+            const eOnly = d.method === 'AIMNET2' ? (() => { const Q = aimEngine(d.W); return (a) => Q.energy(a, d.charge).E; })() : d.method === 'ANI2X' ? (a) => E.grad(a).E : (() => { const Q = am1Engine(d.method); return (a) => Q.scf(a, d.charge).E; })();
+            if (d.kind === 'rigid') { d.geoms.forEach((g, k) => { self.postMessage({ type: 'pt', k, E: eOnly(g) }); }); self.postMessage({ type: 'done' }); return; }
+            // relaxed: turn the dihedral step by step, re-optimizing everything else with the dihedral held
+            const S = scanCore(E.grad); let cur = d.atoms;
+            const rot = (atoms, ang) => { const p = atoms[d.fix], q = atoms[d.mov], ax = [q.x - p.x, q.y - p.y, q.z - p.z], L = Math.hypot(...ax); const u = ax.map(v => v / L), c = Math.cos(ang), s = Math.sin(ang);
+                return atoms.map((a, i) => { if (!d.side.includes(i) || i === d.mov) return { ...a }; const v = [a.x - q.x, a.y - q.y, a.z - q.z], dt = u[0] * v[0] + u[1] * v[1] + u[2] * v[2], cr = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+                    return { ...a, x: q.x + v[0] * c + cr[0] * s + u[0] * dt * (1 - c), y: q.y + v[1] * c + cr[1] * s + u[1] * dt * (1 - c), z: q.z + v[2] * c + cr[2] * s + u[2] * dt * (1 - c) }; }); };
+            const res = [], tg = [];
+            for (let k = 0; k < d.n; k++) { const start = k ? rot(cur, d.step) : cur, P = start.map(a => [a.x, a.y, a.z]), target = dihedGrad(P, ...d.dih).phi; tg[k] = target;
+                const r = S.optR(start, d.dih, target, d.gtol, d.maxSteps); cur = r.atoms; res[k] = r; self.postMessage({ type: 'pt', k, E: r.E, coords: cur.map(a => [a.x, a.y, a.z]) }); }
+            // second sweep in the other direction: another group (an O–H, a methyl) may have changed its conformation on the way; keep the lower energy at each angle
+            for (let k = d.n - 1; k >= 0; k--) { const r = S.optR(rot(res[(k + 1) % d.n].atoms, -d.step), d.dih, tg[k], d.gtol, d.maxSteps);
+                if (r.E < res[k].E - 0.001) { res[k] = r; self.postMessage({ type: 'pt', k, E: r.E, coords: r.atoms.map(a => [a.x, a.y, a.z]), pass: 1 }); } }
+            self.postMessage({ type: 'done' });
+        } catch (err) { self.postMessage({ type: 'error', msg: err.message }); } };`], { type: 'text/javascript' })));
+        w.onmessage = (e) => onMsg(e.data); w.onerror = (err) => onMsg({ type: 'error', msg: err.message || 'worker error' }); return w; }
+    function jobLoad(lot) { return lot === 'AIMNET2' ? aimLoad() : lot === 'ANI2X' ? Promise.all([aniLoad(), aimLoad().catch(() => null)]) : Promise.resolve(); }
+    // ---- vibrational frequencies
+    function freqStart() {
+        const lot = LOT, why = lot === 'AIMNET2' || lot === 'ANI2X' ? mlCheck(lot, M3.g) : (nddoOK(M3.g, lot) ? '' : `${lot} here cannot treat this structure (elements or an odd number of electrons).`);
+        if (why) { $('mm-out').textContent = why; return; }
+        const g = M3.g, key = structKey(g), noOpt = !$('job-freqopt').checked;
+        COMP.job = { lot, task: 'freq', t: performance.now() }; $('mm-out').textContent = 'Starting the frequency calculation…'; syncJob();
+        jobLoad(lot).then(() => {
+            if (!COMP.job || COMP.job.task !== 'freq') return;
+            const w = jobWorker((d) => { if (COMP.worker !== w) return;
+                if (d.type === 'prog') { const p = d.p; $('mm-out').textContent = p.stage === 'opt' ? `${LOTS[lot].name} · optimizing first · step ${p.step} · max force ${p.gmax.toFixed(3)} eV/Å` : p.stage === 'hess' ? `${LOTS[lot].name} · force constants: displacement ${p.k} of ${p.n}` : 'diagonalizing…'; return; }
+                COMP.worker = null; w.terminate(); const j = COMP.job; COMP.job = null; syncJob();
+                if (d.type === 'error') { $('mm-out').textContent = 'Frequency calculation failed: ' + d.msg; return; }
+                if (!M3 || structKey(M3.g) !== key) { $('mm-out').textContent = 'The structure changed during the calculation.'; return; }
+                d.r.coords.forEach((c, i) => { if (M3.base[i]) { M3.base[i].set(c[0], c[1], c[2]); M3.cur[i].set(c[0], c[1], c[2]); } }); place3D();
+                const sig = irCalcBands(d.r, lot in IR_METH ? lot : 'AM1').map(b => ({ ...b, nu: b.raw * FREQ_SCALE[lot], why: `harmonic ${Math.round(b.raw)} × ${FREQ_SCALE[lot]}` }));
+                COMP.freq = { lot, key, r: d.r, sig, sel: -1 };
+                if (lot in IR_METH) IRS.calc = { key, meth: lot, ...d.r, sig: irCalcBands(d.r, lot) };
+                const nIm = d.r.modes.filter(m2 => m2.nu < -30).length;
+                $('mm-out').textContent = `${LOTS[lot].name} frequencies: ${d.r.modes.length} modes${noOpt ? ' at the current geometry' : ' at the optimized geometry'}${nIm ? ` · ${nIm} imaginary (not a minimum)` : ''}.`;
+                jobDone(j); });
+            COMP.worker = w;
+            w.postMessage({ kind: 'freq', noOpt, atoms: g.atoms.map((a, i) => ({ el: a.el, x: M3.base[i].x, y: M3.base[i].y, z: M3.base[i].z })), charge: totCharge(), method: lot, W: lot === 'AIMNET2' ? AIM.W : lot === 'ANI2X' ? ANI.W : null, Waim: AIM.W });
+        }).catch(err => { COMP.job = null; syncJob(); $('mm-out').textContent = err.message; });
+    }
+    function freqRender() {
+        const el = $('comp-freq'); if (!el) return; const F = COMP.freq;
+        if (!F || !M3 || F.key !== structKey(M3.g)) { el.innerHTML = ''; return; }
+        const sig = F.sig.slice().sort((p, q) => p.nu - q.nu), im = F.r.modes.filter(m2 => m2.nu < -30), Imax = Math.max(1e-6, ...sig.map(b => b.km || 0));
+        const W = 520, Hh = 120, X = (nu) => 14 + (4000 - nu) / 3600 * (W - 28);
+        let svg = `<svg viewBox="0 0 ${W} ${Hh}" class="fq-svg" xmlns="http://www.w3.org/2000/svg"><line x1="14" y1="${Hh - 22}" x2="${W - 14}" y2="${Hh - 22}" stroke="#64748b"/>`;
+        [4000, 3000, 2000, 1500, 1000, 500].forEach(t => { svg += `<text x="${X(t)}" y="${Hh - 6}" font-size="11" text-anchor="middle" fill="#94a3b8">${t}</text>`; });
+        sig.forEach((b, k) => { const x = X(b.nu), h = (Hh - 32) * (b.km || 0) / Imax; svg += `<line x1="${x}" y1="${Hh - 22}" x2="${x}" y2="${Hh - 22 - Math.max(1.5, h)}" stroke="${F.sel === k ? '#f87171' : '#60a5fa'}" stroke-width="${F.sel === k ? 3 : 2}"/>`; });
+        svg += `</svg>`;
+        el.innerHTML = `<details class="rd rd-main" open><summary>VIBRATIONAL FREQUENCIES <span class="src">${LOTS[F.lot].name} · ${sig.length} modes · ${FREQ_SCALE[F.lot] === 1 ? 'unscaled harmonic' : 'harmonic × ' + FREQ_SCALE[F.lot]}</span></summary><div class="rd-in">
+            ${im.length ? `<div class="hint-sm" style="color:#fbbf24">${im.length} imaginary frequenc${im.length > 1 ? 'ies' : 'y'} (${im.map(m2 => Math.round(-m2.nu) + 'i').join(', ')} cm⁻¹): this geometry is not a true minimum (a saddle point); optimize further or from another starting structure.</div>` : ''}
+            ${F.lot === 'PM7' ? '<div class="hint-sm" style="color:#fbbf24">PM7 X–H stretches come out far too low in this app (water ~2800 cm⁻¹); prefer AIMNet2, ANI-2x, AM1 or PM3 for frequencies.</div>' : ''}
+            ${svg}<div class="cp-row" style="margin:4px 0">${F.lot in IR_METH ? '<button class="btn" id="fq-ir" title="Show this calculated spectrum in the IR window">OPEN IN THE IR WINDOW</button>' : ''}<span class="hint-in">Click a row to watch that vibration on the model.</span></div>
+            <div class="rt-wrap"><table class="rt"><thead><tr><th>#</th><th>ν (cm⁻¹)</th><th>harmonic</th><th>IR intensity (km/mol)</th><th>Description</th></tr></thead><tbody>
+            ${sig.map((b, k) => `<tr class="fq-row${F.sel === k ? ' on' : ''}" data-k="${k}"><td>${k + 1}</td><td><b>${Math.round(b.nu)}</b></td><td>${Math.round(b.raw)}</td><td>${b.km == null ? '—' : b.km < 1 ? b.km.toFixed(1) : Math.round(b.km)}</td><td>${b.label}</td></tr>`).join('')}</tbody></table></div></div></details>`;
+        el.querySelectorAll('.fq-row').forEach(tr => tr.addEventListener('click', () => { const k = +tr.dataset.k; irStop(); if (F.sel === k) { F.sel = -1; } else { F.sel = k; const b = sig[k]; IRS.vib = { rest: M3.cur.map(v => v.clone()), disp: b.disp, t0: performance.now() }; } freqRender(); }));
+        const fb = $('fq-ir'); if (fb) fb.onclick = () => { IRS.src = 'calc'; IRS.meth = F.lot; $('ir-meth').value = F.lot; setLeftMode('sketch'); setRightMode('ir'); };
+    }
+    // ---- coordinate scan (dihedral)
+    function scanBondPicked(k) {
+        if (!M3) return; const g = M3.g, b = g.bonds[k], nb = neighbors(g), pick = (x, not) => { const c = nb[x].filter(y => y.j !== not); return (c.find(y => g.atoms[y.j].el !== 'H') || c[0] || {}).j; };
+        const a = pick(b.a, b.b), d = pick(b.b, b.a); if (a == null || d == null) return;
+        COMP.scanBond = { k, dih: [a, b.a, b.b, d], key: structKey(g) }; if (COMP.task === 'scan') compRefresh();
+    }
+    const atomName = (i) => M3 ? M3.g.atoms[i].el + (i + 1) : '';
+    function scanBondText() {
+        const S = COMP.scanBond; if (!S || !M3 || S.key !== structKey(M3.g)) return '<span class="hint-in">click a single bond in the 3D model</span>';
+        const [a, b, c, d] = S.dih, P = M3.cur.map(v => [v.x, v.y, v.z]);
+        return `<b>${atomName(b)}–${atomName(c)}</b> <span class="hint-in">(dihedral ${atomName(a)}–${atomName(b)}–${atomName(c)}–${atomName(d)} = ${Math.round(dihedGrad(P, a, b, c, d).phi * 180 / Math.PI)}°)</span>`;
+    }
+    function scanStart() {
+        const lot = LOT, S = COMP.scanBond, g = M3.g;
+        if (!S || S.key !== structKey(g)) { $('mm-out').textContent = 'Click the bond to rotate in the 3D model first.'; return; }
+        if (lot === 'AIMNET2' || lot === 'ANI2X') { const why = mlCheck(lot, g); if (why) { $('mm-out').textContent = why; return; } }
+        else if (lot !== 'MM' && !nddoOK(g, lot)) { $('mm-out').textContent = `${lot} here cannot treat this structure.`; return; }
+        const side = bondSide(S.k); if (!side) { $('mm-out').textContent = 'That bond is in a ring and cannot be rotated.'; return; }
+        const step = +$('job-step').value, n = Math.round(360 / step), relaxed = $('job-scanmode').value === 'relaxed', rad = step * Math.PI / 180;
+        const base = M3.cur.map(v => [v.x, v.y, v.z]), dih = S.dih;      // start from the model as it is shown
+        const SC = COMP.scan = { lot, key: structKey(g), dih, k: S.k, side, step, n, relaxed, pts: new Array(n).fill(null), sel: 0, done: false };
+        COMP.job = { lot, task: 'scan', t: performance.now() }; syncJob();
+        const geoms = relaxed ? null : Array.from({ length: n }, (_, k) => scanRot(SC, base, k * rad));
+        const put = (k, E, coords, pass) => { const P = coords || geoms[k]; SC.pts[k] = { E, phi: dihedGrad(P, ...dih).phi * 180 / Math.PI, x: P }; const m = SC.pts.filter(Boolean).length;
+            $('mm-out').textContent = `${LOTS[lot].name} ${relaxed ? 'relaxed' : 'rigid'} scan · ${pass ? 'second sweep (the other direction) · point ' + (k + 1) : m + ' / ' + n + ' points'}`; scanRender(); };
+        const finish = (msg) => { COMP.job = null; COMP.worker = null; SC.done = true; syncJob(); $('mm-out').textContent = msg || `${LOTS[lot].name} ${relaxed ? 'relaxed (swept in both directions)' : 'rigid'} scan finished: ${n} points every ${step}°.`;
+            COMP.optimized = true; COMP.lot = lot; COMP.method = LOTS[lot].name; COMP.task = 'scan'; compRefresh(); scanGo(SC.pts.reduce((b2, p, k) => p && (!SC.pts[b2] || p.E < SC.pts[b2].E) ? k : b2, 0), true); };
+        if (lot === 'MM') {      // the force field runs here, a point at a time; relaxed scans go forward, then back, keeping the lower energy at each angle
+            const T = mmSetup(), K = 600, targets = [];
+            const relax = (P0, target) => { const P = P0.map(v => V(...v)), G = P.map(() => V(0, 0, 0)), trial = P.map(v => v.clone()), Gt = P.map(() => V(0, 0, 0));
+                const egR = (Q, Gg) => { let E = mmEnergyGrad(Q, T, Gg); const D = dihedGrad(Q.map(v => [v.x, v.y, v.z]), ...dih); let dp = D.phi - target; dp = Math.atan2(Math.sin(dp), Math.cos(dp)); E += K * dp * dp; dih.forEach((i, j) => { Gg[i].x += 2 * K * dp * D.g[j][0]; Gg[i].y += 2 * K * dp * D.g[j][1]; Gg[i].z += 2 * K * dp * D.g[j][2]; }); return E; };
+                let E = egR(P, G), st2 = 0.05;
+                for (let it = 0; it < 4000; it++) { let gm = 0; G.forEach(v => { gm = Math.max(gm, v.length()); }); if (gm < 0.02) break; const sc = st2 / gm; for (let i = 0; i < T.n; i++) trial[i].copy(P[i]).addScaledVector(G[i], -sc); const Et = egR(trial, Gt); if (Et < E) { for (let i = 0; i < T.n; i++) { P[i].copy(trial[i]); G[i].copy(Gt[i]); } E = Et; st2 = Math.min(st2 * 1.15, 0.2); } else { st2 *= 0.5; if (st2 < 1e-6) break; } }
+                return { E: mmEnergyGrad(P, T, G), x: P.map(v => [v.x, v.y, v.z]) }; };
+            let k = 0, pass = 0;
+            const tick = () => { if (COMP.scan !== SC || !COMP.job) return;
+                if (!relaxed) { const P = geoms[k].map(v => V(...v)), G = P.map(() => V(0, 0, 0)); put(k, mmEnergyGrad(P, T, G)); if (++k < n) setTimeout(tick, 0); else finish(); return; }
+                if (pass === 0) { const P0 = k ? scanRot(SC, SC.pts[k - 1].x, rad) : base; targets[k] = dihedGrad(P0, ...dih).phi; const r = relax(P0, targets[k]); put(k, r.E, r.x); if (++k < n) { setTimeout(tick, 0); return; } pass = 1; k = n - 1; setTimeout(tick, 0); return; }
+                const from = SC.pts[(k + 1) % n].x, r = relax(scanRot(SC, from, -rad), targets[k]); if (r.E < SC.pts[k].E - 0.02) put(k, r.E, r.x, 1);
+                if (--k >= 0) setTimeout(tick, 0); else finish(); };
+            setTimeout(tick, 0); return;
+        }
+        jobLoad(lot).then(() => {
+            if (COMP.scan !== SC || !COMP.job) return;
+            const w = jobWorker((d) => { if (COMP.worker !== w) return;
+                if (d.type === 'pt') { put(d.k, d.E * 23.0605, d.coords, d.pass); return; }
+                w.terminate(); if (d.type === 'error') { finish('Scan failed: ' + d.msg); return; } finish(); });
+            COMP.worker = w;
+            const atoms = (P) => P.map((v, i) => ({ el: g.atoms[i].el, x: v[0], y: v[1], z: v[2] }));
+            w.postMessage({ kind: relaxed ? 'relaxed' : 'rigid', method: lot, charge: totCharge(), W: lot === 'AIMNET2' ? AIM.W : lot === 'ANI2X' ? ANI.W : null, Waim: AIM.W,
+                geoms: geoms ? geoms.map(atoms) : null, atoms: atoms(base), dih, fix: side.fix, mov: side.mov, side: side.atoms, step: rad, n, gtol: Math.min(0.01, +$('job-conv').value), maxSteps: 300 });
+        }).catch(err => finish(err.message));
+    }
+    function scanRot(SC, P, ang) {      // turn the moving side of the scanned bond by ang (radians)
+        const p = P[SC.side.fix], q = P[SC.side.mov], ax = V(q[0] - p[0], q[1] - p[1], q[2] - p[2]).normalize(), Q = new THREE.Quaternion().setFromAxisAngle(ax, ang);
+        return P.map((v, i) => { if (!SC.side.atoms.includes(i) || i === SC.side.mov) return v.slice(); const w = V(v[0] - q[0], v[1] - q[1], v[2] - q[2]).applyQuaternion(Q); return [w.x + q[0], w.y + q[1], w.z + q[2]]; });
+    }
+    // a point anywhere along the scan (fractional index): the rotation is interpolated exactly, everything else linearly, so the model turns smoothly
+    function scanAt(SC, f) {
+        const n = SC.n, k0 = ((Math.floor(f) % n) + n) % n, t = f - Math.floor(f), A = SC.pts[k0], B = SC.pts[(k0 + 1) % n], rad = SC.step * Math.PI / 180;
+        if (!A) return null; if (!B || t < 1e-4) return { x: A.x, E: A.E, phi: A.phi };
+        const Ar = scanRot(SC, A.x, rad), At = scanRot(SC, A.x, rad * t), x = At.map((v, i) => [v[0] + t * (B.x[i][0] - Ar[i][0]), v[1] + t * (B.x[i][1] - Ar[i][1]), v[2] + t * (B.x[i][2] - Ar[i][2])]);
+        let dphi = B.phi - A.phi; dphi = ((dphi + 540) % 360) - 180;
+        return { x, E: A.E + t * (B.E - A.E), phi: ((A.phi + t * dphi + 540) % 360) - 180 };
+    }
+    function scanShow(f) {      // put the scan at (fractional) point f on the 3D model, looking down the bond (Newman projection)
+        const SC = COMP.scan; if (!SC || !M3 || SC.key !== structKey(M3.g)) return; const p = scanAt(SC, f); if (!p) return; SC.sel = f;
+        p.x.forEach((c, i) => { if (M3.base[i]) { M3.base[i].set(c[0], c[1], c[2]); M3.cur[i].set(c[0], c[1], c[2]); } }); place3D();
+        if (SC.newman !== false) { try { if (!bondSel || bondSel.k !== SC.k) selectBond(SC.k); else updateBondMarker(); if (!NV || NV.k !== SC.k) newmanView(); } catch (err) {} }
+        scanMark();
+    }
+    function scanGo(target, now) {      // glide to a point (so the conformation turns rather than jumps)
+        const SC = COMP.scan; if (!SC) return; cancelAnimationFrame(SC.anim);
+        const from = SC.sel || 0; if (now || Math.abs(target - from) < 1e-3) { scanShow(target); return; }
+        const t0 = performance.now(), dur = clamp(Math.abs(target - from) * 60, 200, 900);
+        const tick = () => { const u = clamp((performance.now() - t0) / dur, 0, 1), e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; scanShow(from + (target - from) * e); if (u < 1) SC.anim = requestAnimationFrame(tick); };
+        SC.anim = requestAnimationFrame(tick);
+    }
+    function scanMark() {      // move the marker on the graph and the readout without redrawing the panel
+        const SC = COMP.scan, G = SC && SC.geo; if (!G) return; const p = scanAt(SC, SC.sel || 0); if (!p) return;
+        const x = G.X(p.phi), y = G.Y(p.E), mk = $('sc-mk'), ln = $('sc-ln'), sl = $('sc-k'), tx = $('sc-t');
+        if (mk) { mk.setAttribute('cx', x); mk.setAttribute('cy', y); } if (ln) { ln.setAttribute('x1', x); ln.setAttribute('x2', x); }
+        if (sl && document.activeElement !== sl) sl.value = SC.sel; if (tx) tx.textContent = `${p.phi.toFixed(0)}° · ΔE = ${(p.E - G.Emin).toFixed(2)} kcal/mol`;
+    }
+    function scanRender() {
+        const el = $('comp-scan'); if (!el) return; const SC = COMP.scan;
+        if (!SC || !M3 || SC.key !== structKey(M3.g)) { el.innerHTML = ''; return; }
+        const pts = SC.pts.map((p, k) => p ? { ...p, k } : null).filter(Boolean); if (!pts.length) { el.innerHTML = ''; return; }
+        const Emin = Math.min(...pts.map(p => p.E)), Emax = Math.max(...pts.map(p => p.E)), span = Math.max(1, Emax - Emin);
+        const W = 560, H = 230, l = 48, r = 14, t = 14, b = 34, X = (phi) => l + (phi + 180) / 360 * (W - l - r), Y = (E) => t + (1 - (E - Emin) / span) * (H - t - b);
+        SC.geo = { X, Y, Emin };
+        const srt = pts.slice().sort((p, q) => p.phi - q.phi), closed = SC.done && pts.length === SC.n && srt.length > 2 ? [{ ...srt[srt.length - 1], phi: srt[srt.length - 1].phi - 360 }, ...srt, { ...srt[0], phi: srt[0].phi + 360 }] : srt;
+        let svg = `<svg viewBox="0 0 ${W} ${H}" class="sc-svg" id="sc-svg" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="sc-clip"><rect x="${l}" y="0" width="${W - l - r}" height="${H}"/></clipPath></defs><rect x="${l}" y="${t}" width="${W - l - r}" height="${H - t - b}" fill="none" stroke="#475569"/>`;
+        [-180, -120, -60, 0, 60, 120, 180].forEach(a => { svg += `<line x1="${X(a)}" y1="${t}" x2="${X(a)}" y2="${H - b}" stroke="#334155" stroke-dasharray="2 3"/><text x="${X(a)}" y="${H - b + 15}" font-size="11" text-anchor="middle" fill="#94a3b8">${a}°</text>`; });
+        const tk = span > 20 ? 5 : span > 8 ? 2 : span > 3 ? 1 : 0.5; for (let e = 0; e <= span + 1e-9; e += tk) svg += `<text x="${l - 6}" y="${Y(Emin + e) + 4}" font-size="11" text-anchor="end" fill="#94a3b8">${+e.toFixed(1)}</text>`;
+        svg += `<text x="12" y="${(t + H - b) / 2}" font-size="11" fill="#94a3b8" text-anchor="middle" transform="rotate(-90 12 ${(t + H - b) / 2})">ΔE (kcal/mol)</text><text x="${(l + W - r) / 2}" y="${H - 3}" font-size="11" fill="#94a3b8" text-anchor="middle">dihedral ${atomName(SC.dih[0])}–${atomName(SC.dih[1])}–${atomName(SC.dih[2])}–${atomName(SC.dih[3])} (°)</text>`;
+        svg += `<path clip-path="url(#sc-clip)" d="${closed.map((p, k) => (k ? 'L' : 'M') + X(p.phi).toFixed(1) + ' ' + Y(p.E).toFixed(1)).join(' ')}" fill="none" stroke="#60a5fa" stroke-width="2"/>`;
+        if (SC.n <= 72) pts.forEach(p => { svg += `<circle cx="${X(p.phi)}" cy="${Y(p.E)}" r="3" fill="#60a5fa"/>`; });
+        svg += `<line id="sc-ln" x1="0" y1="${t}" x2="0" y2="${H - b}" stroke="#f87171" stroke-width="1"/><circle id="sc-mk" cx="0" cy="0" r="6" fill="#f87171"/></svg>`;
+        el.innerHTML = `<details class="rd rd-main" open><summary>COORDINATE SCAN <span class="src">${LOTS[SC.lot].name} · ${SC.relaxed ? 'relaxed (everything else optimized at each angle)' : 'rigid (all other atoms fixed)'} · every ${SC.step}°</span></summary><div class="rd-in">
+            ${svg}<div class="sc-ctl"><input type="range" id="sc-k" min="0" max="${SC.n - 1}" step="0.02" value="${SC.sel || 0}"><span id="sc-t"></span>
+            <button class="btn" id="sc-nv" title="Look down the bond (Newman projection) or return to the normal view">${SC.newman === false ? 'NEWMAN VIEW' : 'SIDE VIEW'}</button></div>
+            <div class="hint-in">Drag along the curve or the slider: the model turns smoothly between the computed points. Barrier: ${span.toFixed(2)} kcal/mol (highest − lowest point).${SC.relaxed ? '' : ' A rigid scan does not let anything else relax, so it overestimates the barriers (and atoms that clash give tall spikes); use a relaxed scan for the real profile.'}</div></div></details>`;
+        scanMark();
+        $('sc-k').addEventListener('input', (e) => { cancelAnimationFrame(SC.anim); scanShow(+e.target.value); });
+        $('sc-nv').addEventListener('click', () => { SC.newman = SC.newman === false; if (SC.newman === false) { try { sideView(); endBondSel(); } catch (err) {} scanRender(); } else scanShow(SC.sel || 0); });
+        const sv = $('sc-svg'), toF = (ev) => { const R = sv.getBoundingClientRect(), x = (ev.clientX - R.left) / R.width * W; const phi = (x - l) / (W - l - r) * 360 - 180;
+            const order = pts.slice().sort((p, q) => p.phi - q.phi); let best = null; for (let i = 0; i < order.length; i++) { const a = order[i], c = order[(i + 1) % order.length], span2 = ((c.phi - a.phi + 360) % 360) || 360, dd = ((phi - a.phi + 360) % 360);
+                if (dd <= span2) { const fr = dd / span2, ka = a.k, kc = c.k; const dir = ((kc - ka + SC.n) % SC.n) === 1 ? 1 : ((ka - kc + SC.n) % SC.n) === 1 ? -1 : 0; best = dir === 1 ? ka + fr : dir === -1 ? ka - fr : (fr < 0.5 ? ka : kc); break; } }
+            return best == null ? null : ((best % SC.n) + SC.n) % SC.n; };
+        sv.addEventListener('pointerdown', (ev) => { sv.setPointerCapture(ev.pointerId); const f = toF(ev); if (f != null) scanGo(f); });
+        sv.addEventListener('pointermove', (ev) => { if (!sv.hasPointerCapture(ev.pointerId)) return; const f = toF(ev); if (f != null) { cancelAnimationFrame(SC.anim); scanShow(f); } });
+    }
     function nddoOK(g, method) { const E = am1Engine(method).ELP; return g.atoms.every(a => E[a.el]) && (g.atoms.reduce((t, a) => t + E[a.el].Z, 0) - totCharge()) % 2 === 0; }
     function compProps() {
         if (!M3 || COMP.pending || !COMP.optimized) return;
@@ -9890,7 +10675,7 @@ function autoMapAtoms(m, R, P) {
         } catch (err) { COMP.pending = false; }
     }
     $('comp-res').addEventListener('click', (e) => { const b = e.target.closest('[data-show]'); if (!b) return; e.preventDefault(); e.stopPropagation(); const k = b.dataset.show; COMP.show[k] = !COMP.show[k]; compRefresh(); });
-    function clearLabels() { COMP.meas = []; COMP.picks = []; COMP.show = { pq: false, bo: false, dip: false }; if ($('b-job')) compRefresh(); }
+    function clearLabels() { COMP.vis = -1; COMP.picks = []; COMP.show = { pq: false, bo: false, dip: false }; if ($('b-job')) compRefresh(); }
     $('b-clrlab').addEventListener('click', clearLabels);
     const fmtQ = (q) => (q >= 0 ? '+' : '−') + Math.abs(q).toFixed(3);
     const mns = (v, d = 2) => { const t = v.toFixed(d); return (/^-0\.?0*$/.test(t) ? t.slice(1) : t).replace('-', '−'); };
@@ -9900,7 +10685,11 @@ function autoMapAtoms(m, R, P) {
         if (m.c == null) return P[m.a].distanceTo(P[m.b]);
         const u = P[m.a].clone().sub(P[m.b]).normalize(), w = P[m.c].clone().sub(P[m.b]).normalize(); return Math.acos(clamp(u.dot(w), -1, 1)) / deg; }
     const measLab = (m) => [m.a, m.b, m.c, m.d].filter(x => x != null).map(aName).join('–');
-    const measTxt = (m) => m.d != null ? mns(measVal(m), 1) + '°' : m.c == null ? measVal(m).toFixed(3) + ' Å' : measVal(m).toFixed(1) + '°';
+    const measFmt = (m, v) => m.d != null ? mns(v, 1) + '°' : m.c == null ? v.toFixed(3) + ' Å' : v.toFixed(1) + '°';
+    const measTxt = (m) => measFmt(m, measVal(m));
+    const measKey = () => M3 ? structKey(M3.g) : '';
+    const measShown = () => { const m = COMP.meas[COMP.vis]; return m && M3 && m.key === measKey() ? m : null; };      // the one measurement drawn on the model
+    function measClear() { COMP.meas = []; COMP.vis = -1; COMP.picks = []; COMP.mn = 0; compResults(); comp2D(); }
     function compResults() {
         const el = $('comp-res'); if (!el) return; let h = '';
         const P = COMP.props, OPEN = (COMP.open ||= { results: true, mm: true, charges: false, bonds: false, meas: true });
@@ -9913,7 +10702,7 @@ function autoMapAtoms(m, R, P) {
                 const parts = [];
                 // summary
                 const S = [];
-                S.push(['Level of theory', COMP.method + (COMP.task === 'opt' ? ' · optimized' : ' · single point')]);
+                S.push(['Level of theory', COMP.method + ({ opt: ' · optimized', freq: ' · frequencies', scan: ' · scan point' }[COMP.task] || ' · single point')]);
                 if (COMP.opt) S.push(['Optimization', `${COMP.opt.steps} steps · ΔE = ${mns(COMP.opt.E1 - COMP.opt.E0, 2)} kcal/mol`]);
                 if (P.mm) S.push(['Steric energy', `${mns(P.mm.total, 2)} kcal/mol`]);
                 if (P.ani) { S.push(['ANI-2x energy', `<b>${mns(P.ani.Eh, 6)} hartree</b> (${mns(P.ani.Eh * 627.5095, 2)} kcal/mol)`]); }
@@ -9945,8 +10734,11 @@ function autoMapAtoms(m, R, P) {
                 h += `<div class="res-grid">${parts.join('')}</div>`;
             }
         }
-        if (COMP.meas.length && M3) h += `<div class="res-grid" style="margin-top:8px">${tbl('MEASUREMENTS', ['atoms', 'value'], COMP.meas.map(m => `<tr><td>${measLab(m)}</td><td class="n"><b>${measTxt(m)}</b></td></tr>`))}</div>`;
+        if (COMP.meas.length) { const kind = (m) => m.d != null ? 'dihedral' : m.c != null ? 'angle' : 'distance';
+            h += `<div class="res-grid" style="margin-top:8px">${tbl('MEASUREMENTS <button class="meas-clr" id="meas-clr" title="Delete every recorded measurement">CLEAR</button>', ['#', 'atoms', 'type', 'value', 'geometry'], COMP.meas.map((m, k) =>
+                `<tr${k === COMP.vis && measShown() ? ' class="hl"' : ''}><td>${m.n}</td><td>${m.lab}</td><td>${kind(m)}</td><td class="n"><b>${measFmt(m, m.v)}</b></td><td><span class="src">${escX(m.geo)}</span></td></tr>`))}</div>`; }
         el.innerHTML = h;
+        { const b = $('meas-clr'); if (b) b.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); measClear(); }); }
         el.querySelectorAll('details.rd, details.rsub').forEach(d => d.addEventListener('toggle', () => { OPEN[d.dataset.k] = d.open; }));
         if (!$('cp-math').hidden) mathShow();
     }
@@ -10110,11 +10902,11 @@ function autoMapAtoms(m, R, P) {
     var LEFT = 'sketch';
     function setLeftMode(m) {
         LEFT = m === 'comp' ? 'comp' : 'sketch';
-        $('comp-pane').hidden = LEFT !== 'comp'; $('v-2d').textContent = LEFT === 'comp' ? 'COMP' : '2D';
+        $('comp-pane').hidden = LEFT !== 'comp'; $('v-2d').textContent = LEFT === 'comp' ? 'COMPUTE' : '2D';
         $('v-2d').title = LEFT === 'comp' ? 'Show only the Computations window' : 'Show only the 2D editor';
         $('lm-2d').textContent = LEFT === 'comp' ? '' : '✓'; $('lm-comp').textContent = LEFT === 'comp' ? '✓' : '';
         if (LEFT === 'comp') { const c2 = $('comp-2d'); if (c2) delete c2.dataset.closed; if (NMRS.mode !== '3d') setRightMode('3d', true); if (layoutMode !== 'both' && avail3D) layoutTo('both'); compRefresh(); }
-        else { lotInfo(false); }
+        else { lotInfo(false); moFadeOut(); }
         comp2D();
     }
     (function setupLeftMenu() {
@@ -10175,7 +10967,7 @@ function autoMapAtoms(m, R, P) {
         const maxW = Math.min(460, vwrap.clientWidth * 0.6), maxH = Math.min(260, vwrap.clientHeight * 0.36), pad = 16;
         const k = Math.min(46 / bl, (maxW - 2 * pad) / ((x1 - x0) || 1), (maxH - 2 * pad) / ((y1 - y0) || 1)), W = (x1 - x0) * k + 2 * pad, H = (y1 - y0) * k + 2 * pad;
         const X = (i) => (pos[i].x - x0) * k + pad, Y = (i) => (pos[i].y - y0) * k + pad, fs = clamp(k * bl * 0.3, 7.5, 11);
-        const hot = new Set(COMP.picks), mh = new Set(COMP.meas.flatMap(m => [m.a, m.b, m.c, m.d]).filter(x => x != null));
+        const hot = new Set(COMP.picks), mh = new Set((measShown() ? [measShown()] : []).flatMap(m => [m.a, m.b, m.c, m.d]).filter(x => x != null));
         let o = `<svg width="${W.toFixed(0)}" height="${H.toFixed(0)}" viewBox="0 0 ${W.toFixed(1)} ${H.toFixed(1)}" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">`;
         const r0 = (i) => g.atoms[i].el === 'H' ? fs * 0.75 : fs * 1.0;
         g.bonds.forEach(b => { const ax = X(b.a), ay = Y(b.a), bx = X(b.b), by = Y(b.b), L = Math.hypot(bx - ax, by - ay) || 1, ux = (bx - ax) / L, uy = (by - ay) / L, s0 = r0(b.a), s1 = r0(b.b);
@@ -10197,11 +10989,14 @@ function autoMapAtoms(m, R, P) {
         return best;
     }
     function measPick(i) {
-        const pk = COMP.picks; if (pk.length && pk[pk.length - 1] === i) return; if (pk.includes(i)) { COMP.picks = [i]; compResults(); comp2D(); return; }
-        pk.push(i); const last = COMP.meas[COMP.meas.length - 1], same = (m, n) => m && [m.a, m.b, m.c, m.d].filter(x => x != null).length === n && pk.slice(0, n).every((x, k) => x === [m.a, m.b, m.c, m.d][k]);
-        if (pk.length === 2) COMP.meas.push({ a: pk[0], b: pk[1] });
-        else if (pk.length === 3) { if (same(last, 2)) COMP.meas.pop(); COMP.meas.push({ a: pk[0], b: pk[1], c: pk[2] }); }
-        else if (pk.length === 4) { if (same(last, 3)) COMP.meas.pop(); COMP.meas.push({ a: pk[0], b: pk[1], c: pk[2], d: pk[3] }); COMP.picks = []; }
+        const pk = COMP.picks; if (pk.length && pk[pk.length - 1] === i) return; if (pk.includes(i)) { COMP.picks = [i]; COMP.vis = -1; compResults(); comp2D(); return; }
+        if (!pk.length) COMP.vis = -1;      // a new measurement begins: the last one leaves the model (it stays in the table)
+        pk.push(i); const last = measShown(), same = (m, n) => m && [m.a, m.b, m.c, m.d].filter(x => x != null).length === n && pk.slice(0, n).every((x, k) => x === [m.a, m.b, m.c, m.d][k]);
+        const rec = (m, old) => { m.v = measVal(m); m.lab = measLab(m); m.key = measKey(); m.geo = COMP.optimized ? `${COMP.method} ${COMP.task === 'opt' ? 'optimized' : COMP.task === 'scan' ? 'scan point' : 'geometry'}` : 'initial 3D model'; m.n = old ? old.n : ++COMP.mn;
+            if (old) COMP.meas[COMP.vis] = m; else { COMP.meas.push(m); COMP.vis = COMP.meas.length - 1; } };
+        if (pk.length === 2) rec({ a: pk[0], b: pk[1] });
+        else if (pk.length === 3) rec({ a: pk[0], b: pk[1], c: pk[2] });      // a third atom extends the distance into an angle (both stay in the table; the model shows the angle)
+        else if (pk.length === 4) { rec({ a: pk[0], b: pk[1], c: pk[2], d: pk[3] }); COMP.picks = []; }
         compResults(); comp2D();
     }
     // ---- molecules in one 3D window: double-click one to select it, then drag to turn it / right-drag (or Shift+drag) to move it on its own
@@ -10347,6 +11142,14 @@ function autoMapAtoms(m, R, P) {
         el.hidden = false; el.style.bottom = (($('hint3d').offsetHeight || 14) + 16) + 'px'; const k = MO.sel;
         el.innerHTML = `<b>${moName(k)}</b> <span>· ${D.huckel ? 'Hückel π' : D.lot || 'AM1'} · MO ${k + 1} of ${D.eps.length} · ${moE(k)} · ${moOcc(k) ? `${moOcc(k) === 2 ? 'filled' : 'half-filled'} (${moOcc(k)} e⁻)` : 'empty'}</span><div class="mo-ph"><i style="background:#e11d48"></i>+ phase <i style="background:#2563eb"></i>− phase</div>`;
     }
+    // ↑ / ↓ step through the orbitals while one is shown (left / right still move the model)
+    window.addEventListener('keydown', (e) => {
+        if ((e.key !== 'ArrowUp' && e.key !== 'ArrowDown') || e.ctrlKey || e.metaKey || e.altKey) return;
+        const t = document.activeElement && document.activeElement.tagName; if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT') return;
+        if (!MO.on || !MO.data || MO.sel == null || !$('mo-box') || $('mo-box').hidden) return;
+        e.preventDefault(); e.stopImmediatePropagation();
+        MO.wasSet = true; MO.jump = true; MO.sel = clamp(MO.sel + (e.key === 'ArrowUp' ? 1 : -1), 0, MO.data.eps.length - 1); MO.hidden = false; moPanel(); moDraw();
+    }, true);
     function moPanel() {
         const box = $('mo-box'); if (!box) return; box.hidden = !MO.on;
         if (!MO.on) { moMiniStop(); return; }
@@ -10356,8 +11159,8 @@ function autoMapAtoms(m, R, P) {
         const ho = D.nocc - 1, lu = D.nocc, N = D.eps.length, ks = []; for (let k = 0; k < N; k++) ks.push(k);      // every orbital
         const LT = document.body.classList.contains('light'), eCol = LT ? '#475569' : '#94a3b8';
         const W = 236, top = 12, e0 = D.eps[0], e1 = D.eps[N - 1], span = (e1 - e0) || 1, Hh = Math.max(300, Math.min(900, 18 * N)), Y = (e) => top + (Hh - 2 * top) * (1 - (e - e0) / span);
-        const ys = ks.map(k => Y(D.eps[k])); for (let i = 1; i < ys.length; i++) if (ys[i - 1] - ys[i] < 15) ys[i] = ys[i - 1] - 15;      // bottom → top, close levels spread apart
-        const sh = Math.min(0, ...ys.map(y => y - 10)), yy = ys.map(y => y - sh), H2 = Math.max(...yy) + 12;
+        const ys = ks.map((k, i) => 10000 - 18 * i - (k > ho ? 34 : 0));      // evenly spaced, bottom → top; the only wide gap is between HOMO and LUMO
+        const sh = Math.min(...ys) - 12, yy = ys.map(y => y - sh), H2 = Math.max(...yy) + 12;
         let o = `<svg viewBox="0 0 ${W} ${H2}" width="${W}" height="${H2}" class="mo-lad" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">`;
         ks.forEach((k, i) => { const y = yy[i], sel = k === MO.sel, occ = moOcc(k) > 0, col = sel ? (LT ? '#b45309' : '#facc15') : occ ? (LT ? '#0f172a' : '#e2e8f0') : (LT ? '#64748b' : '#94a3b8');
             o += `<g class="mo-lv" data-k="${k}"><rect x="0" y="${y - 7}" width="${W}" height="14" fill="${sel ? 'rgba(250,204,21,0.18)' : 'transparent'}" rx="4"/>`
@@ -10369,11 +11172,12 @@ function autoMapAtoms(m, R, P) {
         o += '</svg>';
         const k = MO.sel, top3 = moAtoms(k).slice(0, 4).filter(x => x[1] > 0.04).map(([A, f]) => `${M3.g.atoms[A].el}${A + 1} ${Math.round(f * 100)}%`).join(' · ');
         const keepScroll = box.querySelector('.mo-scroll') ? box.querySelector('.mo-scroll').scrollTop : null;
-        box.innerHTML = `<div class="mo-top"><div class="mo-btns"><button class="btn" data-mo="ho">HOMO</button><button class="btn" data-mo="lu">LUMO</button><button class="btn mo-ar" data-mo="dn" title="Next orbital down" aria-label="Next orbital down">▼</button><button class="btn mo-ar" data-mo="up" title="Next orbital up" aria-label="Next orbital up">▲</button><button class="btn mo-hide ${MO.hidden ? 'active' : ''}" id="mo-hide" title="Hide or show the orbital on the 3D model">${MO.hidden ? 'SHOW' : 'HIDE'}</button></div>`
+        box.innerHTML = `<div class="mo-top"><div class="mo-btns"><button class="btn${MO.sel === ho ? ' active' : ''}" data-mo="ho">HOMO</button><button class="btn${MO.sel === lu ? ' active' : ''}" data-mo="lu">LUMO</button><button class="btn mo-ar" data-mo="dn" title="Next orbital down" aria-label="Next orbital down">▼</button><button class="btn mo-ar" data-mo="up" title="Next orbital up" aria-label="Next orbital up">▲</button><button class="btn mo-hide ${MO.hidden ? 'active' : ''}" id="mo-hide" title="Hide or show the orbital on the 3D model">${MO.hidden ? 'SHOW' : 'HIDE'}</button></div>`
             + `<label class="mo-sl">Lobe size <input type="range" id="mo-iso" min="0.01" max="0.12" step="0.005" value="${(0.13 - MO.iso).toFixed(3)}"></label>`
             + `<label class="mo-sl">Opacity <input type="range" id="mo-op" min="0.3" max="1" step="0.05" value="${MO.opacity}"></label></div>`
             + `<div class="mo-split"><div class="mo-scroll">${o}</div><div class="mo-view"><canvas id="mo-mini"></canvas><div class="mo-info"><b>${moName(k)}</b> · ${moE(k)} · ${moOcc(k) ? (moOcc(k) === 2 ? 'filled' : 'half-filled') : 'empty'} · ${D.huckel ? 'Hückel π' : D.lot || 'AM1'}<br>largest on: ${top3}</div><div class="hint-sm">drag to turn · scroll to zoom (limited) · double-click to match the main view</div></div></div>`
             + `<div class="hint-sm">HOMO: where the molecule gives electrons (nucleophile / base). LUMO: where it accepts them (electrophile). Red and blue are the two phases; a node lies between them. ${D.huckel ? 'Hückel: π orbitals only, energies in units of β (negative).' : 'Semi-empirical shapes are reliable, energies approximate.'}</div>`;
+        { const ph = $('mo-mini'); if (MINI.canvas && ph && MINI.canvas !== ph) ph.replaceWith(MINI.canvas); }      // keep one canvas (one WebGL context): new contexts on every redraw push out the main 3D view's
         const sc = box.querySelector('.mo-scroll'), selY = yy[k];
         if (keepScroll != null && !MO.jump) sc.scrollTop = keepScroll; else sc.scrollTop = Math.max(0, selY - sc.clientHeight / 2);
         if (sc.scrollTop > selY - 10 || sc.scrollTop + sc.clientHeight < selY + 10) sc.scrollTop = Math.max(0, selY - sc.clientHeight / 2);
@@ -10394,7 +11198,7 @@ function autoMapAtoms(m, R, P) {
         const cv = $('mo-mini'); if (!cv || !M3) return;
         try {
             if (!MINI.r || MINI.canvas !== cv) {
-                if (MINI.r) { try { MINI.r.dispose(); } catch (e) {} }
+                if (MINI.r) { try { MINI.r.dispose(); MINI.r.forceContextLoss(); } catch (e) {} }
                 MINI.r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true }); MINI.canvas = cv;
                 MINI.cam = new THREE.PerspectiveCamera(camera.fov || 35, 1, 0.05, 2000); MINI.res = new THREE.Vector2();
                 if (idOK) { MINI.id = mkRT(); MINI.peel = mkRT(); }
@@ -10444,6 +11248,16 @@ function autoMapAtoms(m, R, P) {
         }
         R.autoClear = true; TOON.res.value.copy(saveRes);
     }
+    function moFadeOut() {      // leaving Computations: the orbital fades away, then the orbital panel closes
+        if (!MO.on || !MO.meshes.length || MO.hidden) { if (MO.on && $('mo-det')) $('mo-det').open = false; return; }
+        const t0 = performance.now(), dur = 600, op0 = 0.85;
+        const step = (now) => { const f = Math.min(1, (now - t0) / dur), e = 1 - (1 - f) * (1 - f);
+            moMats.forEach(m => { m.uniforms.uOpacity.value = op0 * (1 - e); });
+            if (f < 1 && LEFT !== 'comp') { requestAnimationFrame(step); return; }
+            moMats.forEach(m => { m.uniforms.uOpacity.value = op0; });
+            if (LEFT !== 'comp' && MO.on) { const d = $('mo-det'); if (d && d.open) d.open = false; else moSet(false); } };
+        requestAnimationFrame(step);
+    }
     function moHide(h) { MO.hidden = !!h; MO.meshes.forEach(m => { m.visible = !MO.hidden; }); moLegend(); const b = $('mo-hide'); if (b) { b.textContent = MO.hidden ? 'SHOW' : 'HIDE'; b.classList.toggle('active', MO.hidden); } }
     function moSet(on) { MO.on = on; MO.hidden = false; $('b-mo').classList.toggle('active', on);
         if (on) { if (!MO.data || MO.key !== moKey()) moCompute(); else { moPanel(); moDraw(); } } else { moClear(); moPanel(); moLegend(); } }
@@ -10458,7 +11272,7 @@ function autoMapAtoms(m, R, P) {
     // ---- the overlay drawn over the 3D model: measurements, partial charges, bond orders, dipole arrow, the selected molecule
     const ov3d = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); ov3d.id = 'ov3d'; vwrap.appendChild(ov3d);
     function drawOV() {
-        const need = M3 && (COMP.meas.length || COMP.picks.length || MSEL || (COMP.optimized && COMP.props && (COMP.show.pq || COMP.show.bo || COMP.show.dip)));
+        const need = M3 && (measShown() || COMP.picks.length || MSEL || (COMP.optimized && COMP.props && (COMP.show.pq || COMP.show.bo || COMP.show.dip)));
         if (!need) { if (ov3d.innerHTML) ov3d.innerHTML = ''; return; }
         const cr = renderer.domElement.getBoundingClientRect(), vr = vwrap.getBoundingClientRect();
         Object.assign(ov3d.style, { left: (cr.left - vr.left) + 'px', top: (cr.top - vr.top) + 'px', width: cr.width + 'px', height: cr.height + 'px' });
@@ -10480,7 +11294,7 @@ function autoMapAtoms(m, R, P) {
                 o += `<g stroke="#9333ea" stroke-width="3.5" stroke-linecap="round" fill="#9333ea"><line x1="${A.x}" y1="${A.y}" x2="${hx}" y2="${hy}"/><line x1="${tx - uy * 8}" y1="${ty + ux * 8}" x2="${tx + uy * 8}" y2="${ty - ux * 8}"/>`
                     + `<polygon stroke="none" points="${B.x},${B.y} ${hx - uy * 8},${hy + ux * 8} ${hx + uy * 8},${hy - ux * 8}"/></g>`; }
         }
-        COMP.meas.forEach(m => { const a = S[m.a], b = S[m.b];
+        (measShown() ? [measShown()] : []).forEach(m => { const a = S[m.a], b = S[m.b];
             if (m.c == null) { o += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#facc15" stroke-width="2.5" stroke-dasharray="6 4"/>` + tag((a.x + b.x) / 2, (a.y + b.y) / 2 - 12, measVal(m).toFixed(3) + ' Å', '#0f172a', '#facc15', 11); }
             else if (m.d == null) { const c = S[m.c]; o += `<polyline points="${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y}" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-dasharray="6 4"/>` + tag(b.x, b.y - 18, measVal(m).toFixed(1) + '°', '#0f172a', '#22d3ee', 11); }
             else { const c = S[m.c], d = S[m.d]; o += `<polyline points="${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y} ${d.x},${d.y}" fill="none" stroke="#f472b6" stroke-width="2.5" stroke-dasharray="6 4"/>` + tag((b.x + c.x) / 2, (b.y + c.y) / 2 - 16, mns(measVal(m), 1) + '°', '#0f172a', '#f472b6', 11); } });
@@ -10662,6 +11476,7 @@ function autoMapAtoms(m, R, P) {
             else if (b.order === 1) { V = 0.4; nper = 6; sign = 1; }
             if (!V) return;
             A.forEach(a => D.forEach(d => tors.push([a, i, j, d, V / cnt, nper, sign])));
+            if (b.order === 1 && hyb[i] === 3 && hyb[j] === 3) A.forEach(a => D.forEach(d => { if (at[a].el === 'C' && at[d].el === 'C') tors.push([a, i, j, d, 1.3, 1, 1]); }));      // a one-fold term: anti below gauche
         });
         const imps = [];
         for (let j = 0; j < n; j++) if (hyb[j] === 2 && nb[j].length === 3) imps.push([j, nb[j][0].j, nb[j][1].j, nb[j][2].j]);
@@ -10801,6 +11616,7 @@ function autoMapAtoms(m, R, P) {
         if (mm.running) mmStop();
         st.rot = { x: false, y: false, z: false }; ['x', 'y', 'z'].forEach(a => $('b-r' + a).classList.remove('active'));      // the model holds still while a bond is worked on
         bondSel = { k, ...s, total: 0 };
+        try { scanBondPicked(k); } catch (err) {}
         $('bp-name').textContent = nm; $('bp-ang').value = 0; $('bp-val').textContent = '0°'; $('bondpanel').hidden = false;
         bondMark.visible = bondRing.visible = true; updateBondMarker();
     }
@@ -10843,7 +11659,7 @@ function autoMapAtoms(m, R, P) {
         const ai = pickAtom(e.clientX - r.left, e.clientY - r.top);
         if (ai >= 0) { endBondSel(); measPick(ai); return; }
         const k = pickBond(e.clientX - r.left, e.clientY - r.top);
-        if (k >= 0) selectBond(k); else { endBondSel(); if (COMP.picks.length) { COMP.picks = []; compResults(); comp2D(); } }
+        if (k >= 0) selectBond(k); else { endBondSel(); if (COMP.picks.length || COMP.vis >= 0) { COMP.picks = []; COMP.vis = -1; compResults(); comp2D(); } }      // clicking empty space: the measurement leaves the model (it stays in the table)
     });
 
     // =====================================================================
