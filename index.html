@@ -426,6 +426,13 @@
     #pause3d { white-space: nowrap; padding-left: 0.3rem; padding-right: 0.3rem; } #pause3d.active { background: #2563eb; color: #fff; }
     #center3d { position: absolute; left: 50%; transform: translateX(-50%); top: 10px; z-index: 6; border-radius: 999px; padding: 0.45rem 0.9rem; background: rgba(30,41,59,0.9); border: 1px solid rgba(255,255,255,0.15); }
     #main.anim { transition: grid-template-columns 0.45s ease; }
+    #adj3d { position: absolute; left: 12px; right: 12px; margin: 0 auto; width: fit-content; bottom: 12px; z-index: 7; display: flex; align-items: center; gap: 6px; padding: 6px 8px 6px 12px; border-radius: 10px; background: rgba(15,23,42,0.92); border: 1px solid #334155; box-shadow: 0 6px 18px rgba(0,0,0,0.3); color: #e2e8f0; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; white-space: nowrap; box-sizing: border-box; max-width: calc(100% - 24px); }
+    #adj3d input { width: 5.6em; font: inherit; font-size: 0.85rem; letter-spacing: 0; text-align: right; padding: 3px 6px; border-radius: 6px; border: 1px solid #475569; background: #0b1220; color: #fde68a; }
+    #adj3d .btn { padding: 3px 9px; min-width: 0; } #adj3d .adj-set { background: #2563eb; border-color: #2563eb; color: #fff; } #adj-u { color: #94a3b8; letter-spacing: 0; }
+    #adj3d.narrow { flex-wrap: wrap; justify-content: center; white-space: normal; } #adj3d.narrow #adj-lab { flex-basis: 100%; text-align: center; }
+    #adj3d.ro input { color: #94a3b8; } #adj3d.ro .btn { display: none; }
+    body.light #adj3d { background: rgba(255,255,255,0.96); border-color: #cbd5e1; color: #1e293b; } body.light #adj3d input { background: #fff; color: #9a3412; border-color: #cbd5e1; }
+    #viewer canvas { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
     #hint3d { position: absolute; left: 50%; transform: translateX(-50%); bottom: 10px; max-width: calc(100% - 90px); text-align: center; font-size: 0.7rem; color: rgba(226,232,240,0.7); pointer-events: none; z-index: 5; }
     #v3-off { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 24px; pointer-events: none; color: #cbd5e1; font: 500 0.85rem/1.45 "Inter", system-ui, sans-serif; }
     #v3-off[hidden] { display: none; }
@@ -713,7 +720,7 @@
                 <div class="tab-col"><button class="tab-btn" id="tab" aria-expanded="false">STYLE<span class="chev">▲</span></button></div>
             </div>
             <div id="busy" hidden>Building 3D model…</div>
-            <div id="v3bar"><button class="btn" id="center3d" title="Center the model in the window">⌖ CENTER</button><button class="btn tg" id="b-flex" title="Let the single bonds turn, so the molecule moves through its conformations (staggered, eclipsed, gauche, anti…)">SINGLE-BOND ROTATION: OFF</button><button class="btn tg" id="b-esp" title="Electrostatic potential energy map on the molecule's surface: red = electron-rich (δ−), blue = electron-poor (δ+)">ELECTROSTATIC POTENTIAL ENERGY MAP: OFF</button><button class="btn" id="b-clrlab" title="Clear the labels on the model (measurements, charges, bond orders, dipole). Measurements stay in the Measurements table until you press its CLEAR button">✕ CLEAR LABELS</button></div>
+            <div id="v3bar"><button class="btn" id="center3d" title="Center the model in the window">⌖ CENTER</button><button class="btn tg" id="b-flex" title="Let the single bonds turn, so the molecule moves through its conformations (staggered, eclipsed, gauche, anti…)">SINGLE-BOND ROTATION: OFF</button><button class="btn tg" id="b-esp" title="Electrostatic potential energy map on the molecule's surface: red = electron-rich (δ−), blue = electron-poor (δ+)">ELECTROSTATIC POTENTIAL ENERGY MAP: OFF</button></div>
             <div id="esp-op" hidden><label for="s-espop">Surface opacity <span id="v-espop"></span></label><input id="s-espop" type="range" min="0.05" max="1" step="0.05" value="0.7"></div>
             <div id="bondpanel" hidden>
                 <span>Bond <b id="bp-name" style="min-width:0;text-align:left"></b></span>
@@ -725,6 +732,7 @@
                 <button class="btn" id="bp-side" title="Back to the normal view" hidden>SIDE VIEW</button>
                 <button class="btn" id="bp-x" title="Deselect the bond" aria-label="Deselect the bond">✕</button>
             </div>
+            <div id="adj3d" hidden><span id="adj-lab">ADJUST BOND LENGTH:</span><button class="btn" id="adj-m" title="Smaller">−</button><input id="adj-in" type="number" inputmode="decimal" aria-label="New value"><span id="adj-u">Å</span><button class="btn" id="adj-p" title="Larger">+</button><button class="btn adj-set" id="adj-set" title="Apply this value to the model (or press Enter)">SET</button></div>
             <div id="hint3d">drag to rotate · scroll to zoom · arrows move · click atoms to measure · click a bond to turn it</div>
         </div>
     </div>
@@ -10676,7 +10684,6 @@ function autoMapAtoms(m, R, P) {
     }
     $('comp-res').addEventListener('click', (e) => { const b = e.target.closest('[data-show]'); if (!b) return; e.preventDefault(); e.stopPropagation(); const k = b.dataset.show; COMP.show[k] = !COMP.show[k]; compRefresh(); });
     function clearLabels() { COMP.vis = -1; COMP.picks = []; COMP.show = { pq: false, bo: false, dip: false }; if ($('b-job')) compRefresh(); }
-    $('b-clrlab').addEventListener('click', clearLabels);
     const fmtQ = (q) => (q >= 0 ? '+' : '−') + Math.abs(q).toFixed(3);
     const mns = (v, d = 2) => { const t = v.toFixed(d); return (/^-0\.?0*$/.test(t) ? t.slice(1) : t).replace('-', '−'); };
     const aName = (i) => M3.g.atoms[i].el + (i + 1);
@@ -10690,7 +10697,63 @@ function autoMapAtoms(m, R, P) {
     const measKey = () => M3 ? structKey(M3.g) : '';
     const measShown = () => { const m = COMP.meas[COMP.vis]; return m && M3 && m.key === measKey() ? m : null; };      // the one measurement drawn on the model
     function measClear() { COMP.meas = []; COMP.vis = -1; COMP.picks = []; COMP.mn = 0; compResults(); comp2D(); }
+    // ---- the ADJUST box at the bottom of the 3D window: type a new bond length / angle / dihedral for the measurement shown
+    function adjSide(fixAtom, movAtom) {      // atoms on movAtom's side when the fixAtom–movAtom link is cut (null when they are joined some other way, e.g. a ring)
+        const nb = neighbors(M3.g), seen = new Set([movAtom]), stk = [movAtom];
+        while (stk.length) { const v = stk.pop(); for (const { j } of nb[v]) { if (v === movAtom && j === fixAtom) continue; if (j === fixAtom) return null; if (!seen.has(j)) { seen.add(j); stk.push(j); } } }
+        return [...seen]; }
+    function adjPlan(m) {      // which atoms move, or why nothing can
+        const nb = neighbors(M3.g), bonded = (x, y) => nb[x].some(q => q.j === y);
+        if (m.c == null) { if (!bonded(m.a, m.b)) { const cs = components(), cb = cs.find(c => c.includes(m.b)); return cb.includes(m.a) ? { why: 'not a bond' } : { mov: cb, kind: 'DISTANCE' }; }
+            const s = adjSide(m.a, m.b) || adjSide(m.b, m.a); return s ? { mov: s, kind: 'BOND LENGTH' } : { why: 'bond in a ring', kind: 'BOND LENGTH' }; }
+        if (m.d == null) { if (!bonded(m.a, m.b) || !bonded(m.b, m.c)) return { why: 'atoms not bonded in a row', kind: 'ANGLE' };
+            const s = adjSide(m.b, m.c) || adjSide(m.b, m.a); return s ? { mov: s, kind: 'BOND ANGLE' } : { why: 'angle in a ring', kind: 'BOND ANGLE' }; }
+        if (!bonded(m.b, m.c)) return { why: 'b–c not bonded', kind: 'DIHEDRAL ANGLE' };
+        const s = adjSide(m.b, m.c) || adjSide(m.c, m.b); return s ? { mov: s, kind: 'DIHEDRAL ANGLE' } : { why: 'bond in a ring', kind: 'DIHEDRAL ANGLE' };
+    }
+    function adjApply(target) {
+        const m = measShown(); if (!m || !isFinite(target)) return; const P = adjPlan(m); if (!P.mov) { showMsg('This one can’t be changed: ' + P.why); return; }
+        if (m.c == null && !(target > 0.3)) { showMsg('Use a distance larger than 0.3 Å'); return; }
+        if (st.flex) setFlex(false); else bakeConformation(); if (mm.running) mmStop(); endBondSel();
+        const B = M3.base, mv = m.c == null ? P.mov : P.mov.filter(i => i !== m.b);
+        const rot = (axisP, axisV, ang) => { const q = new THREE.Quaternion().setFromAxisAngle(axisV.clone().normalize(), ang); mv.forEach(i => B[i].sub(axisP).applyQuaternion(q).add(axisP)); };
+        const cur = () => { M3.cur.forEach((p, i) => p.copy(B[i])); return measVal(m); };
+        const v0 = cur();
+        if (m.c == null) { const fix = P.mov.includes(m.b) ? m.a : m.b, go = fix === m.a ? m.b : m.a, u = B[go].clone().sub(B[fix]).normalize(); mv.forEach(i => B[i].addScaledVector(u, target - v0)); }
+        else if (m.d == null) { const piv = B[m.b].clone(); let ax = B[m.a].clone().sub(piv).cross(B[m.c].clone().sub(piv)); if (ax.lengthSq() < 1e-8) ax = B[m.a].clone().sub(piv).cross(V(0.3, 1, 0.2));
+            const t = clamp(target, 1, 179), d = (t - v0) * deg; rot(piv, ax, d); if (Math.abs(cur() - t) > Math.abs(v0 - t) + 1e-6) rot(piv, ax, -2 * d); }
+        else { const piv = B[m.b].clone(), ax = B[m.c].clone().sub(piv); let d = ((target - v0 + 540) % 360) - 180; rot(piv, ax, d * deg); const e1 = Math.abs((((cur() - target) + 540) % 360) - 180);
+            if (e1 > 0.5) { rot(piv, ax, -2 * d * deg); } }
+        cur(); place3D(); m.v = measVal(m); m.geo = 'set by hand'; adjShown = '';
+        if (COMP.props) { COMP.props = null; if (Object.values(COMP.show).some(Boolean)) compProps(); }
+        compResults(); comp2D(); showMsg(`${P.kind[0] + P.kind.slice(1).toLowerCase()} set to ${measFmt(m, m.v)}`);
+    }
+    let adjShown = '';
+    function adjUpdate() {
+        const box = $('adj3d'); if (!box) return; const m = M3 && COMP.picks.length >= 2 && measShown();
+        if (!m) { if (!box.hidden) { box.hidden = true; $('hint3d').style.visibility = ''; } adjShown = ''; return; }
+        const P = adjPlan(m), key = m.n + ':' + m.v;
+        box.classList.toggle('ro', !P.mov); $('adj-lab').textContent = (P.mov ? 'ADJUST ' + P.kind : (P.kind || 'DISTANCE') + ' (' + P.why + ')') + ':';
+        $('adj-u').textContent = m.c == null ? 'Å' : '°'; $('adj-in').readOnly = !P.mov; $('adj-in').step = m.c == null ? '0.01' : '1';
+        if (key !== adjShown || document.activeElement !== $('adj-in')) $('adj-in').value = m.c == null ? measVal(m).toFixed(3) : measVal(m).toFixed(1);
+        adjShown = key; box.hidden = false; $('hint3d').style.visibility = 'hidden'; adjPlace();
+    }
+    function adjPlace() {      // centred at the bottom, lifted above anything else docked at the bottom of the 3D window
+        const box = $('adj3d'); if (box.hidden) return; box.style.bottom = '12px';
+        const W = vwrap.getBoundingClientRect(); box.classList.remove('narrow'); if (box.scrollWidth > box.clientWidth + 1) box.classList.add('narrow');
+        for (let pass = 0; pass < 6; pass++) { const b = box.getBoundingClientRect(); let lift = 0;
+            for (const el of vwrap.children) { if (el === box || el.id === 'hint3d' || el.tagName === 'CANVAS' || el.hidden) continue; const r = el.getBoundingClientRect();
+                if (!r.width || !r.height || r.height > W.height * 0.5 || getComputedStyle(el).display === 'none' || getComputedStyle(el).visibility === 'hidden') continue;
+                if (r.right > b.left && r.left < b.right && r.bottom > b.top && r.top < b.bottom) lift = Math.max(lift, W.bottom - r.top + 8); }
+            if (!lift) break; box.style.bottom = lift + 'px'; }
+    }
+    addEventListener('resize', () => { try { adjPlace(); } catch (err) {} });
+    $('adj-set').addEventListener('click', () => adjApply(parseFloat($('adj-in').value)));
+    $('adj-in').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); adjApply(parseFloat($('adj-in').value)); $('adj-in').blur(); } e.stopPropagation(); });
+    const adjStep = (sg) => { const m = measShown(); if (!m) return; adjApply(measVal(m) + sg * (m.c == null ? 0.05 : 5)); };
+    $('adj-m').addEventListener('click', () => adjStep(-1)); $('adj-p').addEventListener('click', () => adjStep(1));
     function compResults() {
+        try { adjUpdate(); } catch (err) {}
         const el = $('comp-res'); if (!el) return; let h = '';
         const P = COMP.props, OPEN = (COMP.open ||= { results: true, mm: true, charges: false, bonds: false, meas: true });
         const tbl = (cap, head, rows, wrap) => { const key = { 'SUMMARY': 'summary', 'DIPOLE': 'dipole', 'PARTIAL': 'charges', 'BOND': 'bonds', 'MOLECULAR': 'mm', 'MEASUREMENTS': 'meas' }[cap.split(' ')[0]] || cap;
@@ -10991,13 +11054,14 @@ function autoMapAtoms(m, R, P) {
     function measPick(i) {
         if (!COMP.undo || performance.now() - COMP.undo.t > 800) COMP.undo = { picks: COMP.picks.slice(), vis: COMP.vis, n: COMP.meas.length, mn: COMP.mn }; COMP.undo.t = performance.now();
         const pk = COMP.picks; if (pk.length && pk[pk.length - 1] === i) return; if (pk.includes(i)) { COMP.picks = [i]; COMP.vis = -1; compResults(); comp2D(); return; }
+        if (pk.length === 4) pk.length = 0;      // the last dihedral stays selected until the next pick starts a new measurement
         if (!pk.length) COMP.vis = -1;      // a new measurement begins: the last one leaves the model (it stays in the table)
         pk.push(i); const last = measShown(), same = (m, n) => m && [m.a, m.b, m.c, m.d].filter(x => x != null).length === n && pk.slice(0, n).every((x, k) => x === [m.a, m.b, m.c, m.d][k]);
         const rec = (m, old) => { m.v = measVal(m); m.lab = measLab(m); m.key = measKey(); m.geo = COMP.optimized ? `${COMP.method} ${COMP.task === 'opt' ? 'optimized' : COMP.task === 'scan' ? 'scan point' : 'geometry'}` : 'initial 3D model'; m.n = old ? old.n : ++COMP.mn;
             if (old) COMP.meas[COMP.vis] = m; else { COMP.meas.push(m); COMP.vis = COMP.meas.length - 1; } };
         if (pk.length === 2) rec({ a: pk[0], b: pk[1] });
         else if (pk.length === 3) rec({ a: pk[0], b: pk[1], c: pk[2] });      // a third atom extends the distance into an angle (both stay in the table; the model shows the angle)
-        else if (pk.length === 4) { rec({ a: pk[0], b: pk[1], c: pk[2], d: pk[3] }); COMP.picks = []; }
+        else if (pk.length === 4) { rec({ a: pk[0], b: pk[1], c: pk[2], d: pk[3] }); }
         compResults(); comp2D();
     }
     // ---- molecules in one 3D window: double-click one to select it, then drag to turn it / right-drag (or Shift+drag) to move it on its own
@@ -11005,19 +11069,38 @@ function autoMapAtoms(m, R, P) {
         const seen = new Array(g.atoms.length).fill(false), out = [];
         for (let i = 0; i < g.atoms.length; i++) { if (seen[i]) continue; const c = [], st2 = [i]; seen[i] = true; while (st2.length) { const v = st2.pop(); c.push(v); nb[v].forEach(j => { if (!seen[j]) { seen[j] = true; st2.push(j); } }); } out.push(c); }
         return out; }
-    renderer.domElement.addEventListener('dblclick', (e) => {
-        if (!M3) return;
-        const r = renderer.domElement.getBoundingClientRect(), i = pickAtom(e.clientX - r.left, e.clientY - r.top);
+    let dblT = 0;
+    renderer.domElement.addEventListener('dblclick', (e) => { if (performance.now() - dblT > 450) dbl3D(e.clientX, e.clientY); });
+    function dbl3D(cx, cy) {      // double-click / double-tap: on an atom selects (or releases) its molecule; on empty space clears the labels
+        if (!M3) return; dblT = performance.now();
+        const r = renderer.domElement.getBoundingClientRect(), i = pickAtom(cx - r.left, cy - r.top);
         if (i >= 0 && COMP.undo && performance.now() - COMP.undo.t < 800) { const u = COMP.undo; COMP.undo = null;      // the clicks of a double-click picked this atom for measuring: take that back
             COMP.picks = u.picks; COMP.vis = u.vis; COMP.meas.length = u.n; COMP.mn = u.mn; compResults(); comp2D(); }
         if (i < 0) { if (MSEL) { MSEL = null; showMsg('Molecule released'); } clearLabels(); if (MO.on && !MO.hidden && MO.meshes.length) { moHide(true); showMsg('Orbital hidden · SHOW (Computations → Molecular orbitals) brings it back'); } return; }
-        const cs = components(); if (cs.length < 2) { showMsg('Double-click selects one molecule when the 3D window holds several'); return; }
-        const c = cs.find(x => x.includes(i));
         if (MSEL && MSEL.atoms.includes(i)) { MSEL = null; showMsg('Molecule released'); return; }
+        molSelect(i);
+    }
+    function molSelect(i) {      // select the whole molecule atom i belongs to (double-click, or long-press an atom)
+        const c = components().find(x => x.includes(i));
+        COMP.picks = []; COMP.vis = -1; compResults(); comp2D();
         endBondSel(); if (st.flex) setFlex(false); else bakeConformation();
         st.rot = { x: false, y: false, z: false }; ['x', 'y', 'z'].forEach(a => $('b-r' + a).classList.remove('active'));
-        MSEL = { atoms: c }; showMsg('Molecule selected: drag to turn it · right-drag, Shift+drag, three fingers or the arrow keys move it · double-click empty space to release');
-    });
+        MSEL = { atoms: c }; showMsg('Molecule selected: drag to turn it · two fingers, right-drag, Shift+drag or the arrow keys move it · double-click empty space to release'); return true;
+    }
+    // long press (hold ~½ s without moving) on an atom selects its molecule
+    { let lp = null;
+      vwrap.addEventListener('pointerdown', (e) => { clearTimeout(lp && lp.t); lp = null; if (!M3 || e.target !== renderer.domElement || (e.pointerType === 'mouse' && e.button !== 0)) return;
+          const r = renderer.domElement.getBoundingClientRect(), i = pickAtom(e.clientX - r.left, e.clientY - r.top); if (i < 0) return;
+          lp = { x: e.clientX, y: e.clientY, id: e.pointerId, t: setTimeout(() => { lp = null; mdrag = null; if (MSEL && MSEL.atoms.includes(i)) return; if (molSelect(i) && navigator.vibrate) try { navigator.vibrate(15); } catch (err) {} }, 550) };
+      }, true);
+      vwrap.addEventListener('pointermove', (e) => { if (lp && e.pointerId === lp.id && Math.hypot(e.clientX - lp.x, e.clientY - lp.y) > (e.pointerType === 'mouse' ? 6 : 12)) { clearTimeout(lp.t); lp = null; } }, true);
+      const stop = () => { if (lp) { clearTimeout(lp.t); lp = null; } };
+      let tap = null;      // touch screens rarely send dblclick: two quick taps in the same spot count as a double-click
+      vwrap.addEventListener('pointerup', (e) => { if (e.pointerType === 'mouse' || e.target !== renderer.domElement) return; const now = performance.now();
+          if (tap && now - tap.t < 350 && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) < 24) { tap = null; dbl3D(e.clientX, e.clientY); }
+          else tap = { t: now, x: e.clientX, y: e.clientY }; }, true);
+      vwrap.addEventListener('pointerup', stop, true); vwrap.addEventListener('pointercancel', stop, true);
+      vwrap.addEventListener('touchstart', (e) => { if (e.touches.length > 1) stop(); }, true); }
     function msMove(dx, dy) {      // slide the selected molecule by (dx, dy) screen pixels, in the plane of the screen
         if (!MSEL || !M3) return; world.updateMatrixWorld(); camera.updateMatrixWorld(); world.getWorldQuaternion(qW); const qi = qW.clone().invert();
         const camR = V(1, 0, 0).applyQuaternion(camera.quaternion).applyQuaternion(qi), camU = V(0, 1, 0).applyQuaternion(camera.quaternion).applyQuaternion(qi);
@@ -11046,18 +11129,21 @@ function autoMapAtoms(m, R, P) {
     });
     vwrap.addEventListener('pointerup', () => { if (mdrag && COMP.optimized && COMP.props) { COMP.props = null; if (Object.values(COMP.show).some(Boolean)) compProps(); } mdrag = null; });
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && MSEL) { MSEL = null; } });
-    // three fingers (iPad / touch screens) slide the model, or only the selected molecule when one is selected
-    { let tri = null; const cen = (T) => { let x = 0, y = 0; for (let k = 0; k < T.length; k++) { x += T[k].clientX; y += T[k].clientY; } return { x: x / T.length, y: y / T.length }; };
+    // two or three fingers (iPad / phones) slide the model, or only the selected molecule when one is selected; two fingers still pinch to zoom
+    { let tri = null, two = null; const cen = (T) => { let x = 0, y = 0; for (let k = 0; k < T.length; k++) { x += T[k].clientX; y += T[k].clientY; } return { x: x / T.length, y: y / T.length }; };
       vwrap.addEventListener('touchstart', (e) => {
-          if (e.touches.length < 3 || !M3) return;
+          if (e.touches.length === 2 && M3 && !tri) { two = cen(e.touches); mdrag = null; p3 = null; return; }
+          if (e.touches.length < 3 || !M3) return; two = null;
           tri = cen(e.touches); mdrag = null; p3 = null; controls.enabled = false; e.preventDefault(); e.stopPropagation();
       }, { capture: true, passive: false });
       vwrap.addEventListener('touchmove', (e) => {
+          if (two && !tri) { if (e.touches.length !== 2) return; const c = cen(e.touches), dx = c.x - two.x, dy = c.y - two.y; two = c; mdrag = null; if (dx || dy) { if (MSEL) msMove(dx, dy); else { VOFF.x += dx; VOFF.y += dy; } } return; }
           if (!tri) return; e.preventDefault(); e.stopPropagation(); if (e.touches.length < 3) return;
           const c = cen(e.touches), dx = c.x - tri.x, dy = c.y - tri.y; tri = c; if (!dx && !dy) return;
           if (MSEL) msMove(dx, dy); else { VOFF.x += dx; VOFF.y += dy; }
       }, { capture: true, passive: false });
-      const end = (e) => { if (!tri) return; if (e.touches.length >= 3) { tri = cen(e.touches); return; }
+      const end = (e) => { if (two && e.touches.length !== 2) { two = e.touches.length === 2 ? cen(e.touches) : null; if (MSEL && COMP.optimized && COMP.props) { COMP.props = null; if (Object.values(COMP.show).some(Boolean)) compProps(); } }
+          if (!tri) return; if (e.touches.length >= 3) { tri = cen(e.touches); return; }
           if (e.touches.length === 0) { tri = null; controls.enabled = true; } e.stopPropagation(); };      // stays off until every finger lifts, so the last fingers don't spin the model
       vwrap.addEventListener('touchend', end, { capture: true }); vwrap.addEventListener('touchcancel', end, { capture: true });
       vwrap.addEventListener('pointerdown', (e) => { if (tri) { e.stopPropagation(); e.preventDefault(); } }, true);
@@ -11314,9 +11400,13 @@ function autoMapAtoms(m, R, P) {
                     + `<polygon stroke="none" points="${B.x},${B.y} ${hx - uy * 8},${hy + ux * 8} ${hx + uy * 8},${hy - ux * 8}"/></g>`; }
         }
         (measShown() ? [measShown()] : []).forEach(m => { const a = S[m.a], b = S[m.b];
-            if (m.c == null) { o += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#facc15" stroke-width="2.5" stroke-dasharray="6 4"/>` + tag((a.x + b.x) / 2, (a.y + b.y) / 2 - 12, measVal(m).toFixed(3) + ' Å', '#0f172a', '#facc15', 11); }
-            else if (m.d == null) { const c = S[m.c]; o += `<polyline points="${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y}" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-dasharray="6 4"/>` + tag(b.x, b.y - 18, measVal(m).toFixed(1) + '°', '#0f172a', '#22d3ee', 11); }
-            else { const c = S[m.c], d = S[m.d]; o += `<polyline points="${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y} ${d.x},${d.y}" fill="none" stroke="#f472b6" stroke-width="2.5" stroke-dasharray="6 4"/>` + tag((b.x + c.x) / 2, (b.y + c.y) / 2 - 16, mns(measVal(m), 1) + '°', '#0f172a', '#f472b6', 11); } });
+            // labels sit a little off the bond (on its upper side), so the line and the atoms never run through the text
+            const side = (p, q, d) => { let nx = -(q.y - p.y), ny = q.x - p.x; const L = Math.hypot(nx, ny) || 1; nx /= L; ny /= L; if (ny > 0) { nx = -nx; ny = -ny; } return [(p.x + q.x) / 2 + nx * d, (p.y + q.y) / 2 + ny * d]; };
+            if (m.c == null) { const [lx, ly] = side(a, b, 22); o += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#facc15" stroke-width="2.5" stroke-dasharray="6 4"/>` + tag(lx, ly, measVal(m).toFixed(3) + ' Å', '#0f172a', '#facc15', 14); }
+            else if (m.d == null) { const c = S[m.c]; let ux = (a.x - b.x) / (Math.hypot(a.x - b.x, a.y - b.y) || 1) + (c.x - b.x) / (Math.hypot(c.x - b.x, c.y - b.y) || 1), uy = (a.y - b.y) / (Math.hypot(a.x - b.x, a.y - b.y) || 1) + (c.y - b.y) / (Math.hypot(c.x - b.x, c.y - b.y) || 1); const L = Math.hypot(ux, uy);
+                if (L < 0.15) { ux = 0; uy = 1; } else { ux /= L; uy /= L; }      // label on the outside of the angle
+                o += `<polyline points="${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y}" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-dasharray="6 4"/>` + tag(b.x - ux * 30, b.y - uy * 30, measVal(m).toFixed(1) + '°', '#0f172a', '#22d3ee', 14); }
+            else { const c = S[m.c], d = S[m.d], [lx, ly] = side(b, c, 26); o += `<polyline points="${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y} ${d.x},${d.y}" fill="none" stroke="#f472b6" stroke-width="2.5" stroke-dasharray="6 4"/>` + tag(lx, ly, mns(measVal(m), 1) + '°', '#0f172a', '#f472b6', 14); } });
         COMP.picks.forEach(i => { o += `<circle cx="${S[i].x}" cy="${S[i].y}" r="13" fill="none" stroke="#facc15" stroke-width="3"/>`; });
         ov3d.innerHTML = o;
     }
