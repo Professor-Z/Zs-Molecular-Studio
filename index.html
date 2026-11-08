@@ -10989,6 +10989,7 @@ function autoMapAtoms(m, R, P) {
         return best;
     }
     function measPick(i) {
+        if (!COMP.undo || performance.now() - COMP.undo.t > 800) COMP.undo = { picks: COMP.picks.slice(), vis: COMP.vis, n: COMP.meas.length, mn: COMP.mn }; COMP.undo.t = performance.now();
         const pk = COMP.picks; if (pk.length && pk[pk.length - 1] === i) return; if (pk.includes(i)) { COMP.picks = [i]; COMP.vis = -1; compResults(); comp2D(); return; }
         if (!pk.length) COMP.vis = -1;      // a new measurement begins: the last one leaves the model (it stays in the table)
         pk.push(i); const last = measShown(), same = (m, n) => m && [m.a, m.b, m.c, m.d].filter(x => x != null).length === n && pk.slice(0, n).every((x, k) => x === [m.a, m.b, m.c, m.d][k]);
@@ -11007,13 +11008,15 @@ function autoMapAtoms(m, R, P) {
     renderer.domElement.addEventListener('dblclick', (e) => {
         if (!M3) return;
         const r = renderer.domElement.getBoundingClientRect(), i = pickAtom(e.clientX - r.left, e.clientY - r.top);
+        if (i >= 0 && COMP.undo && performance.now() - COMP.undo.t < 800) { const u = COMP.undo; COMP.undo = null;      // the clicks of a double-click picked this atom for measuring: take that back
+            COMP.picks = u.picks; COMP.vis = u.vis; COMP.meas.length = u.n; COMP.mn = u.mn; compResults(); comp2D(); }
         if (i < 0) { if (MSEL) { MSEL = null; showMsg('Molecule released'); } clearLabels(); if (MO.on && !MO.hidden && MO.meshes.length) { moHide(true); showMsg('Orbital hidden · SHOW (Computations → Molecular orbitals) brings it back'); } return; }
         const cs = components(); if (cs.length < 2) { showMsg('Double-click selects one molecule when the 3D window holds several'); return; }
         const c = cs.find(x => x.includes(i));
         if (MSEL && MSEL.atoms.includes(i)) { MSEL = null; showMsg('Molecule released'); return; }
         endBondSel(); if (st.flex) setFlex(false); else bakeConformation();
         st.rot = { x: false, y: false, z: false }; ['x', 'y', 'z'].forEach(a => $('b-r' + a).classList.remove('active'));
-        MSEL = { atoms: c }; showMsg('Molecule selected: drag to turn it · right-drag, Shift+drag or the arrow keys move it · double-click empty space to release');
+        MSEL = { atoms: c }; showMsg('Molecule selected: drag to turn it · right-drag, Shift+drag, three fingers or the arrow keys move it · double-click empty space to release');
     });
     function msMove(dx, dy) {      // slide the selected molecule by (dx, dy) screen pixels, in the plane of the screen
         if (!MSEL || !M3) return; world.updateMatrixWorld(); camera.updateMatrixWorld(); world.getWorldQuaternion(qW); const qi = qW.clone().invert();
@@ -11043,6 +11046,22 @@ function autoMapAtoms(m, R, P) {
     });
     vwrap.addEventListener('pointerup', () => { if (mdrag && COMP.optimized && COMP.props) { COMP.props = null; if (Object.values(COMP.show).some(Boolean)) compProps(); } mdrag = null; });
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && MSEL) { MSEL = null; } });
+    // three fingers (iPad / touch screens) slide the model, or only the selected molecule when one is selected
+    { let tri = null; const cen = (T) => { let x = 0, y = 0; for (let k = 0; k < T.length; k++) { x += T[k].clientX; y += T[k].clientY; } return { x: x / T.length, y: y / T.length }; };
+      vwrap.addEventListener('touchstart', (e) => {
+          if (e.touches.length < 3 || !M3) return;
+          tri = cen(e.touches); mdrag = null; p3 = null; controls.enabled = false; e.preventDefault(); e.stopPropagation();
+      }, { capture: true, passive: false });
+      vwrap.addEventListener('touchmove', (e) => {
+          if (!tri) return; e.preventDefault(); e.stopPropagation(); if (e.touches.length < 3) return;
+          const c = cen(e.touches), dx = c.x - tri.x, dy = c.y - tri.y; tri = c; if (!dx && !dy) return;
+          if (MSEL) msMove(dx, dy); else { VOFF.x += dx; VOFF.y += dy; }
+      }, { capture: true, passive: false });
+      const end = (e) => { if (!tri) return; if (e.touches.length >= 3) { tri = cen(e.touches); return; }
+          if (e.touches.length === 0) { tri = null; controls.enabled = true; } e.stopPropagation(); };      // stays off until every finger lifts, so the last fingers don't spin the model
+      vwrap.addEventListener('touchend', end, { capture: true }); vwrap.addEventListener('touchcancel', end, { capture: true });
+      vwrap.addEventListener('pointerdown', (e) => { if (tri) { e.stopPropagation(); e.preventDefault(); } }, true);
+      vwrap.addEventListener('pointermove', (e) => { if (tri) e.stopPropagation(); }, true); }
     // =====================================================================
     //  Molecular orbitals (AM1): an energy ladder (HOMO / LUMO marked) and the chosen orbital drawn on the model as two-colour lobes
     //  (the two phases), from the AM1 coefficients over Slater-type valence orbitals. Isosurfaces by surface nets.
