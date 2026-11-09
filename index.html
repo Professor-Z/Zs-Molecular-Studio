@@ -809,7 +809,7 @@
 </div>
 <div id="file-menu" class="menu" hidden>
     <button class="mi" id="f-new">New drawing</button>
-    <button class="mi" id="f-open">Open… <span>.mstud, .mol, .smi, ChemDraw .cdx</span></button>
+    <button class="mi" id="f-open">Open… <span>.mstud, .mol, .smi, ChemDraw .cdx / .cdxml</span></button>
     <button class="mi" id="f-save">Save for later editing <span>.mstud · Ctrl+S</span></button>
     <div class="dm-head">Examples</div>
     <select id="examples" class="ex-select" aria-label="Example molecules"><option value="">Choose an example molecule…</option></select>
@@ -821,6 +821,7 @@
     <button class="mi" data-fmt="png600">PNG 600 dpi <span>posters</span></button>
     <button class="mi" data-fmt="emf">EMF <span>editable shapes in Word / PowerPoint</span></button>
     <button class="mi" data-fmt="mol">MOL file</button>
+    <button class="mi" data-fmt="cdxml">ChemDraw CDXML <span>opens in ChemDraw</span></button>
     <button class="mi" data-fmt="clip">Copy as picture <span>Ctrl+Shift+C · paste into Office</span></button>
     <label class="dm-row"><input type="checkbox" id="d-transp"> Transparent background (PNG/SVG/EMF)</label>
     <div class="dm-head">From other sources</div>
@@ -835,6 +836,7 @@
     <button class="mi" data-fmt="png300">PNG 300 dpi</button>
     <button class="mi" data-fmt="emf">EMF <span>Office, editable</span></button>
     <button class="mi" data-fmt="mol">MOL file</button>
+    <button class="mi" data-fmt="cdxml">ChemDraw CDXML <span>opens in ChemDraw</span></button>
     <button class="mi" data-fmt="clip">Copy as picture</button>
 </div>
 <div id="color-menu" class="menu" hidden>
@@ -858,7 +860,7 @@
         <label class="ctx-slider" title="How far the glow spreads">RADIUS <input type="range" id="hl-glowr" min="0.08" max="0.8" step="0.02" value="0.3" aria-label="Glow radius"></label></div>
     <button class="mi" id="hl-none">Remove highlight</button>
 </div>
-<input type="file" id="file-input" accept=".mstud,.mstudio,.json,.mol,.sdf,.smi,.txt,.cdx" hidden>
+<input type="file" id="file-input" accept=".mstud,.mstudio,.json,.mol,.sdf,.smi,.txt,.cdx,.cdxml" hidden>
 <div id="rtable-box" class="modal" hidden role="dialog" aria-label="R-group table">
     <div class="modal-card rt-card">
         <div class="modal-head"><b>R-group table</b><span class="grow"></span><span class="hint-sm">First row = headings · formulas like CH2CH3 get subscripts</span></div>
@@ -1664,6 +1666,11 @@ function bondLength(e1, e2, o) {
     if (o === 2) d -= 0.18; if (o === 3) d -= 0.31;
     return d;
 }
+function metalGeom(el, n) {      // 'sq' (d8 square-planar), 'oh' (octahedral) or null
+    if (n === 4 && /^(Pd|Pt|Au|Rh|Ir)$/.test(el)) return 'sq';
+    if (n === 6 && /^(Sc|Ti|V|Cr|Mn|Fe|Co|Ni|Cu|Zn|Y|Zr|Nb|Mo|Tc|Ru|Rh|Pd|Ag|Cd|Hf|Ta|W|Re|Os|Ir|Pt|Au|Hg|Al|Ga|In|Si|Ge|Sn|Pb|P|As|Sb|S|Se|Te)$/.test(el)) return 'oh';
+    return null;
+}
 function embed3D(m0, opts = {}) {
     const m = cloneMol(m0), nb0 = neighbors(m), n0 = m.atoms.length;
     let sd = opts.seed || 12345; const rnd = () => { sd = (sd * 16807) % 2147483647; return sd / 2147483647; };
@@ -1698,9 +1705,12 @@ function embed3D(m0, opts = {}) {
     m.bonds.forEach(b => { const d = bondLength(at[b.a].el, at[b.b].el, b.order); L.set(b.a + ',' + b.b, d); L.set(b.b + ',' + b.a, d); addC(b.a, b.b, d, 1); });
     for (let c = 0; c < N; c++) {
         const ang = (sp[c] === 1 ? 180 : sp[c] === 2 ? 120 : at[c].el === 'O' ? 105 : 109.5) * Math.PI / 180, ns = nb[c].map(x => x.j);
+        const mg = metalGeom(at[c].el, ns.length);      // square-planar (Pd, Pt …) or octahedral metals: cis 90°, trans 180°, trans partners as drawn
+        let ord = null; if (mg) { ord = ns.slice().sort((p, q) => Math.atan2(at[p].y - at[c].y, at[p].x - at[c].x) - Math.atan2(at[q].y - at[c].y, at[q].x - at[c].x)); }
         for (let x = 0; x < ns.length; x++) for (let y = x + 1; y < ns.length; y++) {
             const a = L.get(c + ',' + ns[x]), b = L.get(c + ',' + ns[y]);
-            addC(ns[x], ns[y], Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(ang)), 0.5);
+            let t = ang; if (mg) { const d = Math.abs(ord.indexOf(ns[x]) - ord.indexOf(ns[y])); t = (d === ns.length / 2 ? 180 : 90) * Math.PI / 180; }
+            addC(ns[x], ns[y], Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(t)), mg ? 0.8 : 0.5);
         }
     }
     // planar, cis/trans-fixed double bonds (from the 2D drawing): every substituent pair across C=C / C=N
@@ -6315,6 +6325,11 @@ function autoMapAtoms(m, R, P) {
             else if (o.kids) o.kids.forEach(k => walk(k, grp));
         }
         doc.kids.forEach(o => walk(o, null));
+        return cdxFinish(m, frags, lps, warn, has(doc, 0x0805) ? int(doc, 0x0805, 14.4 * F) / F : 14.4, labelPt);
+    }
+    // shared by the CDX and CDXML readers: lone labels → text boxes, scale to one bond length = 1, lone pairs / charges onto atoms, text sizes
+    function cdxFinish(m, frags, lps, warn, BL0, labelPt) {
+        const W = (k) => { warn[k] = (warn[k] || 0) + 1; };
         // ---- 5. lone single-label fragments → text boxes (remove those atoms)
         if (frags.length) { const drop = new Set(frags.map(f => f.i)), map = new Map(); const keep = [];
             m.atoms.forEach((a, i) => { if (!drop.has(i)) { map.set(i, keep.length); keep.push(a); } }); m.atoms = keep;
@@ -6322,7 +6337,7 @@ function autoMapAtoms(m, R, P) {
             frags.forEach(f => m.arrows.push(f.text)); }
         // ---- 6. scale: one bond length = 1 (ChemDraw's document bond length, else the typical bond in the file)
         const lens = m.bonds.map(b => Math.hypot(m.atoms[b.a].x - m.atoms[b.b].x, m.atoms[b.a].y - m.atoms[b.b].y)).filter(v => v > 1e-3).sort((x, y) => x - y);
-        let BL = lens.length ? lens[lens.length >> 1] : 0; if (!BL) BL = has(doc, 0x0805) ? int(doc, 0x0805, 14.4 * F) / F : 14.4;
+        let BL = lens.length ? lens[lens.length >> 1] : 0; if (!BL) BL = BL0 || 14.4;
         const s = 1 / BL;
         m.atoms.forEach(a => { a.x *= s; a.y *= s; });
         // lone pairs / electrons / free +,− symbols go to the nearest atom
@@ -6353,8 +6368,17 @@ function autoMapAtoms(m, R, P) {
             } catch (err) { showMsg('Could not open ' + f.name + ': ' + err.message); }
             return;
         }
-        if (/\.cdxml$/i.test(f.name)) { showMsg('CDXML files are not supported yet — please use the .cdx file'); return; }
         const txt = await f.text();
+        if (/\.cdxml$/i.test(f.name) || /^\s*(<\?xml[^>]*>\s*)?(<!DOCTYPE CDXML[^>]*>\s*)?<CDXML/.test(txt)) {
+            try {
+                const { mol: m, warn } = parseCDXML(txt);
+                if (!m.atoms.length && !m.arrows.length) throw new Error('nothing in it that can be drawn here');
+                m.arrows.forEach(ar => { if (ar.t === 'text' && ar.yTop != null) { ar.y1 = ar.yTop + textSize(ar) * 0.62; delete ar.yTop; } delete ar.fs0; });
+                commit(); mol = normMol(m); clearSel(); changed(true); fitView();
+                const w = Object.keys(warn); showMsg('Opened ' + f.name + (w.length ? ' — left out: ' + w.map(k => warn[k] + ' ' + k).join(', ') : ''));
+            } catch (err) { showMsg('Could not open ' + f.name + ': ' + err.message); }
+            return;
+        }
         try {
             let m;
             if (/^\s*\{/.test(txt)) { const d = JSON.parse(txt); if (!d.mol || !Array.isArray(d.mol.atoms)) throw new Error('Not a Molecule Studio file'); m = d.mol;
@@ -6512,7 +6536,7 @@ function autoMapAtoms(m, R, P) {
     $('examples').addEventListener('change', (e) => { const s = e.target.value; if (!s) return; loadSMILES(s); e.target.value = ''; closeMenus(); });
     function showMsg(t) { $('msg').textContent = t; if (t) { clearTimeout(showMsg.tm); showMsg.tm = setTimeout(() => { if ($('msg').textContent === t) $('msg').textContent = ''; }, 6000); } }
     function loadSMILES(s) {
-        if (looksLikeName(s)) { const r = tryLoadName(s); if (r === true) return; try { const m = parseSMILES(s); layout2D(m); assignWedges(m); commit(); mol = normMol(m); clearSel(); showMsg(''); changed(true); fitView(); } catch (err) { showMsg('Name: ' + r.message); } return; }
+        if (looksLikeName(s)) { const r = tryLoadName(s); if (r === true) return; try { const m = parseSMILES(s); layout2D(m); assignWedges(m); commit(); mol = normMol(m); clearSel(); showMsg(''); changed(true); fitView(); } catch (err) { loadNameOnline(s, r); } return; }
         try { const m = parseSMILES(s); layout2D(m); assignWedges(m); markStep('SMILES'); commit(); mol = normMol(m); clearSel(); showMsg(''); changed(true); fitView(); }
         catch (err) { const r = tryLoadName(s); if (r !== true) showMsg(err.message); }
     }
@@ -11543,8 +11567,8 @@ function autoMapAtoms(m, R, P) {
     // ---- molecular mechanics: a small force field (bond stretch, angle bend, torsions, sp2 planarity, van der Waals)
     const mm = { running: false };
     const EPS = { H: 0.02, C: 0.07, N: 0.07, O: 0.06, F: 0.06, S: 0.25, P: 0.2, Cl: 0.25, Br: 0.32, I: 0.4 };
-    function mmSetup() {
-        const g = M3.g, at = g.atoms, n = at.length, nb = neighbors(g);
+    function mmSetup(g0) {
+        const g = g0 || M3.g, at = g.atoms, n = at.length, nb = neighbors(g);
         const multi = (i) => nb[i].reduce((s, x) => s + (x.o - 1), 0);
         const hyb = at.map((a, i) => {
             const m = multi(i), tri = nb[i].some(x => x.o === 3);
@@ -11569,7 +11593,11 @@ function autoMapAtoms(m, R, P) {
         for (let j = 0; j < n; j++) { const ns = nb[j].map(x => x.j);
             const th0 = hyb[j] === 1 ? Math.PI : hyb[j] === 2 ? 120 * deg : at[j].el === 'O' ? 104.5 * deg : at[j].el === 'N' && ns.length === 3 ? 107 * deg : 109.47 * deg;
             const in3 = ns.filter(x => ns.some(y => y !== x && ring3(x, y, j))), in4 = ns.filter(x => !in3.includes(x) && ns.some(y => y !== x && ring4(x, y, j)));
+            const mg = metalGeom(at[j].el, ns.length), trans = new Map();
+            if (mg) ns.forEach(x => { let best = -1, bc = 2; const ux = at[x].x - at[j].x, uy = at[x].y - at[j].y, uz = at[x].z - at[j].z;
+                ns.forEach(y => { if (y === x) return; const vx = at[y].x - at[j].x, vy = at[y].y - at[j].y, vz = at[y].z - at[j].z, co = (ux * vx + uy * vy + uz * vz) / ((Math.hypot(ux, uy, uz) * Math.hypot(vx, vy, vz)) || 1); if (co < bc) { bc = co; best = y; } }); trans.set(x, best); });
             for (let a = 0; a < ns.length; a++) for (let c = a + 1; c < ns.length; c++) { const x = ns[a], y = ns[c]; let t = th0;
+                if (mg) { angles.push([x, j, y, trans.get(x) === y ? Math.PI : Math.PI / 2, 70]); continue; }
                 if (hyb[j] !== 1) {
                     if (ring3(x, y, j)) t = 60 * deg;
                     else if (ring4(x, y, j) && !in3.length) t = 88 * deg;
@@ -12637,6 +12665,207 @@ function autoMapAtoms(m, R, P) {
     const looksLikeName = (s) => /[a-z]{3,}/.test(s.replace(/\b(c|n|o|s|p|b)+\d?/g, '')) && /[aeiuy]/.test(s) && !/[=#@\[\]\\\/%]/.test(s) || /\s/.test(s.trim());
     if (typeof EXAMPLES === 'object') Object.values(EXAMPLES).forEach(list => list.forEach(([n, smi]) => { NAME2MOL.addTrivial(n.replace(/\s*\(.*\)\s*$/, ''), smi); NAME2MOL.addTrivial(n, smi); }));
 
+    // ---------------------------------------------------------------- ChemDraw CDXML (the XML form of .cdx): read and write
+    function parseCDXML(txt) {
+        const xml = new DOMParser().parseFromString(txt, 'application/xml');
+        if (xml.getElementsByTagName('parsererror').length) throw new Error('the file is not well-formed XML');
+        const doc = xml.documentElement; if (!doc || doc.nodeName !== 'CDXML') throw new Error('not a ChemDraw CDXML file');
+        const m = { atoms: [], bonds: [], arrows: [], fills: [] }, idx = new Map(), warn = {}, lps = [], frags = [];
+        const W = (k) => { warn[k] = (warn[k] || 0) + 1; };
+        const at = (e, k) => e.getAttribute(k);
+        const num = (e, k, d) => { const v = at(e, k); return v == null || v === '' ? d : +v; };
+        const pt = (e, k) => { const v = at(e, k); if (!v) return null; const q = v.trim().split(/\s+/).map(Number); return q.length >= 2 && q.every(isFinite) ? { x: q[0], y: q[1] } : null; };
+        const box = (e) => { const v = at(e, 'BoundingBox'); if (!v) return null; const q = v.trim().split(/\s+/).map(Number); return q.length >= 4 ? { l: q[0], t: q[1], r: q[2], b: q[3] } : null; };
+        const kids = (e, name) => [...e.children].filter(c => !name || c.nodeName === name);
+        // colour table: 0 = black, 1 = white, 2… = the table's entries in order
+        const colors = ['#000000', '#ffffff'];
+        const ct = kids(doc, 'colortable')[0];
+        if (ct) kids(ct, 'color').forEach(c => { const h = (k) => Math.round(Math.max(0, Math.min(1, num(c, k, 0))) * 255).toString(16).padStart(2, '0'); colors.push('#' + h('r') + h('g') + h('b')); });
+        const colOf = (e) => { const v = at(e, 'color'); if (v == null) return null; const c = colors[+v]; return c && c !== '#000000' ? c : null; };
+        const labelPt = num(doc, 'LabelSize', 10) || 10;
+        const strOf = (t) => { const runs = kids(t, 's'); if (!runs.length) return { text: t.textContent || '', runs: [] };
+            return { text: runs.map(s => s.textContent).join(''), runs: runs.map(s => ({ size: num(s, 'size', labelPt), face: num(s, 'face', 0), color: num(s, 'color', 0) })) }; };
+        const labelOf = (n) => { const t = kids(n, 't')[0]; return t ? strOf(t).text.replace(/\s+/g, '').trim() : ''; };
+        let grpSeq = 0;
+        const ELZ = {}; Object.entries(CDX_EL).forEach(([z, e]) => { ELZ[z] = e; });
+        function fragment(fr, grp) {
+            const mine = [];
+            kids(fr, 'n').forEach(n => {
+                const P = pt(n, 'p'); if (!P) return;
+                const type = at(n, 'NodeType') || 'Element', Z = num(n, 'Element', 6), lab = labelOf(n);
+                if (type === 'ExternalConnectionPoint') return;
+                const a = { el: ELZ[Z] || 'C', charge: num(n, 'Charge', 0) || 0, hx: null, x: P.x, y: P.y };
+                const rad = at(n, 'Radical'); if (rad === 'Doublet') a.rad = 1; else if (rad === 'Singlet' || rad === 'Triplet') a.rad = 2;
+                const iso = num(n, 'Isotope', 0); if (iso) a.iso = iso;
+                const isEl = type === 'Element' || (type === 'Unspecified' && !lab);
+                if (!isEl || (lab && !new RegExp('^' + a.el + '(H\\d*)?$|^(H\\d*)?' + a.el + '$').test(lab.replace(/[+\-−•.:]+$/, '')))) {
+                    if (lab) { a.el = lab.replace(/[−]/g, '-'); a.pseudo = true; a.charge = 0; delete a.rad; }
+                    else if (type === 'GenericNickname' && at(n, 'GenericNickname')) { a.el = at(n, 'GenericNickname'); a.pseudo = true; a.charge = 0; }
+                    else return; }
+                else if (a.el === 'C' && lab) { const hm = lab.match(/H(\d*)/); a.hx = at(n, 'NumHydrogens') != null ? num(n, 'NumHydrogens', 0) : hm ? +(hm[1] || 1) : 0; }
+                const c = colOf(n); if (c) a.color = c;
+                if (grp) a.grp = grp;
+                idx.set(at(n, 'id'), m.atoms.length); mine.push({ i: m.atoms.length, lab, node: n }); m.atoms.push(a);
+            });
+            let nb = 0;
+            kids(fr, 'b').forEach(e => {
+                let i = idx.get(at(e, 'B')), j = idx.get(at(e, 'E')); if (i == null || j == null || i === j) return;
+                const ord = (at(e, 'Order') || '1').split(/\s+/)[0], disp = at(e, 'Display') || '';
+                const b = { a: i, b: j, order: ord === '3' ? 3 : ord === '2' || ord === '1.5' ? 2 : 1 };
+                if (ord === 'dative') b.style = 'dative'; else if (ord === 'hydrogen') b.style = 'hbond'; else if (ord === '0.5') b.style = 'partial';
+                const dp = at(e, 'DoublePosition'); if (b.order === 2 && dp) b.side = dp === 'Right' ? 1 : dp === 'Left' ? -1 : 0;
+                let flip = false;
+                if (disp === 'WedgeBegin') b.wedge = 'wedge'; else if (disp === 'WedgeEnd') { b.wedge = 'wedge'; flip = true; }
+                else if (disp === 'WedgedHashBegin') b.wedge = 'hash'; else if (disp === 'WedgedHashEnd') { b.wedge = 'hash'; flip = true; }
+                else if (disp === 'Wavy') b.wedge = 'wavy'; else if (disp === 'Hash') b.wedge = 'hash';
+                else if (disp === 'Bold') b.bold = true; else if (disp === 'Dash' && !b.style) b.style = 'dash';
+                if (flip) { b.a = j; b.b = i; if (b.side) b.side = -b.side; }
+                const c = colOf(e); if (c) b.color = c;
+                m.bonds.push(b); nb++;
+            });
+            if (!nb && mine.length === 1 && mine[0].lab) {      // a lone label (a reagent, "HBr") becomes a text box
+                const { i, lab, node } = mine[0], a = m.atoms[i], t = kids(node, 't')[0], s = t && strOf(t);
+                let txtL = lab; if (!a.pseudo && a.charge && !/[+\-]$/.test(txtL)) txtL += (Math.abs(a.charge) > 1 ? Math.abs(a.charge) : '') + (a.charge > 0 ? '+' : '-');
+                frags.push({ i, text: { t: 'text', x1: 0, y1: 0, text: txtL, size: 1, fmt: true, _box: t && box(t), _pt: s && s.runs[0] ? s.runs[0].size : labelPt, _anchor: { x: a.x, y: a.y } } });
+            }
+            kids(fr).forEach(o => { if (o.nodeName !== 'n' && o.nodeName !== 'b') walk(o, grp); });
+        }
+        function textObj(t, grp) {
+            const s = strOf(t); if (!s.text.trim()) return;
+            const c0 = s.runs[0] && colors[s.runs[0].color];
+            m.arrows.push({ t: 'text', x1: 0, y1: 0, text: s.text.replace(/\r\n?/g, '\n').replace(/[ \t]+$/gm, ''), size: 1, fmt: s.runs.some(r => r.face & 0x60), _box: box(t), _pt: s.runs[0] ? s.runs[0].size : labelPt, _anchor: pt(t, 'p'),
+                ...(c0 && c0 !== '#000000' ? { color: c0 } : {}), ...(grp ? { grp } : {}) });
+        }
+        const curved = (tail, head, apex, half, grp, color) => {
+            const ar = { t: half ? 'fish' : 'curve', x1: tail.x, y1: tail.y, x2: head.x, y2: head.y, head: 'barb', ...(color ? { color } : {}), ...(grp ? { grp } : {}) };
+            const cx = 2 * apex.x - (tail.x + head.x) / 2, cy = 2 * apex.y - (tail.y + head.y) / 2, dx = head.x - tail.x, dy = head.y - tail.y, L2 = dx * dx + dy * dy || 1, rx = cx - tail.x, ry = cy - tail.y;
+            ar.ct = (rx * dx + ry * dy) / L2; ar.ch = (rx * -dy + ry * dx) / L2; m.arrows.push(ar);
+        };
+        const arcApex = (C, tail, head, deg) => {
+            const r = (Math.hypot(tail.x - C.x, tail.y - C.y) + Math.hypot(head.x - C.x, head.y - C.y)) / 2, t0 = Math.atan2(tail.y - C.y, tail.x - C.x), t1 = Math.atan2(head.y - C.y, head.x - C.x);
+            let d = t1 - t0; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI;
+            if (Math.abs(deg) > 180.5) d = d > 0 ? d - 2 * Math.PI : d + 2 * Math.PI;
+            const tm = t0 + d / 2; return { x: C.x + r * Math.cos(tm), y: C.y + r * Math.sin(tm) };
+        };
+        const straight = (tail, head, kind, grp, color) => {
+            if (!tail || !head || Math.hypot(head.x - tail.x, head.y - tail.y) < 1e-3) return;
+            if (kind === 'line') { m.arrows.push({ t: 'shape', shape: 'line', x1: tail.x, y1: tail.y, x2: head.x, y2: head.y, color: color || '#1e293b', fill: null, lw: 1, dash: null, ...(grp ? { grp } : {}) }); return; }
+            m.arrows.push({ t: kind, x1: tail.x, y1: tail.y, x2: head.x, y2: head.y, head: 'barb', size: 1, ...(color ? { color } : {}), ...(grp ? { grp } : {}) });
+        };
+        const headCode = (v) => !v || v === 'None' ? 1 : /^Half/.test(v) ? 3 : 2;
+        function arrowObj(e, grp) {
+            const head = pt(e, 'Head3D'), tail = pt(e, 'Tail3D'); if (!head || !tail) return;
+            const hh = headCode(at(e, 'ArrowheadHead')), ht = headCode(at(e, 'ArrowheadTail')), deg = num(e, 'AngularSize', 0), C = pt(e, 'Center3D'), color = colOf(e);
+            if (deg && C) { let t = tail, h = head, hp = hh; if (hh < 2 && ht >= 2) { t = head; h = tail; hp = ht; } if (hp < 2) { W('plain arcs'); return; }
+                curved(t, h, arcApex(C, t, h, deg), hp >= 3, grp, color); return; }
+            const kind = hh >= 2 && ht >= 2 ? (hh >= 3 && ht >= 3 && at(e, 'ArrowShaftSpacing') ? 'eq' : 'res') : hh >= 2 ? 'rxn' : ht >= 2 ? 'rxnR' : 'line';
+            if (/Retro/i.test(at(e, 'ArrowheadType') || '') || at(e, 'NoGo') === 'Retro') { straight(tail, head, 'retro', grp, color); return; }
+            if (kind === 'rxnR') straight(head, tail, 'rxn', grp, color); else straight(tail, head, kind, grp, color);
+        }
+        function graphic(e, grp) {
+            if (at(e, 'SupersededBy')) return;
+            const gt = at(e, 'GraphicType') || '', B = box(e), color = colOf(e);
+            const P1 = B && { x: B.l, y: B.t }, P2 = B && { x: B.r, y: B.b };
+            if (gt === 'Line') { const ty = at(e, 'ArrowType') || 'NoHead';
+                straight(P1, P2, /Equilibrium/.test(ty) ? 'eq' : /Resonance/.test(ty) ? 'res' : /RetroSynthetic/.test(ty) ? 'retro' : ty && ty !== 'NoHead' ? 'rxn' : 'line', grp, color); return; }
+            if (gt === 'Rectangle' && B) { m.arrows.push({ t: 'shape', shape: 'rect', x1: B.l, y1: B.t, x2: B.r, y2: B.b, round: /Rounded/.test(at(e, 'RectangleType') || ''), shadow: false, color: color || '#1e293b', fill: null, lw: 1, ...(grp ? { grp } : {}) }); return; }
+            if (gt === 'Oval' && B) { const rx = Math.hypot(B.r - B.l, B.b - B.t); m.arrows.push({ t: 'shape', shape: 'ellipse', x1: B.l - rx, y1: B.t - rx, x2: B.l + rx, y2: B.t + rx, round: false, shadow: false, color: color || '#1e293b', fill: null, lw: 1, ...(grp ? { grp } : {}) }); return; }
+            if (gt === 'Symbol' && P1) { const sy = at(e, 'SymbolType') || '';
+                if (sy === 'LonePair') lps.push({ x: P1.x, y: P1.y, e: false }); else if (sy === 'Electron') lps.push({ x: P1.x, y: P1.y, e: true });
+                else if (/Plus|Cation/.test(sy)) lps.push({ x: P1.x, y: P1.y, q: 1 }); else if (/Minus|Anion/.test(sy)) lps.push({ x: P1.x, y: P1.y, q: -1 }); else W('symbols'); return; }
+            W(gt === 'Orbital' ? 'orbitals' : gt === 'Bracket' ? 'brackets' : 'other graphics');
+        }
+        function walk(o, grp) {
+            const t = o.nodeName;
+            if (t === 'fragment') fragment(o, grp);
+            else if (t === 't') textObj(o, grp);
+            else if (t === 'graphic') graphic(o, grp);
+            else if (t === 'arrow') arrowObj(o, grp);
+            else if (t === 'group') { const g = 'cdx' + Date.now().toString(36) + (++grpSeq); kids(o).forEach(k => walk(k, grp || g)); }
+            else if (t === 'page') kids(o).forEach(k => walk(k, grp));
+            else if (t === 'embeddedobject' || t === 'picture') W('pictures');
+            else if (t === 'curve') W('freehand curves');
+            else if (t === 'colortable' || t === 'fonttable' || t === 'n' || t === 'b' || t === 'templategrid' || t === 'step' || t === 'scheme' || t === 'chemicalproperty' || t === 'objecttag' || t === 'annotation') { }
+            else kids(o).forEach(k => walk(k, grp));
+        }
+        kids(doc).forEach(o => walk(o, null));
+        return cdxFinish(m, frags, lps, warn, num(doc, 'BondLength', 14.4) || 14.4, labelPt);
+    }
+    function cdxmlOf(items) {      // the drawing (or the selection) as CDXML: one bond = 14.4 pt, like ChemDraw's default
+        const BL = 14.4, esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const A = [...items.atoms].sort((p, q) => p - q), R = [...items.arrows].map(k => mol.arrows[k]).filter(Boolean);
+        const xs = [], ys = []; A.forEach(i => { xs.push(mol.atoms[i].x); ys.push(mol.atoms[i].y); }); R.forEach(r => { ['x1', 'x2'].forEach(k => r[k] != null && xs.push(r[k])); ['y1', 'y2'].forEach(k => r[k] != null && ys.push(r[k])); });
+        const x0 = Math.min(...xs, 0) - 2, y0 = Math.min(...ys, 0) - 2, X = (x) => ((x - x0) * BL).toFixed(2), Y = (y) => ((y - y0) * BL).toFixed(2);
+        const ctab = [], colIdx = (c) => { if (!c) return null; const h = String(c).toLowerCase(); if (!/^#[0-9a-f]{6}$/.test(h) || h === '#000000' || h === '#1e293b' || h === '#0f172a') return null; let k = ctab.indexOf(h); if (k < 0) { ctab.push(h); k = ctab.length - 1; } return 4 + k; };
+        let id = 100; const nid = new Map(), out = [];
+        const Z = {}; Object.entries(CDX_EL).forEach(([z, e]) => { if (Z[e] == null) Z[e] = +z; });
+        const nb = neighbors(mol);
+        const frag = [];
+        A.forEach(i => { const a = mol.atoms[i], k = ++id; nid.set(i, k); const ci = colIdx(a.color);
+            let attrs = `id="${k}" p="${X(a.x)} ${Y(a.y)}"`;
+            const shown = a.pseudo || a.el !== 'C' || a.charge || a.hx != null || (nb[i] || []).length === 0;
+            if (a.pseudo) attrs += ` NodeType="GenericNickname" GenericNickname="${esc(a.el)}"`;
+            else { if (a.el !== 'C') attrs += ` Element="${Z[a.el] || 6}"`; if (a.charge) attrs += ` Charge="${a.charge}"`; if (a.iso) attrs += ` Isotope="${a.iso}"`; if (a.rad === 1) attrs += ' Radical="Doublet"'; }
+            if (ci) attrs += ` color="${ci}"`;
+            let lab = '';
+            if (shown) { let t = a.pseudo ? a.el : a.el; if (!a.pseudo) { const h = a.hx != null ? a.hx : implicitH(mol, i, nb); if (h) t += 'H' + (h > 1 ? h : ''); if (a.hx != null) attrs += ` NumHydrogens="${a.hx}"`; }
+                lab = `<t p="${X(a.x) - 3.5} ${(+Y(a.y) + 3.5).toFixed(2)}" LabelJustification="Left"><s font="3" size="10" face="96"${ci ? ` color="${ci}"` : ''}>${esc(t)}</s></t>`; }
+            frag.push(`<n ${attrs}>${lab}</n>`); });
+        mol.bonds.forEach(b => { if (!nid.has(b.a) || !nid.has(b.b)) return; const ci = colIdx(b.color);
+            let attrs = `id="${++id}" B="${nid.get(b.a)}" E="${nid.get(b.b)}"`;
+            if (b.style === 'dative') attrs += ' Order="dative"'; else if (b.style === 'hbond') attrs += ' Order="hydrogen"'; else if (b.order > 1) attrs += ` Order="${b.order}"`;
+            if (b.wedge === 'wedge') attrs += ' Display="WedgeBegin"'; else if (b.wedge === 'hash') attrs += ' Display="WedgedHashBegin"'; else if (b.wedge === 'wavy') attrs += ' Display="Wavy"';
+            else if (b.bold) attrs += ' Display="Bold"'; else if (b.style && b.style !== 'dative' && b.style !== 'hbond' && b.style !== 'solid') attrs += ' Display="Dash"';
+            if (b.order === 2 && b.side) attrs += ` DoublePosition="${b.side > 0 ? 'Right' : 'Left'}"`;
+            if (ci) attrs += ` color="${ci}"`;
+            frag.push(`<b ${attrs}/>`); });
+        if (frag.length) out.push(`<fragment id="${++id}">${frag.join('')}</fragment>`);
+        const warn = new Set();
+        R.forEach(r => { const ci = colIdx(r.color), c = ci ? ` color="${ci}"` : '';
+            if (r.t === 'text') { const sz = Math.max(4, Math.round(10 * (r.size || 1))), lines = String(r.text || '').split('\n');
+                out.push(`<t id="${++id}" p="${X(r.x1)} ${Y(r.y1)}" Justification="Center" LineHeight="auto">${lines.map((l, k) => `<s font="3" size="${sz}" face="0"${c}>${esc(l + (k < lines.length - 1 ? '\n' : ''))}</s>`).join('')}</t>`); return; }
+            if (['rxn', 'eq', 'res', 'retro'].includes(r.t)) { const ty = { rxn: 'FullHead', eq: 'Equilibrium', res: 'Resonance', retro: 'RetroSynthetic' }[r.t];
+                out.push(`<graphic id="${++id}" BoundingBox="${X(r.x1)} ${Y(r.y1)} ${X(r.x2)} ${Y(r.y2)}" GraphicType="Line" ArrowType="${ty}"${c}/>`);
+                out.push(`<arrow id="${++id}" Head3D="${X(r.x2)} ${Y(r.y2)} 0" Tail3D="${X(r.x1)} ${Y(r.y1)} 0" ArrowheadHead="Full"${r.t === 'eq' || r.t === 'res' ? ' ArrowheadTail="Full"' : ''}${r.t === 'eq' ? ' ArrowShaftSpacing="400"' : ''}${c}/>`); out.splice(out.length - 2, 1); return; }
+            if ((r.t === 'curve' || r.t === 'fish') && r.x2 != null) {      // an arc through tail, the bow's apex and head
+                const tx = r.x1, ty = r.y1, hx = r.x2, hy = r.y2, dx = hx - tx, dy = hy - ty, cxp = tx + (r.ct || 0.5) * dx - (r.ch || 0) * dy, cyp = ty + (r.ct || 0.5) * dy + (r.ch || 0) * dx;
+                const ax = 0.25 * tx + 0.5 * cxp + 0.25 * hx, ay = 0.25 * ty + 0.5 * cyp + 0.25 * hy;
+                const d = 2 * (tx * (ay - hy) + ax * (hy - ty) + hx * (ty - ay));
+                if (Math.abs(d) < 1e-6) { out.push(`<arrow id="${++id}" Head3D="${X(hx)} ${Y(hy)} 0" Tail3D="${X(tx)} ${Y(ty)} 0" ArrowheadHead="${r.t === 'fish' ? 'HalfLeft' : 'Full'}"${c}/>`); return; }
+                const ux = ((tx * tx + ty * ty) * (ay - hy) + (ax * ax + ay * ay) * (hy - ty) + (hx * hx + hy * hy) * (ty - ay)) / d, uy = ((tx * tx + ty * ty) * (hx - ax) + (ax * ax + ay * ay) * (tx - hx) + (hx * hx + hy * hy) * (ax - tx)) / d;
+                const a0 = Math.atan2(ty - uy, tx - ux), a1 = Math.atan2(ay - uy, ax - ux), a2 = Math.atan2(hy - uy, hx - ux);
+                const wrap = (v) => { while (v > Math.PI) v -= 2 * Math.PI; while (v < -Math.PI) v += 2 * Math.PI; return v; };
+                let sweep = wrap(a1 - a0) + wrap(a2 - a1);
+                out.push(`<arrow id="${++id}" Head3D="${X(hx)} ${Y(hy)} 0" Tail3D="${X(tx)} ${Y(ty)} 0" Center3D="${X(ux)} ${Y(uy)} 0" AngularSize="${(sweep * 180 / Math.PI).toFixed(1)}" ArrowheadHead="${r.t === 'fish' ? 'HalfLeft' : 'Full'}" ArrowheadType="Solid"${c}/>`); return; }
+            if (r.t === 'shape' && r.shape === 'line') { out.push(`<graphic id="${++id}" BoundingBox="${X(r.x1)} ${Y(r.y1)} ${X(r.x2)} ${Y(r.y2)}" GraphicType="Line"${c}/>`); return; }
+            if (r.t === 'shape' && r.shape === 'rect') { out.push(`<graphic id="${++id}" BoundingBox="${X(Math.min(r.x1, r.x2))} ${Y(Math.min(r.y1, r.y2))} ${X(Math.max(r.x1, r.x2))} ${Y(Math.max(r.y1, r.y2))}" GraphicType="Rectangle"${r.round ? ' RectangleType="RoundEdge"' : ''}${c}/>`); return; }
+            warn.add(r.t === 'shape' ? r.shape + 's' : r.t);
+        });
+        if ((mol.fills || []).length) warn.add('ring fills');
+        const hex = (h) => [1, 3, 5].map(k => (parseInt(h.slice(k, k + 2), 16) / 255).toFixed(3));
+        const xml = `<?xml version="1.0" encoding="UTF-8" ?>\n<!DOCTYPE CDXML SYSTEM "http://www.cambridgesoft.com/xml/cdxml.dtd" >\n` +
+            `<CDXML CreationProgram="Z's Molecular Studio" BondLength="${BL}" LabelFont="3" LabelSize="10" LabelFace="96" CaptionFont="3" CaptionSize="10" LineWidth="0.6" BoldWidth="2" HashSpacing="2.5" MarginWidth="1.6" ChainAngle="120">` +
+            `<colortable><color r="1" g="1" b="1"/><color r="0" g="0" b="0"/>${ctab.map(h => { const [r, g, b] = hex(h); return `<color r="${r}" g="${g}" b="${b}"/>`; }).join('')}</colortable>` +
+            `<fonttable><font id="3" charset="iso-8859-1" name="Arial"/></fonttable><page id="${++id}" HeightPages="1" WidthPages="1">${out.join('')}</page></CDXML>\n`;
+        return { xml, warn: [...warn] };
+    }
+    // ---------------------------------------------------------------- name → structure: online fallbacks (OPSIN web service, then PubChem)
+    async function nameOnline(name) {
+        const q = encodeURIComponent(name.trim());
+        try { const r = await fetch('https://opsin.ch.cam.ac.uk/opsin/' + q + '.smi'); if (r.ok) { const t = (await r.text()).trim(); if (t && !/^</.test(t)) return { smi: t.split(/\s+/)[0], src: 'OPSIN (opsin.ch.cam.ac.uk)' }; } } catch (err) {}
+        try { const r = await fetch('https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/' + q + '/property/IsomericSMILES,SMILES/JSON');
+            if (r.ok) { const j = await r.json(), p = j && j.PropertyTable && j.PropertyTable.Properties && j.PropertyTable.Properties[0]; const smi = p && (p.IsomericSMILES || p.SMILES || p.CanonicalSMILES); if (smi) return { smi, src: 'PubChem' + (p.CID ? ' (CID ' + p.CID + ')' : '') }; } } catch (err) {}
+        return null;
+    }
+    async function loadNameOnline(name, offlineErr) {
+        showMsg('Not recognised offline — asking OPSIN (online)…');
+        const r = await nameOnline(name);
+        if (!r) { showMsg((offlineErr && offlineErr.message ? offlineErr.message + ' · ' : '') + 'OPSIN and PubChem did not recognise it either (or there is no internet connection)'); return false; }
+        try { const m = parseSMILES(r.smi); layout2D(m); assignWedges(m); markStep('Structure from name'); commit(); mol = normMol(m); clearSel(); changed(true); fitView(); showMsg('Drawn from “' + name.trim() + '” — structure from ' + r.src); return true; }
+        catch (err) { showMsg('The online answer could not be read: ' + err.message); return false; }
+    }
+
+
     // ---------------------------------------------------------------- pointer hooks
     function extraPointerUp(d, p, K) {      // returns undefined when not handled, otherwise whether something changed
         if (K === 'bondx') {
@@ -13084,7 +13313,8 @@ function autoMapAtoms(m, R, P) {
         emf: (items, base) => { try { const r = exportSVG(items, !!disp.transparent); download(svgToEMF(r.svg), fileBase(items, base) + '.emf'); showMsg('EMF saved — in PowerPoint or Word: Insert ▸ Pictures, then right-click ▸ Group ▸ Ungroup to edit the shapes'); } catch (err) { showMsg('EMF export failed: ' + err.message); } },
         png300: async (items, base) => { try { download(await renderPNG(items, 300, !!disp.transparent), fileBase(items, base) + '_300dpi.png'); } catch (err) { showMsg(err.message); } },
         png600: async (items, base) => { try { download(await renderPNG(items, 600, !!disp.transparent), fileBase(items, base) + '_600dpi.png'); } catch (err) { showMsg(err.message); } },
-        clip: (items) => copyImage(items)
+        clip: (items) => copyImage(items),
+        cdxml: (items, base) => { try { const r = cdxmlOf(items); download(new Blob([r.xml], { type: 'chemical/x-cdxml' }), fileBase(items, base) + '.cdxml'); showMsg('CDXML saved — opens in ChemDraw' + (r.warn.length ? ' (left out: ' + r.warn.join(', ') + ')' : '')); } catch (err) { showMsg('CDXML: ' + err.message); } }
     };
     async function copyImage(items) {
         if (!items.atoms.size && !items.arrows.size) { showMsg('Nothing to copy'); return; }
