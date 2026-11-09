@@ -429,6 +429,7 @@
     #adj3d { position: absolute; left: 12px; right: 12px; margin: 0 auto; width: fit-content; bottom: 12px; z-index: 7; display: flex; align-items: center; gap: 6px; padding: 6px 8px 6px 12px; border-radius: 10px; background: rgba(15,23,42,0.92); border: 1px solid #334155; box-shadow: 0 6px 18px rgba(0,0,0,0.3); color: #e2e8f0; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; white-space: nowrap; box-sizing: border-box; max-width: calc(100% - 24px); }
     #adj3d input { width: 5.6em; font: inherit; font-size: 0.85rem; letter-spacing: 0; text-align: right; padding: 3px 6px; border-radius: 6px; border: 1px solid #475569; background: #0b1220; color: #fde68a; }
     #adj3d .btn { padding: 3px 9px; min-width: 0; } #adj3d .adj-set { background: #2563eb; border-color: #2563eb; color: #fff; } #adj-u { color: #94a3b8; letter-spacing: 0; }
+    #adj3d[hidden] { display: none !important; }
     #adj3d.narrow { flex-wrap: wrap; justify-content: center; white-space: normal; } #adj3d.narrow #adj-lab { flex-basis: 100%; text-align: center; }
     #adj3d.ro input { color: #94a3b8; } #adj3d.ro .btn { display: none; }
     body.light #adj3d { background: rgba(255,255,255,0.96); border-color: #cbd5e1; color: #1e293b; } body.light #adj3d input { background: #fff; color: #9a3412; border-color: #cbd5e1; }
@@ -11377,6 +11378,7 @@ function autoMapAtoms(m, R, P) {
     // ---- the overlay drawn over the 3D model: measurements, partial charges, bond orders, dipole arrow, the selected molecule
     const ov3d = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); ov3d.id = 'ov3d'; vwrap.appendChild(ov3d);
     function drawOV() {
+        { const k = M3 && COMP.picks.length >= 2 && measShown() ? 'on' : ''; if (k !== ($('adj3d').hidden ? '' : 'on')) try { adjUpdate(); } catch (err) {} }      // keep the ADJUST box in step with the selection
         const need = M3 && (measShown() || COMP.picks.length || MSEL || (COMP.optimized && COMP.props && (COMP.show.pq || COMP.show.bo || COMP.show.dip)));
         if (!need) { if (ov3d.innerHTML) ov3d.innerHTML = ''; return; }
         const cr = renderer.domElement.getBoundingClientRect(), vr = vwrap.getBoundingClientRect();
