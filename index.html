@@ -165,8 +165,72 @@
     .lit-h { font-weight: 800; margin-bottom: 4px; } .lit-h2 { font-weight: 700; color: #475569; margin: 6px 0 2px; font-size: 14px; } .lit-card ul { margin: 2px 0 0 18px; padding: 0; } .lit-card li { margin: 2px 0; }
     .lit-t td { padding: 2px 8px 2px 0; vertical-align: top; } .lit-t td:first-child { color: #64748b; white-space: nowrap; } .lit-links { display: flex; flex-wrap: wrap; gap: 6px 14px; font-weight: 600; } .lit-busy { color: #2563eb; font-weight: 600; }
     #props-box { position: absolute; top: 8px; right: 10px; z-index: 6; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; max-width: calc(100% - 20px); }
+    /* compact top toolbar (and any toolbar docked along the top or bottom) */
+    .bar.horiz { gap: 3px; padding: 4px 6px; }
+    .bar.horiz .tool { width: 30px; height: 28px; border-radius: 6px; } .bar.horiz .tool svg { width: 18px; height: 18px; }
+    .bar.horiz .tool.txt { width: auto; min-width: 28px; padding: 0 7px; font-size: 10px; } .bar.horiz .tool.sym { font-size: 14px; }
+    .bar.horiz > .grip { height: 24px; width: 12px; } .bar.horiz > .tsep { height: 20px; margin: 0 2px; } .bar.horiz .ctx-sep { height: 20px; }
+    @media (max-width: 760px) {
+        #dock-top > .bar.horiz, #dock-bottom > .bar.horiz { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; max-width: 100%; }
+        #topbar { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 5px 6px; padding: 5px 6px; }
+        #topbar h1 { font-size: 0.88rem; margin: 0 2px 0 0; } #topbar .btn { padding: 5px 8px; font-size: 0.66rem; } .tb-left, .tb-right { gap: 5px 6px; }
+    }
+    /* structure tabs along the top of the 2D canvas */
+    #tabs { position: absolute; top: 7px; left: 8px; right: 130px; z-index: 6; display: flex; gap: 4px; align-items: center; overflow-x: auto; scrollbar-width: none; pointer-events: none; }
+    #tabs::-webkit-scrollbar { display: none; }
+    #tabs.in-cp { position: static; margin-left: auto; max-width: 62%; pointer-events: auto; } .cp-head:has(#tabs) { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .cp-head #tabs.in-cp span.tab-n { font-size: 12px; color: inherit; }
+    #tabs.in-cp .tab, #tabs.in-cp .tab-add { background: #1e293b; border-color: #334155; color: #cbd5e1; } #tabs.in-cp .tab.on { background: #2563eb; border-color: #2563eb; color: #fff; }
+    body.light #tabs.in-cp .tab, body.light #tabs.in-cp .tab-add { background: #fff; border-color: #cbd5e1; color: #475569; } body.light #tabs.in-cp .tab.on { background: #2563eb; color: #fff; }
+    #tabs > * { pointer-events: auto; flex: none; }
+    .tab { display: flex; align-items: center; gap: 2px; max-width: 170px; height: 26px; padding: 0 3px 0 10px; border-radius: 7px; border: 1px solid #cbd5e1; background: rgba(241,245,249,0.92); color: #475569; font: 600 12px/1 system-ui, sans-serif; cursor: pointer; user-select: none; }
+    .tab:hover { border-color: #93c5fd; } .tab.on { background: #2563eb; border-color: #2563eb; color: #fff; }
+    .tab-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .tab-n sub, .tab-n sup { font-size: 0.72em; line-height: 0; }
+    .tab-x { border: 0; background: transparent; color: inherit; opacity: 0.55; font-size: 15px; line-height: 1; width: 18px; height: 18px; border-radius: 4px; cursor: pointer; padding: 0; } .tab-x:hover { opacity: 1; background: rgba(0,0,0,0.12); }
+    .tab-in { width: 110px; font: 600 12px/1 system-ui, sans-serif; border: 0; border-radius: 4px; padding: 3px 4px; }
+    .tab-add { width: 26px; height: 26px; border-radius: 7px; border: 1px dashed #94a3b8; background: rgba(241,245,249,0.85); color: #475569; font: 700 16px/1 system-ui, sans-serif; cursor: pointer; padding: 0; } .tab-add:hover { border-color: #2563eb; color: #2563eb; }
+    body.party .tab, body.party .tab-add { background: rgba(15,23,42,0.85); border-color: #334155; color: #cbd5e1; } body.party .tab.on { background: #2563eb; color: #fff; }
+    /* compare saved results */
+    .cmp-save { display: flex; gap: 6px; align-items: center; margin: 2px 0 8px; } #cmp-name { flex: 1; min-width: 120px; max-width: 340px; font: inherit; font-size: 0.78rem; padding: 4px 8px; border-radius: 6px; border: 1px solid #475569; background: #0b1220; color: #e2e8f0; }
+    .cmp-save .cmp-go { background: #2563eb; border-color: #2563eb; color: #fff; padding: 4px 10px; font-size: 0.66rem; }
+    .cmp-wrap { overflow-x: auto; border: 1px solid #1e293b; border-radius: 8px; }
+    table.cmp { border-collapse: separate; border-spacing: 0; font-size: 0.74rem; font-variant-numeric: tabular-nums; min-width: 100%; }
+    table.cmp th, table.cmp td { padding: 3px 9px; border-bottom: 1px solid #1e293b; white-space: nowrap; text-align: right; }
+    table.cmp th.cmp-lab { position: sticky; left: 0; z-index: 1; background: #0f172a; text-align: left; font-weight: 600; color: #94a3b8; border-right: 1px solid #1e293b; }
+    table.cmp th.cmp-lab[data-sort] { cursor: pointer; } table.cmp th.cmp-lab[data-sort]:hover { color: #e2e8f0; } table.cmp th.cmp-lab.sorted { color: #93c5fd; }
+    table.cmp td:not(.n) { text-align: center; color: #cbd5e1; } table.cmp td.best { color: #4ade80; font-weight: 700; } table.cmp .ref { background: rgba(250,204,21,0.06); }
+    .cmp-col { vertical-align: top; min-width: 112px; } .cmp-th { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .cmp-img { width: 104px; height: 64px; border-radius: 6px; background: #f8fafc; cursor: pointer; overflow: hidden; display: grid; place-items: center; } .cmp-img svg { width: 100%; height: 100%; }
+    .cmp-name { max-width: 120px; overflow: hidden; text-overflow: ellipsis; font-weight: 800; color: #fde68a; cursor: text; } .cmp-in { width: 112px; font: inherit; font-size: 0.74rem; padding: 2px 4px; border-radius: 4px; border: 1px solid #475569; background: #0b1220; color: #e2e8f0; }
+    .cmp-act { display: flex; gap: 2px; } .cmp-act button { border: 0; background: transparent; color: #64748b; cursor: pointer; font-size: 13px; line-height: 1; padding: 2px 5px; border-radius: 4px; } .cmp-act button:hover { background: #1e293b; color: #e2e8f0; } .cmp-act .cmp-ref.on { color: #facc15; }
+    .cmp-na { color: #475569; } .cmp-foot { margin-top: 6px; font-size: 0.68rem; color: #94a3b8; display: grid; gap: 2px; } .cmp-tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
+    body.light #cmp-name, body.light .cmp-in { background: #fff; color: #0f172a; border-color: #cbd5e1; } body.light table.cmp th.cmp-lab { background: #f8fafc; color: #475569; } body.light table.cmp th, body.light table.cmp td { border-color: #e2e8f0; } body.light .cmp-wrap { border-color: #e2e8f0; }
+    body.light table.cmp td:not(.n) { color: #334155; } body.light .cmp-name { color: #b45309; } body.light table.cmp td.best { color: #15803d; } body.light .cmp-act button:hover { background: #e2e8f0; color: #0f172a; }
+    /* COMPARE SPECTRA */
+    .spc-go { margin-left: 12px; vertical-align: 2px; } .spc-go.on { background: #2563eb; border-color: #2563eb; color: #fff; }
+    #spc-pane .nmr-hrow { align-items: center; } .spc-legend, .spc-legend * { letter-spacing: normal; text-transform: none; } .spc-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; flex: 1; justify-content: center; font-size: 13px; }
+    .spc-chip { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; color: var(--c); } .spc-chip i { width: 12px; height: 12px; border-radius: 50%; background: var(--c); display: inline-block; }
+    #spc-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 6px; padding: 2px 8px 8px; }
+    .spc-row { flex: 1 1 0; min-height: 0; display: flex; gap: 8px; border: 1px solid #e2e8f0; border-left: 5px solid var(--c); border-radius: 8px; background: #fff; position: relative; padding: 2px 6px 2px 0; }
+    .spc-tag { position: absolute; left: 6px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--c); color: #fff; font: 800 12px/20px system-ui, sans-serif; text-align: center; z-index: 1; }
+    .spc-row .spc-plot { margin-left: 26px; } .spc-plot { flex: 1 1 auto; min-width: 0; position: relative; overflow: hidden; user-select: none; cursor: crosshair; } .spc-plot svg { position: absolute; left: 0; top: 0; }
+    .spc-side { flex: 0 0 min(42%, 400px); display: flex; gap: 6px; min-height: 0; padding: 4px 0; }
+    .spc-card { flex: 0 0 46%; min-width: 0; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; background: #fff; } .spc-card svg { display: block; width: 100%; height: 100%; }
+    .spc-extra { flex: 1 1 auto; min-width: 0; overflow: auto; }
+    .spc-tab { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; } .spc-tab th { text-align: left; font-size: 10.5px; letter-spacing: 0.06em; color: #64748b; padding: 1px 4px; position: sticky; top: 0; background: #fff; }
+    .spc-tab td { padding: 1px 4px; border-top: 1px solid #f1f5f9; white-space: nowrap; } .spc-j { color: #64748b; font-size: 10.5px; }
+    .spc-mi { font-size: 11px; color: #475569; } .spc-mih { font-weight: 800; letter-spacing: 0.08em; font-size: 10.5px; color: #64748b; margin-bottom: 2px; } .spc-mif { margin-top: 2px; }
+    .spc-irrow .spc-irmain { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; margin-left: 26px; } .spc-irrow .spc-irmain .spc-plot { flex: 1 1 auto; margin-left: 0; }
+    .spc-irinfo { font-size: 12.5px; min-height: 18px; padding: 0 4px 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .spc-ircard { flex: 0 0 min(19%, 210px); margin: 4px 0; }
+    .spc-3d { flex: 0 0 min(27%, 300px); position: relative; margin: 4px 0; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; background: #fff; }
+    #viewer #spc-pane canvas.spc-mini { top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; visibility: visible !important; }
+    .spc-mini { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; } .spc-mini:active { cursor: grabbing; }
+    .spc-3dh { position: absolute; right: 6px; bottom: 2px; z-index: 1; font-size: 10px; color: #94a3b8; pointer-events: none; white-space: nowrap; }
+    #viewer.irc > canvas { visibility: hidden !important; }
+    #viewer.irc #ir-div, #viewer.irc #ir-struct, #viewer.irc #stylebar, #viewer.irc #hint3d, #viewer.irc #v3bar, #viewer.irc #busy, #viewer.irc #adj3d { display: none !important; }
     #props-box #props { background: rgba(15,23,42,0.88); border-radius: 8px; padding: 4px 8px; white-space: normal; flex-wrap: wrap; justify-content: flex-end; }
-    #val-warn { position: absolute; left: 10px; top: 8px; z-index: 6; max-width: 55%; background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; border-radius: 8px; padding: 4px 8px; font: 600 12.5px/1.35 system-ui, sans-serif; pointer-events: none; } #val-warn[hidden] { display: none; }
+    #val-warn { position: absolute; left: 10px; top: 42px; z-index: 6; max-width: 55%; background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; border-radius: 8px; padding: 4px 8px; font: 600 12.5px/1.35 system-ui, sans-serif; pointer-events: none; } #val-warn[hidden] { display: none; }
     #cp-job .jrow { display: contents; } #cp-job .jrow[hidden] { display: none; } #job-bond b { color: #f8fafc; }
     .fq-svg, .sc-svg { width: 100%; height: auto; display: block; margin: 4px 0; } .sc-svg { cursor: ew-resize; touch-action: none; }
     .sc-ctl { display: flex; align-items: center; gap: 8px; margin: 2px 0 4px; } .sc-ctl input { flex: 1; } #sc-t { font-variant-numeric: tabular-nums; min-width: 180px; font-size: 0.8rem; }
@@ -583,6 +647,7 @@
                     <feFlood id="neon-flood" flood-color="currentColor" flood-opacity="0.85" result="fl"/><feComposite in="fl" in2="bm" operator="in" result="glow"/>
                     </filter></defs><defs id="fdefs"></defs><g id="view"><g id="g-glow" pointer-events="none"></g><g id="g-fills"></g><g id="g-bonds" stroke="#1e293b" stroke-width="0.065" stroke-linecap="round" fill="none"></g><g id="g-atoms"></g><g id="g-arrows" stroke="#1e293b" stroke-linecap="round" stroke-linejoin="round" fill="none"></g><g id="g-over"></g></g></svg>
                 <div id="sketch-hint"></div>
+                <div id="tabs" role="tablist" aria-label="Structure tabs"></div>
                 <div id="props-box"><button class="btn" id="b-props" title="Show the formula, molar mass and percent composition">PROPERTIES</button><span id="props" hidden><span id="formula"></span><span id="pct"></span></span></div>
                 <div id="val-warn" hidden></div>
                 <button id="restore-bars" class="restore" hidden title="Show the hidden toolbars">☰ TOOLBARS</button>
@@ -3705,7 +3770,7 @@ function autoMapAtoms(m, R, P) {
     const hexMix = (c1, c2, t) => { const p = (c) => [1, 3, 5].map(k => parseInt(c.slice(k, k + 2), 16)); if (!/^#[0-9a-f]{6}$/i.test(c1) || !/^#[0-9a-f]{6}$/i.test(c2)) return c1;
         const a = p(c1), b = p(c2); return '#' + a.map((v, k) => Math.round(v + (b[k] - v) * t).toString(16).padStart(2, '0')).join(''); };
     function drawParts(S, fa, fr, paper, record, idp = 'v') {
-        const f0 = S.font, ink = '#1e293b', col = (a) => a.color ? a.color : (a.pseudo || a.hl) ? ink : disp.color ? (COLOR2D[a.el] || ink) : ink;
+        const f0 = S.font, ink = '#1e293b', OVC = (SPC && SPC.on && SPC.col && spcActive()) ? SPC.col : null, col = (a) => (OVC && OVC.get(a)) ? OVC.get(a) : a.color ? a.color : (a.pseudo || a.hl) ? ink : disp.color ? (COLOR2D[a.el] || ink) : ink;
         const nb = neighbors(mol), nbAll = allNeighbors(mol), R = rings(), inA = (i) => !fa || fa(i);
         if (record) { lpCache = []; qCache = []; pqCache = []; }
         const filled = new Set(); (mol.fills || []).forEach(F => F.ring.forEach(i => filled.add(i)));
@@ -3764,7 +3829,7 @@ function autoMapAtoms(m, R, P) {
             if (!inA(b.a) || !inA(b.b)) return;
             const A = mol.atoms[b.a], B = mol.atoms[b.b];
             if (Math.hypot(B.x - A.x, B.y - A.y) < 0.05) return;           // front–back bond of a Newman projection: hidden
-            const bs = ((A.fs || 1) + (B.fs || 1)) / 2, bc = b.color || null;
+            const bs = ((A.fs || 1) + (B.fs || 1)) / 2, bc = b.color || (OVC && (OVC.get(A) || OVC.get(B))) || null;
             if (halo[k] && bSplit < 0) bSplit = bH.length;
             if (halo[k]) { const Lb = Math.hypot(B.x - A.x, B.y - A.y), ux = (B.x - A.x) / Lb, uy = (B.y - A.y) / Lb, hl = 0.17 * bs,
                     hw = S.lw * bs * 4.2 + (b.order >= 2 ? S.dbl * bs * 1.2 : 0) + (b.bold || b.wedge === 'wedge' ? S.lw * bs * 3.5 : 0);
@@ -3884,7 +3949,7 @@ function autoMapAtoms(m, R, P) {
             const LC = lpCount(i, nb, info.h), showP = lpShown(i), nP = showP ? Math.max(0, LC.n - (a.lpHide || 0)) : 0, nR = LC.rad;
             if (nP + nR) {
                 const sc = (disp.lpScale || 1) * 0.8, ds = disp.lpDist || 1;
-                const fsA = a.fs || 1, lpc = a.color || ink;
+                const fsA = a.fs || 1, lpc = (OVC && OVC.get(a)) || a.color || ink;
                 const Rr = (info.show ? f * 0.5 + 0.08 * fsA : 0.24 * fsA) * ds * (0.85 + 0.15 * sc), dr = Math.max(0.035, S.lw * 1.1) * sc * fsA, sp = Math.max(0.085, f * 0.15) * (0.55 + 0.45 * sc);
                 const fixP = a.lpAng || [], fixR = a.radAng || [], angP = [], angR = [], occ2 = occ.slice();
                 for (let k = 0; k < nP; k++) if (fixP[k] != null) { angP[k] = fixP[k]; occ2.push(fixP[k]); }
@@ -7477,7 +7542,7 @@ function autoMapAtoms(m, R, P) {
         if (!NMRS.ids || NMRS.ids.join() !== ids.join()) NMRS.view = null;      // another structure: back to the full spectrum
         NMRS.ids = ids;
         $('nmr-sub').innerHTML = heavyN ? `${nmrFormula(ids)} · predicted, 400 MHz, CDCl<sub>3</sub>${nFr > 1 ? ' · click a structure to switch' : ''}` : 'Draw a structure in the 2D editor';
-        nmrSubGeo(); drawNMR(); render(); refreshThumbs();
+        nmrSubGeo(); drawNMR(); render(); refreshThumbs(); spcSchedule();
     }
     function drawNMR() {
         const wrap = $('nmr-plot'), sig = NMRS.sig || [], tb = $('nmr-table'), SL = NMRS.showEnv, SM = NMRS.showMult, ADV2 = !!NMRS.adv;
@@ -7574,6 +7639,7 @@ function autoMapAtoms(m, R, P) {
     // letters on the 2D drawing, matching the signals (only while the spectrum is showing): each badge sits just off its atom,
     // in the widest open gap between its bonds, label H's, lone pairs and charge — near the atom but clear of bonds and symbols
     function nmrOverlay(u, thumb) {
+        if (spcActive()) return '';      // comparing spectra: the 2D drawing shows the comparison colours instead
         if (!thumb) NMRS.badges = [];
         if (!NMRS.sig || !NMRS.sig.length || (layoutMode === '3d' && !thumb) || (layoutMode === '2d' && !thumb) || !NMRS.showEnv) return '';
         // every badge sits the same distance from its proton environment: its edge a fixed gap from the atom
@@ -7629,12 +7695,12 @@ function autoMapAtoms(m, R, P) {
     //  each band keeps the atoms that move and how, so clicking a band plays that vibration on the model
     // =====================================================================
     const IRS = { sig: null, sel: -1, vib: null, hiAtoms: null, frag: null, src: 'group', meth: 'AIMNET2', calc: null, busy: false, worker: null, prog: '', calcMsg: '' };
-    function irPredict() {
+    function irPredict(only) {
         if (!M3) return [];
         const g = M3.g, P = M3.cur, nb = neighbors(g), A = (i) => g.atoms[i], el = (i) => A(i).el, mass = (i) => (ELEMENTS[el(i)] && ELEMENTS[el(i)].m) || 12;
         // only the structure being looked at (the one last clicked / selected in 2D)
         let ids = null;
-        try { const f2 = nmrFragment().filter(i => i < g.atoms.length); if (f2.length) { const seen = new Set([f2[0]]), st = [f2[0]];
+        try { const f2 = (only || nmrFragment()).filter(i => i < g.atoms.length); if (f2.length) { const seen = new Set([f2[0]]), st = [f2[0]];
             while (st.length) { const x = st.pop(); nb[x].forEach(y => { if (!seen.has(y.j)) { seen.add(y.j); st.push(y.j); } }); } ids = seen; } } catch (err) {}
         const inF = (i) => !ids || ids.has(i);
         const Hs = (i) => nb[i].filter(y => el(y.j) === 'H').map(y => y.j), heavy = (i) => nb[i].filter(y => el(y.j) !== 'H');
@@ -7838,47 +7904,51 @@ function autoMapAtoms(m, R, P) {
         irStop();
         const sub = $('ir-sub');
         if (!M3) { IRS.sig = []; sub.innerHTML = mol.atoms.length ? (raw3D ? 'Building the 3D model…' : 'The 3D model is paused (more than 2 structures), so there is no IR prediction') : 'Draw a structure in the 2D editor'; drawIR(); return; }
+        { const vk = nmrFragment().join() + '|' + structKey(M3.g); if (IRS.vkey !== vk) { IRS.view = null; IRS.vkey = vk; } }
+        irFocus3D();      // with several structures drawn, only the one whose spectrum is showing stays in the 3D window
         if (IRS.src === 'calc') { const C = IRS.calc; IRS.sig = C && C.key === structKey(M3.g) && C.meth === IRS.meth ? C.sig : []; }
         else try { IRS.sig = irPredict(); } catch (err) { console.error(err); IRS.sig = []; }
         irSub();
-        IRS.sel = -1; drawIR(); refreshThumbs();
+        IRS.sel = -1; drawIR(); refreshThumbs(); spcSchedule();
     }
     const IR_X = (nu, ml, pw) => { const f = nu >= 2000 ? (4000 - nu) / 2000 * 0.4 : 0.4 + (2000 - nu) / 1600 * 0.6; return ml + clamp(f, 0, 1) * pw; };      // 2× expanded below 2000 cm⁻¹, as on most IR charts
     const IR_NU = (x, ml, pw) => { const f = (x - ml) / pw; return f <= 0.4 ? 4000 - f / 0.4 * 2000 : 2000 - (f - 0.4) / 0.6 * 1600; };
     function drawIR() {
         const wrap = $('ir-plot'), sig = IRS.sig || []; if (!wrap) return;
         const W = Math.max(300, wrap.clientWidth), H = Math.max(160, wrap.clientHeight), ml = 54, mr = 18, top = 24, bot = 50, pw = W - ml - mr, ph = H - top - bot;
-        const X = (nu) => IR_X(nu, ml, pw), Y = (t) => top + (1 - t / 100) * ph;
+        const VW = IRS.view, X = VW ? (nu) => ml + (VW.hi - nu) / (VW.hi - VW.lo) * pw : (nu) => IR_X(nu, ml, pw), NU = VW ? (x) => VW.hi - (x - ml) / pw * (VW.hi - VW.lo) : (x) => IR_NU(x, ml, pw), Y = (t) => top + (1 - t / 100) * ph;
+        IRS.scale = { ml, pw, top, bot: top + ph + 8, hi: 4000, lo: 400, inv: NU }; IRS.xmap = { X, NU }; if ($('ir-full')) $('ir-full').hidden = !VW;
         const Aat = (nu, list) => list.reduce((s, b) => s + b.A * (b.w / 2) * (b.w / 2) / ((nu - b.nu) * (nu - b.nu) + (b.w / 2) * (b.w / 2)), 0);
         let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">`;
         // frame, grid, axes
         [0, 25, 50, 75, 100].forEach(t => { s += `<line x1="${ml}" y1="${Y(t)}" x2="${W - mr}" y2="${Y(t)}" stroke="#e2e8f0"/><text x="${ml - 7}" y="${Y(t) + 5}" font-size="${SPEC_FS.tick}" text-anchor="end" fill="#475569">${t}</text>`; });
         s += `<text x="15" y="${top + ph / 2}" font-size="${SPEC_FS.axis}" fill="#475569" text-anchor="middle" transform="rotate(-90 15 ${top + ph / 2})">% Transmittance</text>`;
         s += `<line x1="${ml}" y1="${top + ph}" x2="${W - mr}" y2="${top + ph}" stroke="#334155"/><line x1="${ml}" y1="${top}" x2="${ml}" y2="${top + ph}" stroke="#334155"/>`;
-        [4000, 3500, 3000, 2500, 2000, 1800, 1600, 1400, 1200, 1000, 800, 600, 400].forEach(nu => { const x = X(nu);
-            s += `<line x1="${x}" y1="${top + ph}" x2="${x}" y2="${top + ph + 5}" stroke="#334155"/><text x="${x}" y="${top + ph + 21}" font-size="${SPEC_FS.tick}" text-anchor="middle" fill="#334155">${nu}</text>`; });
-        s += `<text x="${W - mr}" y="${top + ph + 42}" font-size="${SPEC_FS.axis}" text-anchor="end" fill="#64748b">wavenumber (cm⁻¹)</text>`;
+        (VW ? spcTicks(VW.hi, VW.lo, Math.max(4, pw / 75)).out : [4000, 3500, 3000, 2500, 2000, 1800, 1600, 1400, 1200, 1000, 800, 600, 400]).forEach(nu => { const x = X(nu);
+            s += `<line x1="${x}" y1="${top + ph}" x2="${x}" y2="${top + ph + 5}" stroke="#334155"/><text x="${x}" y="${top + ph + 21}" font-size="${SPEC_FS.tick}" text-anchor="middle" fill="#334155">${Math.round(nu)}</text>`; });
+        s += `<text x="${W - mr}" y="${top + ph + 42}" font-size="${SPEC_FS.axis}" text-anchor="end" fill="#64748b">${VW ? 'zoomed · double-click for the full spectrum · ' : ''}wavenumber (cm⁻¹)</text>`;
+        s += `<defs><clipPath id="ir-clip"><rect x="${ml}" y="${top - 2}" width="${pw}" height="${ph + 4}"/></clipPath></defs>`;
         if (!sig.length) { s += `<text x="${ml + pw / 2}" y="${top + ph / 2}" font-size="15" text-anchor="middle" fill="#94a3b8">${!M3 ? 'No 3D model' : IRS.src === 'calc' ? (IRS.busy ? 'Calculating the normal modes…' : 'No calculated spectrum yet') : 'No IR bands predicted'}</text></svg>`; wrap.innerHTML = s; return; }
         // the selected band, shaded
         if (IRS.sel >= 0 && sig[IRS.sel]) { const b = sig[IRS.sel], lo = b.nu - Math.max(4 * b.w, 40), hi = b.nu + Math.max(4 * b.w, 40); let d = '';
             for (let k = 0; k <= 160; k++) { const nu = hi - (hi - lo) * k / 160; d += `${k ? 'L' : 'M'}${X(nu).toFixed(1)} ${Y(100 * Math.pow(10, -Aat(nu, [b]))).toFixed(1)}`; }
-            s += `<path d="${d} L${X(lo).toFixed(1)} ${Y(100)} L${X(hi).toFixed(1)} ${Y(100)} Z" fill="#dc2626" fill-opacity="0.16" stroke="#dc2626" stroke-width="1.5"/>`; }
+            s += `<path d="${d} L${X(lo).toFixed(1)} ${Y(100)} L${X(hi).toFixed(1)} ${Y(100)} Z" fill="#dc2626" fill-opacity="0.16" stroke="#dc2626" stroke-width="1.5" clip-path="url(#ir-clip)"/>`; }
         // the whole spectrum
-        let d = ''; for (let k = 0; k <= 1400; k++) { const x = ml + pw * k / 1400, nu = IR_NU(x, ml, pw); d += `${k ? 'L' : 'M'}${x.toFixed(1)} ${Y(100 * Math.pow(10, -Aat(nu, sig))).toFixed(2)}`; }
-        s += `<path d="${d}" fill="none" stroke="#1e293b" stroke-width="1.4" stroke-linejoin="round"/>`;
+        let d = ''; for (let k = 0; k <= 1400; k++) { const x = ml + pw * k / 1400, nu = NU(x); d += `${k ? 'L' : 'M'}${x.toFixed(1)} ${Y(100 * Math.pow(10, -Aat(nu, sig))).toFixed(2)}`; }
+        s += `<path d="${d}" fill="none" stroke="#1e293b" stroke-width="1.4" stroke-linejoin="round" clip-path="url(#ir-clip)"/>`;
         // wavenumber labels on the strongest bands (never crowding)
         const used = []; sig.map((b, k) => ({ b, k })).filter(o => o.b.A > 0.3).sort((p, q) => q.b.A - p.b.A).forEach(({ b, k }) => {
-            const x = X(b.nu), y = Y(100 * Math.pow(10, -Aat(b.nu, sig))); if (used.some(u => Math.abs(u - x) < 40)) return; used.push(x);
+            const x = X(b.nu), y = Y(100 * Math.pow(10, -Aat(b.nu, sig))); if (x < ml || x > ml + pw || used.some(u => Math.abs(u - x) < 40)) return; used.push(x);
             s += `<text x="${x}" y="${Math.min(top + ph - 2, y + 17)}" font-size="${SPEC_FS.peak}" font-weight="${k === IRS.sel ? 800 : 600}" text-anchor="middle" fill="${k === IRS.sel ? '#dc2626' : '#334155'}">${Math.round(b.nu)}</text>`; });
-        s += `</svg>`;
+        s += `<rect id="ir-band" x="0" y="${top}" width="0" height="${ph}" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb" stroke-opacity="0.5" visibility="hidden"/></svg>`;
         wrap.innerHTML = s;
         const b = sig[IRS.sel];
         $('ir-info').innerHTML = b ? `<b>${Math.round(b.nu)} cm⁻¹</b> · ${b.label} · ${b.A > 0.8 ? 'strong' : b.A > 0.35 ? 'medium' : 'weak'}${b.km != null ? ` (${b.km < 1 ? b.km.toFixed(1) : Math.round(b.km)} km/mol)` : ''}${b.w > 80 ? ', broad' : ''}${b.why ? ` <span class="ir-why">(${b.why} cm⁻¹)</span>` : ''} <span class="ir-hint">· click again to stop</span>` : `<span class="ir-hint">${$('viewer').classList.contains('no3d') ? 'Click a band to see which atoms vibrate (show the 3D model to watch it)' : 'Click a band to watch its vibration on the 3D model below'}</span>`;
     }
     function irPick(x) {      // the band under the pointer: a sharp band whose dip is within a few px wins; otherwise whichever adds most absorbance there
-        const wrap = $('ir-plot'), W = Math.max(300, wrap.clientWidth), ml = 54, pw = W - ml - 18, nu = IR_NU(x, ml, pw), sig = IRS.sig || [];
+        const wrap = $('ir-plot'), W = Math.max(300, wrap.clientWidth), ml = 54, pw = W - ml - 18, XM = IRS.xmap || { X: (v) => IR_X(v, ml, pw), NU: (v) => IR_NU(v, ml, pw) }, nu = XM.NU(x), sig = IRS.sig || [];
         let best = -1, bd = 13;
-        sig.forEach((b, k) => { if (b.w > 80) return; const dx = Math.abs(IR_X(b.nu, ml, pw) - x); if (dx < bd) { bd = dx; best = k; } });
+        sig.forEach((b, k) => { if (b.w > 80) return; const dx = Math.abs(XM.X(b.nu) - x); if (dx < bd) { bd = dx; best = k; } });
         if (best >= 0) return best;
         let bv = 0.02;
         sig.forEach((b, k) => { const hw = Math.max(b.w / 2, 14), v = b.A * hw * hw / ((nu - b.nu) * (nu - b.nu) + hw * hw); if (v > bv) { bv = v; best = k; } });
@@ -8165,6 +8235,7 @@ function autoMapAtoms(m, R, P) {
             return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${col}" stroke-width="${3 * u}" stroke-dasharray="${5 * u} ${4 * u}" opacity="0.8"/><path d="M${mx - px * h} ${my - py * h} q ${px * h * 0.5 + dx / L * 0.12} ${py * h * 0.5 + dy / L * 0.12} ${px * h} ${py * h} t ${px * h} ${py * h}" fill="none" stroke="${col}" stroke-width="${3.2 * u}" stroke-linecap="round"/>`; }).join('');
     }
     function msOverlay(u) {      // the selected fragment on the 2D drawing: ion atoms tinted, broken bonds cut in red
+        if (spcActive()) return '';      // comparing spectra: the 2D drawing shows the comparison colours instead
         if (NMRS.mode !== 'ms' || !MSS.sel || MSS.sel.kind !== 'F') return '';
         let s = ''; MSS.sel.set.forEach(i => { const a = mol.atoms[i]; if (a) s += `<circle cx="${a.x}" cy="${a.y}" r="0.34" fill="#2563eb" fill-opacity="0.16"/>`; });
         return s + msCutsSVG(MSS.sel.cuts, u);
@@ -8305,6 +8376,7 @@ function autoMapAtoms(m, R, P) {
         return out;
     }
     function updateC13() {
+        spcSchedule();
         if (NMRS.mode !== 'c13') return;
         const ids = nmrFragment(); if (!C13.ids || C13.ids.join() !== ids.join()) { C13.sel = -1; C13.hot = null; C13.view = null; } C13.ids = ids;
         try { C13.R = ids.some(i => mol.atoms[i].el === 'C') ? c13Predict(mol, ids) : null; } catch (err) { console.error(err); C13.R = null; }
@@ -8402,6 +8474,7 @@ function autoMapAtoms(m, R, P) {
         return { x: a.x + r * Math.cos(ang), y: a.y + r * Math.sin(ang) };
     }
     function c13Overlay(u, card) {      // carbon numbers (and the selected environment) on the 2D drawing / the structure card, styled like the ¹H letters
+        if (spcActive()) return '';      // comparing spectra: the 2D drawing shows the comparison colours instead
         if (NMRS.mode !== 'c13' || !C13.R) return '';
         let s = '', t = ''; const env = new Map(); C13.R.peaks.forEach((p, k) => p.atoms.forEach(i => env.set(i, k)));
         const act = C13.hot != null ? C13.hot : C13.sel, B = card ? (C13.bCard = []) : (C13.bEd = []);
@@ -8606,7 +8679,7 @@ function autoMapAtoms(m, R, P) {
         const ids = nmrFragment(); if (!MSS.ids || MSS.ids.join() !== ids.join()) { MSS.view = null; MSS.miSel = null; } MSS.ids = ids; MSS.sel = null;
         try { MSS.sig = ids.some(i => mol.atoms[i].el !== 'H') ? msPredict(ids) : null; } catch (err) { console.error(err); MSS.sig = null; }
         $('ms-sub').innerHTML = MSS.sig ? `${nmrFormula(ids)} · M = ${MSS.sig.M} · EI, 70 eV` : 'Draw a structure in the 2D editor';
-        drawMS(); render();
+        drawMS(); render(); spcSchedule();
     }
     // shared text sizes for the NMR, IR and MS windows (px)
     const SPEC_FS = { tick: 15, axis: 15, peak: 15, small: 13.5, head: 14 };
@@ -8811,7 +8884,7 @@ function autoMapAtoms(m, R, P) {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const open = document.querySelector('.spec-pop'); if (open) open.remove(); } });
     function refreshThumbs() {
         const only = layoutMode === '3d', v = $('viewer'), ns = $('nmr-struct'), is = $('ir-struct'); if (!ns || !is) return;
-        const ir2d = only && NMRS.mode === 'ir', was = v.classList.contains('ir2d');
+        const ir2d = only && NMRS.mode === 'ir' && !(typeof spcActive === 'function' && spcActive()), was = v.classList.contains('ir2d');
         v.classList.toggle('ir2d', ir2d); if (ir2d) { v.classList.remove('no3d'); }
         ns.hidden = !(only && NMRS.mode === 'nmr'); is.hidden = !ir2d;
         let ids = []; try { ids = nmrFragment(); } catch (err) {}
@@ -8843,7 +8916,7 @@ function autoMapAtoms(m, R, P) {
     const DRAGPOS = {};
     function specZoom(plot, St, bandId, box, redraw) {      // St.scale: { ml, pw, top, (ph), hi/lo | xh/xl/yh/yl }; sets St.view
         let zd = null; const band = () => document.getElementById(bandId);
-        const pX = (S, x) => { const a = box ? S.xh : S.hi, b = box ? S.xl : S.lo; return a - (x - S.ml) / S.pw * (a - b); }, pY = (S, y) => S.yl + (y - S.top) / S.ph * (S.yh - S.yl);
+        const pX = (S, x) => { if (S.inv) return S.inv(x); const a = box ? S.xh : S.hi, b = box ? S.xl : S.lo; return a - (x - S.ml) / S.pw * (a - b); }, pY = (S, y) => S.yl + (y - S.top) / S.ph * (S.yh - S.yl);
         plot.addEventListener('pointerdown', (e) => { const S = St.scale; if (!S || e.button !== 0) return; const r = plot.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
             if (x < S.ml - 4 || x > S.ml + S.pw + 4 || y < S.top - 4 || y > (box ? S.top + S.ph + 4 : S.bot)) return;
             zd = { x0: clamp(x, S.ml, S.ml + S.pw), y0: box ? clamp(y, S.top, S.top + S.ph) : 0 }; try { plot.setPointerCapture(e.pointerId); } catch (err) {} });
@@ -8936,7 +9009,7 @@ function autoMapAtoms(m, R, P) {
             '<div class="nmr-subrow"><div id="nmr-sub"></div><button class="nmr-tg nmr-full" id="nmr-full" hidden title="Back to the full spectrum (or double-click the spectrum)">FULL VIEW</button></div><div id="nmr-geo"></div></div><div id="nmr-plot"></div><div class="nmr-bottom"><div id="nmr-struct" class="spec-struct" hidden></div><div id="nmr-table"></div></div>';
         $('viewer').appendChild(pane);
         const irp = document.createElement('div'); irp.id = 'ir-pane'; irp.hidden = true;
-        irp.innerHTML = '<div class="nmr-head"><div class="nmr-hrow"><div class="nmr-title">IR <span>predicted spectrum</span><button class="spec-i" data-info="ir" title="How this spectrum is predicted (assumptions and limits)">i</button></div><div class="nmr-tools"><span class="nmr-tl">SPECTRUM</span><button class="nmr-tg on" id="ir-src-g" title="Bands placed at the typical positions of the functional groups found in the structure (instant)">GROUP FREQUENCIES</button><span class="nmr-tg ir-nm" id="ir-src-c" role="button" tabindex="0" title="Optimize the geometry, then calculate every vibration of the molecule (harmonic normal modes, scaled) and its IR intensity, at the level of theory chosen here">NORMAL-MODE CALCULATION ·<select id="ir-meth" class="ir-meth" title="Level of theory for the normal-mode calculation"><option value="AIMNET2">AIMNet2</option><option value="ANI2X">ANI-2x</option><option value="AM1">AM1</option><option value="PM3">PM3</option></select></span><button class="nmr-tg on" id="ir-3d" title="Show or hide the 3D model under the spectrum">3D MODEL: SHOWN</button></div></div><div id="ir-sub"></div><div id="ir-info"></div></div><div id="ir-plot"></div>';
+        irp.innerHTML = '<div class="nmr-head"><div class="nmr-hrow"><div class="nmr-title">IR <span>predicted spectrum</span><button class="spec-i" data-info="ir" title="How this spectrum is predicted (assumptions and limits)">i</button></div><div class="nmr-tools"><span class="nmr-tl">SPECTRUM</span><button class="nmr-tg on" id="ir-src-g" title="Bands placed at the typical positions of the functional groups found in the structure (instant)">GROUP FREQUENCIES</button><span class="nmr-tg ir-nm" id="ir-src-c" role="button" tabindex="0" title="Optimize the geometry, then calculate every vibration of the molecule (harmonic normal modes, scaled) and its IR intensity, at the level of theory chosen here">NORMAL-MODE CALCULATION ·<select id="ir-meth" class="ir-meth" title="Level of theory for the normal-mode calculation"><option value="AIMNET2">AIMNet2</option><option value="ANI2X">ANI-2x</option><option value="AM1">AM1</option><option value="PM3">PM3</option></select></span><button class="nmr-tg on" id="ir-3d" title="Show or hide the 3D model under the spectrum">3D MODEL: SHOWN</button></div></div><div class="nmr-subrow"><div id="ir-sub"></div><button class="nmr-tg nmr-full" id="ir-full" hidden title="Back to the full spectrum (or double-click the spectrum)">FULL VIEW</button></div><div id="ir-info"></div></div><div id="ir-plot"></div>';
         $('viewer').appendChild(irp);
         const irs = document.createElement('div'); irs.id = 'ir-struct'; irs.className = 'spec-struct'; irs.hidden = true; $('viewer').appendChild(irs);
         const ird = document.createElement('div'); ird.id = 'ir-div'; ird.title = 'Drag to resize the spectrum and the models below (double-click to reset)'; $('viewer').appendChild(ird);
@@ -9000,7 +9073,8 @@ function autoMapAtoms(m, R, P) {
         $('ir-meth').addEventListener('change', (e) => { IRS.meth = e.target.value; IRS.calcMsg = ''; IRS.src = 'calc'; const C = IRS.calc; if (C && M3 && C.key === structKey(M3.g) && C.meth === IRS.meth) updateIR(); else irCalcStart(); });
         irp.querySelector('#ir-3d').addEventListener('click', (e) => { const hide = !$('viewer').classList.contains('no3d'); $('viewer').classList.toggle('no3d', hide);
             e.currentTarget.classList.toggle('on', !hide); e.currentTarget.textContent = hide ? '3D MODEL: HIDDEN' : '3D MODEL: SHOWN'; requestAnimationFrame(drawIR); });
-        irPlot.addEventListener('click', (e) => { const r = irPlot.getBoundingClientRect(), k = irPick(e.clientX - r.left); irSelect(k === IRS.sel ? -1 : k); });
+        specZoom(irPlot, IRS, 'ir-band', false, drawIR); $('ir-full').addEventListener('click', () => { IRS.view = null; drawIR(); });
+        irPlot.addEventListener('click', (e) => { if (performance.now() - (IRS.zt || 0) < 350) return; const r = irPlot.getBoundingClientRect(), k = irPick(e.clientX - r.left); irSelect(k === IRS.sel ? -1 : k); });
         irPlot.addEventListener('mousemove', (e) => { const r = irPlot.getBoundingClientRect(); irPlot.style.cursor = irPick(e.clientX - r.left) >= 0 ? 'pointer' : 'default'; });
         if (window.ResizeObserver) new ResizeObserver(() => { if (NMRS.mode === 'ir') drawIR(); }).observe(irp);
         try { const t = JSON.parse(localStorage.getItem('zms-nmr-labels-v3') || '{}'); ['showEnv', 'showMult', 'adv'].forEach(k => { if (typeof t[k] === 'boolean') NMRS[k] = t[k]; }); } catch (err) {}
@@ -9038,12 +9112,311 @@ function autoMapAtoms(m, R, P) {
         let saved = '3d'; try { saved = localStorage.getItem('zms-right') || '3d'; } catch (err) {}
         if (saved === 'nmr' || saved === 'ir' || saved === 'ms') setTimeout(() => setRightMode(saved, true), 0);
     })();
+    // =====================================================================
+    //  COMPARE SPECTRA: the last three structures drawn, each in its own colour (in 2D too), their spectra side by side
+    //  ¹H NMR, ¹³C NMR and MS: one spectrum under another, each with its structure (and its table / molecular-ion region) on the right.
+    //  IR: all three curves on one chart, with the three 3D models stacked in a window to its right (click a band to see it vibrate).
+    // =====================================================================
+    var SPC_COLORS = ['#2563eb', '#ea580c', '#16a34a'];
+    var SPC = { on: false, kind: null, list: [], col: null, rows: [], ir: { view: null }, irSel: null, arranged: null, timer: 0 };
+    var spcKinds = ['nmr', 'c13', 'ms', 'ir'];
+    const spcActive = () => SPC.on && spcKinds.includes(NMRS.mode);
+    function spcStructures() {      // the three most recently built structures (newest atoms are at the end of the list), oldest first
+        const done = new Set(), out = [];
+        mol.atoms.forEach((a, i) => { if (done.has(i)) return; const f = [...fragmentOf(i)]; f.forEach(j => done.add(j));
+            if (f.some(j => mol.atoms[j].el !== 'H' && !mol.atoms[j].pseudo)) out.push({ ids: f.sort((p, q) => p - q), last: Math.max(...f) }); });
+        return out.sort((p, q) => q.last - p.last).slice(0, 3).sort((p, q) => p.last - q.last).map((s, k) => ({ ...s, color: SPC_COLORS[k], n: k + 1 }));
+    }
+    function spcSync() {      // show / hide the comparison window for the current right-hand mode
+        const act = spcActive(), pane = $('spc-pane'), v = $('viewer'); if (!pane) return;
+        if (!act) {
+            const wasIrc = v.classList.contains('irc'); pane.hidden = true; v.classList.remove('irc');
+            if (SPC.col) { SPC.col = null; render(); }
+            spcMiniDispose(); if (SPC.arranged) { SPC.arranged = null; FOCUS3D = null; unspread3D(); }
+            if (spcKinds.includes(NMRS.mode)) { const p = $(NMRS.mode + '-pane'); if (p) p.hidden = false; }
+            document.querySelectorAll('.spc-go').forEach(b => b.classList.remove('on'));
+            requestAnimationFrame(() => { resize3D(); refreshThumbs(); if (wasIrc && M3) { if (NMRS.mode === 'ir') drawIR(); setTimeout(() => { resize3D(); fitCamera(); }, 60); } });
+            return;
+        }
+        spcKinds.forEach(k => { const p = $(k + '-pane'); if (p) p.hidden = true; });
+        pane.hidden = false; v.classList.toggle('irc', NMRS.mode === 'ir'); if (NMRS.mode === 'ir') v.classList.remove('no3d', 'ir2d');
+        $('ir-struct').hidden = true;
+        document.querySelectorAll('.spc-go').forEach(b => b.classList.add('on'));
+        spcUpdate();
+        requestAnimationFrame(() => { resize3D(); if (NMRS.mode === 'ir') spcArrange3D(); });
+    }
+    function spcSchedule() { if (!spcActive()) return; clearTimeout(SPC.timer); SPC.timer = setTimeout(spcUpdate, 160); }
+    function spcUpdate() {
+        if (!spcActive()) return;
+        const L = spcStructures(), kind = NMRS.mode, key = kind + (kind === 'ir' ? ':' + layoutMode : '') + '|' + L.map(s => s.ids.join(',')).join('|') + '|' + mol.atoms.length;
+        SPC.list = L;
+        SPC.col = new Map(); L.forEach(s => s.ids.forEach(i => SPC.col.set(mol.atoms[i], s.color)));
+        const fresh = key !== SPC.key; SPC.key = key; SPC.kind = kind;
+        $('spc-kind').innerHTML = { nmr: '<sup>1</sup>H NMR', c13: '<sup>13</sup>C NMR', ms: 'MASS SPECTRA', ir: 'IR SPECTRA' }[kind];
+        $('spc-legend').innerHTML = L.map(s => `<span class="spc-chip" style="--c:${s.color}"><i></i><span>${s.n} · ${nmrFormula(s.ids)}</span></span>`).join('');
+        $('spc-sub').innerHTML = !L.length ? 'Draw up to three structures in the 2D editor' :
+            (L.length < 2 ? 'Draw another structure (or two): the last three drawn are compared' : 'Colours = the last three structures drawn (see the 2D editor)')
+            + ' · drag to zoom, double-click for the full view';
+        // predictions
+        L.forEach(s => {
+            try { if (kind === 'nmr') s.R = nmrPredict(mol, s.ids, NMRS.adv, null);
+                else if (kind === 'c13') s.R = c13Predict(mol, s.ids);
+                else if (kind === 'ms') s.R = msPredict(s.ids);
+                else if (kind === 'ir') s.R = M3 ? irPredict(s.ids) : null; } catch (err) { console.error(err); s.R = null; } });
+        const body = $('spc-body');
+        if (fresh || body.dataset.kind !== kind) { body.dataset.kind = kind; SPC.rows = []; SPC.ir.view = null; SPC.irSel = null; irStop(); spcBuild(); }
+        SPC.list.forEach((s, k) => { if (SPC.rows[k]) SPC.rows[k].s = s; });
+        spcDrawAll(); render();
+        if (kind === 'ir') requestAnimationFrame(spcArrange3D);
+    }
+    function spcBuild() {
+        const body = $('spc-body'), kind = NMRS.mode, L = SPC.list;
+        SPC.minis = [];
+        if (kind === 'ir') {      // one row per structure: its IR spectrum, (3D-only layout: its 2D structure,) and its own 3D model
+            const only = layoutMode === '3d';
+            body.innerHTML = L.map((s, k) => `<div class="spc-row spc-irrow" style="--c:${s.color}" data-k="${k}"><div class="spc-tag">${s.n}</div><div class="spc-irmain"><div class="spc-plot" id="spc-plot-${k}"></div><div class="spc-irinfo" id="spc-info-${k}"></div></div>${only ? `<div class="spc-card spc-ircard" id="spc-card-${k}"></div>` : ''}<div class="spc-3d" id="spc-3dbox-${k}"><span class="spc-3dh">drag to turn · double-click to reset</span></div></div>`).join('')
+                || '<div class="nmr-empty">No structure yet</div>';
+            SPC.rows = L.map((s, k) => { const row = { s, view: null, k }; const plot = $('spc-plot-' + k);
+                specZoom(plot, row, 'spc-band-' + k, false, () => spcDrawIRRow(k));
+                plot.addEventListener('click', (e) => { if (performance.now() - (row.zt || 0) < 350) return; const r = plot.getBoundingClientRect(), b = spcIrPick(k, e.clientX - r.left);
+                    const same = b != null && SPC.irSel && SPC.irSel.k === k && SPC.irSel.b === b; SPC.irSel = b == null || same ? null : { k, b }; spcIrPlay(); spcDrawAll(); });
+                plot.addEventListener('mousemove', (e) => { const r = plot.getBoundingClientRect(); plot.style.cursor = spcIrPick(k, e.clientX - r.left) != null ? 'pointer' : 'crosshair'; });
+                return row; });
+            SPC.pool = SPC.pool || [];
+            SPC.minis = L.map((s, k) => { let v = SPC.pool[k]; if (!v) { const cv = document.createElement('canvas'); cv.className = 'spc-mini'; v = SPC.pool[k] = spcMiniMake(cv, k); } if (!v) return null;
+                v.q = null; v.zoom = 1; $('spc-3dbox-' + k).prepend(v.cv); return v; });
+            spcMiniLoop();
+            return;
+        }
+        body.innerHTML = L.map((s, k) => `<div class="spc-row" style="--c:${s.color}" data-k="${k}"><div class="spc-tag">${s.n}</div><div class="spc-plot" id="spc-plot-${k}"></div><div class="spc-side"><div class="spc-card" id="spc-card-${k}"></div><div class="spc-extra" id="spc-extra-${k}"></div></div></div>`).join('')
+            || '<div class="nmr-empty">No structure yet</div>';
+        SPC.rows = L.map((s, k) => { const row = { s, view: null }; specZoom($('spc-plot-' + k), row, 'spc-band-' + k, false, () => spcDrawRow(k)); return row; });
+    }
+    function spcDrawAll() {
+        const kind = NMRS.mode;
+        if (kind === 'ir') { SPC.rows.forEach((r, k) => spcDrawIRRow(k)); return; }
+        SPC.rows.forEach((r, k) => spcDrawRow(k));
+    }
+    function spcTicks(hi, lo, target) { const span = hi - lo, st = [100, 50, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01].find((v, k, a) => span / (a[k + 1] || 1e-9) > target || !a[k + 1]) || 1, out = [];
+        for (let n = Math.ceil(lo / st - 1e-9); n * st <= hi + 1e-9; n++) out.push(+(n * st).toFixed(4)); return { out, dec: st >= 1 ? 0 : st >= 0.1 ? 1 : 2 }; };
+    function spcAxis(X, hi, lo, ml, pw, ay, label, zoomed) {
+        const { out, dec } = spcTicks(hi, lo, Math.max(4, pw / 70));
+        let s = `<line x1="${ml}" y1="${ay}" x2="${ml + pw}" y2="${ay}" stroke="#334155"/>`;
+        out.forEach(t => { const x = X(t); s += `<line x1="${x}" y1="${ay}" x2="${x}" y2="${ay + 4}" stroke="#334155"/><text x="${x}" y="${ay + 16}" font-size="12" text-anchor="middle" fill="#334155">${t.toFixed(dec)}</text>`; });
+        s += `<text x="${ml + pw}" y="${ay + 31}" font-size="12" text-anchor="end" fill="#64748b">${zoomed ? 'zoomed · double-click for the full view · ' : ''}${label}</text>`;
+        return s;
+    }
+    function spcDrawRow(k) {
+        const row = SPC.rows[k]; if (!row) return; const s = row.s, R = s.R, kind = NMRS.mode, plot = $('spc-plot-' + k); if (!plot) return;
+        const W = Math.max(240, plot.clientWidth), H = Math.max(110, plot.clientHeight), ml = 14, mr = 14, top = 18, bot = 36, pw = W - ml - mr, base = H - bot, ph = base - top;
+        const col = s.color; let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif"><defs><clipPath id="spc-clip-${k}"><rect x="${ml}" y="0" width="${pw}" height="${base + 1}"/></clipPath></defs>`;
+        const empty = (t) => { plot.innerHTML = `<div class="nmr-empty">${t}</div>`; row.scale = null; };
+        let side = '', cardOverlay = null;
+        if (kind === 'nmr') {
+            const sig = R || []; if (!sig.length) { empty('No hydrogens in this structure'); }
+            else {
+                const fullHi = Math.max(10, Math.ceil(Math.max(...sig.map(q => q.d)) + 0.8)), fullLo = -0.5, hi = row.view ? row.view.hi : fullHi, lo = row.view ? row.view.lo : fullLo, MHz = 400;
+                const X = (d) => ml + (hi - d) / (hi - lo) * pw; row.scale = { ml, pw, hi, lo, top, bot: base + 6 };
+                const prof = sig.map(q => { const Ls = (NMRS.adv && q.sim) || nmrLines(q), w = q.exch ? 12 : 1.0, span = Math.max(...Ls.map(l => Math.abs(l.o))) + 6 * w, pts = [];
+                    const N = 300; for (let n = 0; n <= N; n++) { const o = -span + 2 * span * n / N; let y = 0; Ls.forEach(l => { y += l.I * (w / 2) * (w / 2) / ((o - l.o) * (o - l.o) + (w / 2) * (w / 2)); }); pts.push([o, y]); }
+                    const y0 = Math.min(pts[0][1], pts[N][1]); pts.forEach(p => { p[1] = Math.max(0, p[1] - y0); }); return { pts, span }; });
+                const vis = (d) => d <= hi && d >= lo;
+                const gmax = Math.max(1e-9, ...prof.map((P, n) => Math.max(0, ...P.pts.filter(p => vis(sig[n].d + p[0] / MHz)).map(p => p[1]))));
+                svg += `<line x1="${ml}" y1="${base}" x2="${ml + pw}" y2="${base}" stroke="#94a3b8" stroke-width="1"/>`;
+                if (vis(0)) svg += `<text x="${X(0)}" y="${base - 4}" font-size="11" text-anchor="middle" fill="#94a3b8">TMS</text>`;
+                const lab = [];
+                sig.forEach((q, n) => { const P = prof[n];
+                    svg += `<path d="${P.pts.map((p, m) => `${m ? 'L' : 'M'}${X(q.d + p[0] / MHz).toFixed(2)} ${(base - p[1] / gmax * ph * 0.9).toFixed(2)}`).join(' ')}" fill="none" stroke="${col}" stroke-width="1.3" stroke-linejoin="round" clip-path="url(#spc-clip-${k})"/>`;
+                    if (vis(q.d)) { const pk = Math.max(0, ...P.pts.map(p => p[1])) / gmax * ph * 0.9; lab.push({ x: X(q.d), y: Math.max(top - 4, base - Math.min(pk, ph * 0.9) - 6), t: q.letter }); } });
+                lab.sort((a, b) => a.x - b.x); let px = -1e9; lab.forEach(l => { l.x = Math.max(l.x, px + 13); px = l.x; svg += `<text x="${l.x}" y="${l.y}" font-size="12" font-weight="800" text-anchor="middle" fill="${col}">${l.t}</text>`; });
+                svg += spcAxis(X, hi, lo, ml, pw, base + 2, 'δ (ppm)', !!row.view);
+                side = `<table class="spc-tab"><thead><tr><th></th><th>δ</th><th>mult.</th><th>∫</th></tr></thead><tbody>${sig.map(q => `<tr><td><b style="color:${col}">${q.letter}</b></td><td>${q.d.toFixed(2)}</td><td><i>${q.mult}</i>${q.J && q.J.length ? ` <span class="spc-j">${q.J.map(j => j.toFixed(1)).join(', ')}</span>` : ''}</td><td>${q.n}H</td></tr>`).join('')}</tbody></table>`;
+                cardOverlay = (u) => { let o = ''; const used = {}; sig.forEach(q => (q.heavy || []).forEach(i => { if (!mol.atoms[i]) return; const uu = u * 0.72, b = badgeSpot(i, uu, used[i]); (used[i] = used[i] || []).push(b.ang); o += badgeSVG(b, col, q.letter, false, uu); })); return o; };
+            }
+        } else if (kind === 'c13') {
+            const P = (R && R.peaks) || []; if (!P.length) empty('No carbons in this structure');
+            else {
+                const fullHi = Math.max(220, Math.ceil(Math.max(...P.map(p => p.d)) / 10) * 10 + 10), fullLo = Math.min(0, Math.floor(Math.min(...P.map(p => p.d)) / 10) * 10 - 5);
+                const hi = row.view ? row.view.hi : fullHi, lo = row.view ? row.view.lo : fullLo, X = (d) => ml + (hi - d) / (hi - lo) * pw; row.scale = { ml, pw, hi, lo, top, bot: base + 6 };
+                const mx = Math.max(...P.map(p => p.n)), vis = (d) => d <= hi && d >= lo;
+                svg += `<line x1="${ml}" y1="${base}" x2="${ml + pw}" y2="${base}" stroke="#94a3b8"/>`;
+                if (vis(77.16)) [-0.43, 0, 0.43].forEach(o => { const x = X(77.16 + o); svg += `<line x1="${x}" y1="${base}" x2="${x}" y2="${base - ph * 0.12}" stroke="#cbd5e1" stroke-width="1.2"/>`; });
+                const lab = [];
+                P.forEach(p => { if (!vis(p.d)) return; const x = X(p.d), h = ph * 0.85 * (0.55 + 0.45 * p.n / mx); svg += `<line x1="${x}" y1="${base}" x2="${x}" y2="${base - h}" stroke="${col}" stroke-width="2"/>`; lab.push({ x, y: base - h - 5, t: p.d.toFixed(1) }); });
+                lab.sort((a, b) => a.x - b.x); let px = -1e9; lab.forEach(l => { if (l.x - px < 30) { l.y -= 12; } else px = l.x; svg += `<text x="${l.x}" y="${Math.max(10, l.y)}" font-size="11" font-weight="700" text-anchor="middle" fill="${col}">${l.t}</text>`; });
+                svg += spcAxis(X, hi, lo, ml, pw, base + 2, 'δ (ppm)', !!row.view);
+                side = `<table class="spc-tab"><thead><tr><th>δ</th><th>carbon</th><th>type</th></tr></thead><tbody>${P.map(p => `<tr><td>${p.d.toFixed(1)}</td><td><b style="color:${col}">C${p.nums.join(', C')}</b></td><td>${p.type}</td></tr>`).join('')}</tbody></table>`;
+                cardOverlay = (u) => { let o = ''; const uu = u * 0.72; R.num.forEach((n, i) => { if (mol.atoms[i]) o += badgeSVG(badgeSpot(i, uu), col, n, false, uu); }); return o; };
+            }
+        } else if (kind === 'ms') {
+            if (!R || !R.peaks.length) empty('No spectrum');
+            else {
+                const M = R.M, fullHi = Math.max(40, Math.ceil((M + 8) / 10) * 10), fullLo = Math.max(0, Math.floor((Math.min(...R.peaks.map(p => p.mz)) - 4) / 10) * 10);
+                const hi = row.view ? row.view.hi : fullHi, lo = row.view ? row.view.lo : fullLo, X = (mz) => ml + 22 + (mz - lo) / (hi - lo) * (pw - 22);
+                row.scale = { ml: ml + 22, pw: pw - 22, hi, lo, top, bot: base + 6, inv: (x) => lo + (x - ml - 22) / (pw - 22) * (hi - lo) };
+                svg += `<line x1="${ml + 22}" y1="${base}" x2="${ml + pw}" y2="${base}" stroke="#334155"/><line x1="${ml + 22}" y1="${top}" x2="${ml + 22}" y2="${base}" stroke="#334155"/>`;
+                [0, 50, 100].forEach(t => { const y = base - t / 100 * ph; svg += `<text x="${ml + 18}" y="${y + 4}" font-size="11" text-anchor="end" fill="#64748b">${t}</text>`; });
+                const vis = R.peaks.filter(p => p.mz >= lo && p.mz <= hi), lab = [];
+                vis.forEach(p => { const x = X(p.mz), h = p.rel / 100 * ph; svg += `<line x1="${x}" y1="${base}" x2="${x}" y2="${base - Math.max(0.6, h)}" stroke="${col}" stroke-width="${p.mz === M ? 2.4 : 1.6}"/>`; });
+                vis.filter(p => p.rel >= 8 || p.mz === M).sort((a, b) => b.rel - a.rel).forEach(p => { const x = X(p.mz); if (lab.some(l => Math.abs(l - x) < 24)) return; lab.push(x);
+                    svg += `<text x="${x}" y="${Math.max(11, base - p.rel / 100 * ph - 4)}" font-size="11" font-weight="${p.mz === M ? 800 : 600}" text-anchor="middle" fill="${p.mz === M ? col : '#334155'}">${p.mz}${p.mz === M ? ' M⁺•' : ''}</text>`; });
+                const { out } = spcTicks(hi, lo, Math.max(4, pw / 70));
+                out.forEach(t => { const x = X(t); svg += `<line x1="${x}" y1="${base}" x2="${x}" y2="${base + 4}" stroke="#334155"/><text x="${x}" y="${base + 16}" font-size="12" text-anchor="middle" fill="#334155">${t}</text>`; });
+                svg += `<text x="${ml + pw}" y="${base + 31}" font-size="12" text-anchor="end" fill="#64748b">${row.view ? 'zoomed · double-click for the full view · ' : ''}m/z</text>`;
+                // the molecular-ion region (isotope peaks M, M+1, M+2 …)
+                const by = msIsotopologues(R.fM), p0 = (by[0] || []).reduce((a, c) => a + c.p, 0) || 1, cl = [];
+                for (let n = 0; n <= 6; n++) { const pr = (by[n] || []).reduce((a, c) => a + c.p, 0) / p0 * 100; if (pr >= 0.1 || n === 0) cl.push({ n, pr }); }
+                const mw = 160, mh = 104, mb = mh - 20, mxp = Math.max(...cl.map(c => c.pr));
+                side = `<div class="spc-mi"><div class="spc-mih">MOLECULAR ION REGION</div><svg width="${mw}" height="${mh}" viewBox="0 0 ${mw} ${mh}" font-family="system-ui, sans-serif"><line x1="6" y1="${mb}" x2="${mw - 6}" y2="${mb}" stroke="#334155"/>`
+                    + cl.map((c, n) => { const x = 6 + (n + 0.5) * (mw - 12) / cl.length, h = Math.max(1, c.pr / mxp * (mb - 30)); return `<rect x="${x - 4}" y="${mb - h}" width="8" height="${h}" fill="${col}" opacity="${c.n ? 0.75 : 1}"/><text x="${x}" y="${mb + 13}" font-size="10.5" text-anchor="middle" fill="#334155">${M + c.n}</text><text x="${x}" y="${mb - h - 4}" font-size="10" text-anchor="middle" fill="#475569">${c.n ? (c.pr < 10 ? c.pr.toFixed(1) : Math.round(c.pr)) + '%' : '100'}</text>`; }).join('')
+                    + `</svg><div class="spc-mif">M = ${M} · base peak m/z ${R.base ? R.base.mz : '—'}</div></div>`;
+            }
+        }
+        if (row.scale) { svg += `<rect id="spc-band-${k}" x="0" y="${top - 6}" width="0" height="${base - top + 8}" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb" stroke-opacity="0.5" visibility="hidden"/></svg>`; plot.innerHTML = svg; }
+        const card = $('spc-card-' + k), ex = $('spc-extra-' + k);
+        if (card) card.innerHTML = structThumb(s.ids, Math.max(120, card.clientWidth), Math.max(90, card.clientHeight), cardOverlay);
+        if (ex) ex.innerHTML = side;
+    }
+    // ---- IR rows
+    function spcDrawIRRow(k) {
+        const row = SPC.rows[k]; if (!row) return; const m = row.s, sig = m.R || [], plot = $('spc-plot-' + k); if (!plot) return;
+        const W = Math.max(260, plot.clientWidth), H = Math.max(110, plot.clientHeight), ml = 40, mr = 10, top = 8, bot = 34, pw = W - ml - mr, ph = H - top - bot, col = m.color;
+        const V0 = row.view, X = V0 ? (nu) => ml + (V0.hi - nu) / (V0.hi - V0.lo) * pw : (nu) => IR_X(nu, ml, pw), NU = V0 ? (x) => V0.hi - (x - ml) / pw * (V0.hi - V0.lo) : (x) => IR_NU(x, ml, pw), Y = (t) => top + (1 - t / 100) * ph;
+        row.scale = { ml, pw, top, bot: top + ph + 8, hi: 4000, lo: 400, inv: NU }; row.X = X; row.NU = NU;
+        const Aat = (nu, list) => list.reduce((a, b) => a + b.A * (b.w / 2) * (b.w / 2) / ((nu - b.nu) * (nu - b.nu) + (b.w / 2) * (b.w / 2)), 0);
+        let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif"><defs><clipPath id="spc-irclip-${k}"><rect x="${ml}" y="${top - 2}" width="${pw}" height="${ph + 4}"/></clipPath></defs>`;
+        [0, 50, 100].forEach(t => { s += `<line x1="${ml}" y1="${Y(t)}" x2="${ml + pw}" y2="${Y(t)}" stroke="#eef2f7"/><text x="${ml - 5}" y="${Y(t) + 4}" font-size="11" text-anchor="end" fill="#64748b">${t}</text>`; });
+        s += `<text x="10" y="${top + ph / 2}" font-size="10.5" fill="#64748b" text-anchor="middle" transform="rotate(-90 10 ${top + ph / 2})">%T</text>`;
+        s += `<line x1="${ml}" y1="${top + ph}" x2="${ml + pw}" y2="${top + ph}" stroke="#334155"/><line x1="${ml}" y1="${top}" x2="${ml}" y2="${top + ph}" stroke="#334155"/>`;
+        const ticks = V0 ? spcTicks(V0.hi, V0.lo, Math.max(4, pw / 70)).out : [4000, 3000, 2000, 1600, 1200, 800, 400].filter(nu => pw > 420 || nu !== 1600);
+        ticks.forEach(nu => { const x = X(nu); s += `<line x1="${x}" y1="${top + ph}" x2="${x}" y2="${top + ph + 4}" stroke="#334155"/><text x="${x}" y="${top + ph + 16}" font-size="11.5" text-anchor="middle" fill="#334155">${Math.round(nu)}</text>`; });
+        s += `<text x="${ml + pw}" y="${top + ph + 30}" font-size="11.5" text-anchor="end" fill="#64748b">${V0 ? 'zoomed · double-click for the full view · ' : ''}cm⁻¹</text>`;
+        if (!M3) s += `<text x="${ml + pw / 2}" y="${top + ph / 2}" font-size="13" text-anchor="middle" fill="#94a3b8">Building the 3D models…</text>`;
+        const sel = SPC.irSel && SPC.irSel.k === k ? sig[SPC.irSel.b] : null;
+        if (sel) { const lo = sel.nu - Math.max(4 * sel.w, 40), hi = sel.nu + Math.max(4 * sel.w, 40); let d = '';
+            for (let n = 0; n <= 120; n++) { const nu = hi - (hi - lo) * n / 120; d += `${n ? 'L' : 'M'}${X(nu).toFixed(1)} ${Y(100 * Math.pow(10, -Aat(nu, [sel]))).toFixed(1)}`; }
+            s += `<path d="${d} L${X(lo).toFixed(1)} ${Y(100)} L${X(hi).toFixed(1)} ${Y(100)} Z" fill="${col}" fill-opacity="0.2" stroke="none" clip-path="url(#spc-irclip-${k})"/>`; }
+        if (sig.length) { let d = ''; for (let n = 0; n <= 1000; n++) { const x = ml + pw * n / 1000; d += `${n ? 'L' : 'M'}${x.toFixed(1)} ${Y(100 * Math.pow(10, -Aat(NU(x), sig))).toFixed(2)}`; }
+            s += `<path d="${d}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round" clip-path="url(#spc-irclip-${k})"/>`; }
+        const used = []; sig.map((b, n) => ({ b, n })).filter(o => o.b.A > 0.35).sort((p, q) => q.b.A - p.b.A).forEach(({ b, n }) => {
+            const x = X(b.nu); if (x < ml || x > ml + pw || used.some(u => Math.abs(u - x) < 32)) return; used.push(x); const y = Y(100 * Math.pow(10, -Aat(b.nu, sig)));
+            s += `<text x="${x}" y="${Math.min(top + ph - 2, y + 13)}" font-size="11" font-weight="${sel === b ? 800 : 600}" text-anchor="middle" fill="${sel === b ? col : '#334155'}">${Math.round(b.nu)}</text>`; });
+        s += `<rect id="spc-band-${k}" x="0" y="${top}" width="0" height="${ph}" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb" stroke-opacity="0.5" visibility="hidden"/></svg>`;
+        plot.innerHTML = s;
+        const info = $('spc-info-' + k);
+        if (info) info.innerHTML = sel ? `<b style="color:${col}">${Math.round(sel.nu)} cm⁻¹</b> · ${sel.label} · ${sel.A > 0.8 ? 'strong' : sel.A > 0.35 ? 'medium' : 'weak'}${sel.w > 80 ? ', broad' : ''} <span class="ir-hint">(vibrating on the right)</span>`
+            : `<span class="ir-hint">${sig.length ? 'Click a band to watch that vibration in this structure’s 3D model' : M3 ? 'No IR bands predicted' : ''}</span>`;
+        const card = $('spc-card-' + k); if (card) card.innerHTML = structThumb(m.ids, Math.max(100, card.clientWidth), Math.max(80, card.clientHeight), irOverlay);
+    }
+    function spcIrPick(k, x) {
+        const row = SPC.rows[k]; if (!row || !row.X) return null; const sig = row.s.R || []; let best = null, bd = 12;
+        sig.forEach((b, n) => { const dx = Math.abs(row.X(b.nu) - x); if (dx < bd && b.w <= 80) { bd = dx; best = n; } });
+        if (best != null) return best;
+        const nu = row.NU(x); let bv = 0.05;
+        sig.forEach((b, n) => { const hw = Math.max(b.w / 2, 14), v = b.A * hw * hw / ((nu - b.nu) * (nu - b.nu) + hw * hw); if (v > bv) { bv = v; best = n; } });
+        return best;
+    }
+    function spcIrPlay() {      // the chosen band swings its atoms in that structure's 3D window
+        irStop(); const sel = SPC.irSel && SPC.list[SPC.irSel.k] && (SPC.list[SPC.irSel.k].R || [])[SPC.irSel.b];
+        if (sel && M3) { IRS.vib = { rest: M3.cur.map(v => v.clone()), disp: sel.disp, t0: performance.now() };
+            IRS.hiAtoms = new Set([...sel.disp.keys()].map(i => { const a = M3.g.atoms[i]; return a && a.el === 'H' && a.parent != null ? a.parent : i; }).filter(i => i < mol.atoms.length)); }
+        render(); SPC.rows.forEach((r, k) => { const c = $('spc-card-' + k); if (c && r.s) c.innerHTML = structThumb(r.s.ids, Math.max(100, c.clientWidth), Math.max(80, c.clientHeight), irOverlay); });
+    }
+    // ---- 3D: every structure of the drawing is moved far from the others, so each window (or the single IR view) frames just one
+    var FOCUS3D = null;      // single-IR view: the atoms of the structure whose spectrum is showing (the camera frames only these)
+    function groups3D() {      // the 3D model's connected structures, as lists of atom indices, keyed by a 2D atom of each
+        const g = M3.g, nb = neighbors(g), seen = new Uint8Array(g.atoms.length), out = [];
+        for (let i = 0; i < g.atoms.length; i++) { if (seen[i]) continue; const G = [i]; seen[i] = 1; for (let q = 0; q < G.length; q++) nb[G[q]].forEach(y => { if (!seen[y.j]) { seen[y.j] = 1; G.push(y.j); } }); out.push(G); }
+        return out;
+    }
+    function spread3D(order, key) {      // order: the groups to place, first at the origin, the next 5000 Å along x (far beyond the main camera's reach), and so on
+        unspread3D();
+        const all = groups3D(), used = new Set(order.flat()), rest = all.filter(G => !used.has(G[0])), list = order.concat(rest), undo = [];
+        list.forEach((G, n) => { const c = V(0, 0, 0); G.forEach(i => c.add(M3.base[i])); c.multiplyScalar(1 / G.length); const d = V(n * 5000 - c.x, -c.y, -c.z); G.forEach(i => { M3.base[i].add(d); M3.cur[i].add(d); }); undo.push({ G, d }); });
+        M3.spread = { key, undo }; return list;
+    }
+    function unspread3D() {      // every structure back where the 3D builder put it
+        if (!M3 || !M3.spread) return false; if (IRS.vib) irStop();
+        M3.spread.undo.forEach(({ G, d }) => G.forEach(i => { if (M3.base[i]) { M3.base[i].sub(d); M3.cur[i].sub(d); } })); M3.spread = null; place3D(); return true;
+    }
+    const groupOf = (ids) => { const g = M3.g, seed = ids.find(i => i < g.atoms.length); if (seed == null) return null; return groups3D().find(G => G.includes(seed)) || null; };
+    function spcArrange3D() {
+        if (!spcActive() || NMRS.mode !== 'ir' || !M3) return;
+        const key = 'spc|' + structKey(M3.g) + '|' + SPC.key; if (M3.spread && M3.spread.key === key) return;
+        irStop(); FOCUS3D = null;
+        const order = SPC.list.map(s => groupOf(s.ids)).filter(Boolean); spread3D(order, key);
+        SPC.groups = order.map(G => G.slice()); SPC.arranged = key; place3D();
+        (SPC.minis || []).forEach(v => { v.q = null; });
+    }
+    function irFocus3D() {      // single IR spectrum: only the structure being looked at shows in the 3D window under it
+        if (NMRS.mode !== 'ir' || spcActive() || !M3) return;
+        const G = groupOf(nmrFragment()); if (!G) return;
+        const nG = groups3D().length, key = 'ir|' + structKey(M3.g) + '|' + G[0];
+        if (nG < 2) { if (FOCUS3D) { FOCUS3D = null; if (unspread3D()) fitCamera(); } return; }
+        if (FOCUS3D && M3.spread && M3.spread.key === key) return;
+        irStop(); spread3D([G], key); FOCUS3D = new Set(G); place3D(); VOFF.x = VOFF.y = 0; fitCamera();
+    }
+    function irUnfocus3D() { const had = !!FOCUS3D; FOCUS3D = null; SPC.arranged = null; if (unspread3D() || had) { VOFF.x = VOFF.y = 0; fitCamera(); } }
+    // ---- the small 3D windows (each renders the shared scene with its own camera, like the orbital preview)
+    function spcMiniMake(cv, k) {
+        if (!cv) return null; const v = { k, cv, r: null, cam: new THREE.PerspectiveCamera(camera.fov || 35, 1, 0.05, 4000), q: null, zoom: 1, drag: null, res: new THREE.Vector2(), id: null, peel: null };
+        try { v.r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true }); if (idOK) { v.id = mkRT(); v.peel = mkRT(); } } catch (err) { console.error(err); return null; }
+        cv.style.background = getComputedStyle(vwrap).backgroundImage !== 'none' ? getComputedStyle(vwrap).backgroundImage : getComputedStyle(vwrap).backgroundColor;
+        cv.addEventListener('pointerdown', (e) => { v.drag = { x: e.clientX, y: e.clientY }; cv.setPointerCapture(e.pointerId); });
+        cv.addEventListener('pointermove', (e) => { if (!v.drag || !v.q) return; const dx = e.clientX - v.drag.x, dy = e.clientY - v.drag.y; v.drag = { x: e.clientX, y: e.clientY };
+            v.q.premultiply(new THREE.Quaternion().setFromAxisAngle(V(0, 1, 0), dx * 0.01)).premultiply(new THREE.Quaternion().setFromAxisAngle(V(1, 0, 0), dy * 0.01)); });
+        cv.addEventListener('pointerup', () => { v.drag = null; }); cv.addEventListener('pointercancel', () => { v.drag = null; });
+        cv.addEventListener('dblclick', () => { v.q = null; v.zoom = 1; });
+        cv.addEventListener('wheel', (e) => { e.preventDefault(); v.zoom = clamp(v.zoom * (e.deltaY > 0 ? 0.9 : 1.1), 0.5, 2.5); }, { passive: false });
+        return v;
+    }
+    function spcMiniDispose() { (SPC.pool || []).forEach(v => { if (v && v.r) { try { v.r.dispose(); v.r.forceContextLoss(); } catch (e) {} } if (v && v.id) { v.id.dispose(); v.peel.dispose(); } }); SPC.pool = []; SPC.minis = []; cancelAnimationFrame(SPC.raf); SPC.raf = 0; }
+    function spcMiniLoop() { if (SPC.raf) return; const loop = () => { if (!spcActive() || NMRS.mode !== 'ir' || !(SPC.minis || []).length) { SPC.raf = 0; return; } SPC.raf = requestAnimationFrame(loop); SPC.minis.forEach(v => { if (v) spcMiniFrame(v); }); }; SPC.raf = requestAnimationFrame(loop); }
+    function spcMiniFrame(v) {
+        if (!v || !v.r || !M3 || !document.body.contains(v.cv)) return; const G = (SPC.groups || [])[v.k]; if (!G) return;
+        const cv = v.cv, R = v.r, w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+        if (cv.width !== Math.round(w * DPR) || cv.height !== Math.round(h * DPR)) { R.setPixelRatio(DPR); R.setSize(w, h, false); v.cam.aspect = w / h; v.cam.updateProjectionMatrix();
+            R.getDrawingBufferSize(v.res); if (v.id) { v.id.setSize(v.res.x, v.res.y); v.peel.setSize(v.res.x, v.res.y); } }
+        world.updateMatrixWorld(); const P = M3.cur, c = V(0, 0, 0); G.forEach(i => c.add(P[i])); c.multiplyScalar(1 / G.length);
+        let Rm = 1.2; G.forEach(i => { Rm = Math.max(Rm, P[i].distanceTo(c)); }); Rm += 1.0;
+        if (!v.q) { camera.updateMatrixWorld(); const qw = new THREE.Quaternion(); world.getWorldQuaternion(qw); v.q = qw.clone().invert().multiply(camera.quaternion).invert(); }
+        const fit = Rm / Math.sin((v.cam.fov * deg) / 2) / Math.min(1, v.cam.aspect) * 1.0, qi = v.q.clone().invert();
+        const posL = c.clone().add(V(0, 0, fit / v.zoom).applyQuaternion(qi)), upL = V(0, 1, 0).applyQuaternion(qi), qw = new THREE.Quaternion(); world.getWorldQuaternion(qw);
+        v.cam.position.copy(world.localToWorld(posL.clone())); v.cam.up.copy(upL.applyQuaternion(qw)); v.cam.lookAt(world.localToWorld(c.clone()));
+        const sc = V(0, 0, 0); world.getWorldScale(sc); v.cam.near = Math.max(0.01, (fit / v.zoom - Rm * 1.5) * sc.x); v.cam.far = (fit / v.zoom + Rm * 3) * sc.x + 10; v.cam.updateProjectionMatrix();
+        const saveRes = TOON.res.value.clone(); R.getDrawingBufferSize(TOON.res.value);
+        R.setRenderTarget(null); R.autoClear = false; R.setClearColor(0x000000, 0); R.clear();
+        v.cam.layers.set(0); R.render(scene, v.cam);
+        if (idOK && v.id && EDGE.w > 0.01 && !st.classic) {
+            const f0 = peelMat.uniforms.tFront.value, d1 = edgeMat.uniforms.tD1.value, d2 = edgeMat.uniforms.tD2.value;
+            v.cam.layers.set(3); scene.overrideMaterial = idMat; R.setRenderTarget(v.id); R.clear(); R.render(scene, v.cam);
+            peelMat.uniforms.tFront.value = v.id.texture; scene.overrideMaterial = peelMat; R.setRenderTarget(v.peel); R.clear(); R.render(scene, v.cam);
+            R.setRenderTarget(null); scene.overrideMaterial = null;
+            edgeMat.uniforms.tD1.value = v.id.depthTexture; edgeMat.uniforms.tD2.value = v.peel.depthTexture; edgeMat.uniforms.uW.value = EDGE.w * DPR; edgeMat.uniforms.uNear.value = v.cam.near; edgeMat.uniforms.uFar.value = v.cam.far;
+            R.render(edgeScene, edgeCam);
+            peelMat.uniforms.tFront.value = f0; edgeMat.uniforms.tD1.value = d1; edgeMat.uniforms.tD2.value = d2; v.cam.layers.set(0);
+        }
+        R.autoClear = true; TOON.res.value.copy(saveRes);
+    }
+    (function setupSPC() {
+        const p = document.createElement('div'); p.id = 'spc-pane'; p.className = 'spec-pane'; p.hidden = true;
+        p.innerHTML = '<div class="nmr-head"><div class="nmr-hrow"><div class="nmr-title">COMPARE <span id="spc-kind"></span></div><div class="spc-legend" id="spc-legend"></div><button class="nmr-tg on" id="spc-exit" title="Back to one spectrum at a time">◂ SINGLE SPECTRUM</button></div><div class="nmr-subrow"><div id="spc-sub"></div></div></div><div id="spc-body"></div>';
+        $('viewer').appendChild(p);
+        $('spc-exit').addEventListener('click', () => { SPC.on = false; spcSync(); spcAfterExit(); });
+        spcKinds.forEach(k => { const t = $(k + '-pane') && $(k + '-pane').querySelector('.nmr-title'); if (!t) return;
+            t.insertAdjacentHTML('beforeend', '<button class="nmr-tg spc-go" title="Compare the spectra of the last three structures drawn (each in its own colour)">COMPARE SPECTRA</button>');
+            t.querySelector('.spc-go').addEventListener('click', () => { SPC.on = true; SPC.key = null; spcSync(); }); });
+        if (window.ResizeObserver) { let rt = 0; new ResizeObserver(() => { if (!spcActive()) return; clearTimeout(rt); rt = setTimeout(() => { if (NMRS.mode === 'ir' && SPC.key && SPC.key.indexOf('ir:' + layoutMode + '|') !== 0) spcUpdate(); else spcDrawAll(); }, 60); }).observe($('viewer')); }
+    })();
+    function spcAfterExit() {      // back to the single spectrum of the structure in focus
+        if (NMRS.mode === 'nmr') updateNMR(); else if (NMRS.mode === 'ir') updateIR(); else if (NMRS.mode === 'ms') updateMS(); else if (NMRS.mode === 'c13') updateC13();
+    }
     function setRightMode(m, quiet) {
         const prev = NMRS.mode;
         NMRS.mode = ['nmr', 'ir', 'ms', 'c13', 'n2d', 'lit'].includes(m) ? m : '3d';
         try { localStorage.setItem('zms-right', NMRS.mode); } catch (err) {}
         const nmr = NMRS.mode === 'nmr', ir = NMRS.mode === 'ir', ms = NMRS.mode === 'ms', c13 = NMRS.mode === 'c13', n2d = NMRS.mode === 'n2d', lit = NMRS.mode === 'lit', xp = c13 || n2d || lit;
-        if (prev === 'ir' && !ir) { irStop(); IRS.sel = -1; }
+        if (prev === 'ir' && !ir) { irStop(); IRS.sel = -1; irUnfocus3D(); }
         if (prev === 'ms' && !ms) MSS.sel = null;
         $('nmr-pane').hidden = !nmr; $('ir-pane').hidden = !ir; $('ms-pane').hidden = !ms; $('c13-pane').hidden = !c13; $('n2d-pane').hidden = !n2d; $('lit-pane').hidden = !lit;
         $('viewer').classList.toggle('nmr', nmr || ms || xp); $('viewer').classList.toggle('ir', ir);
@@ -9059,6 +9432,7 @@ function autoMapAtoms(m, R, P) {
         if (nmr) { $('busy').hidden = true; updateNMR(); }
         else { NMRS.sig = null; NMRS.hi = null; if (ir) updateIR(); if (ms) { $('busy').hidden = true; updateMS(); } if (xp) { $('busy').hidden = true; updateExtra(); } render(); }
         refreshThumbs(); if (typeof comp2D === 'function') comp2D();
+        spcSync();
     }
 
     // =====================================================================
@@ -9247,9 +9621,9 @@ function autoMapAtoms(m, R, P) {
         const firstBuild = !M3;
         if (typeof endBondSel === 'function') { if (NV) sideView(true); endBondSel(); if (mm.running) mmStop(''); if (typeof qmStop === 'function' && (qm.worker || qm.timer)) qmStop(); $('mm-out').textContent = ''; }
         disposeM3();
-        { const nS = structureCount(), off = nS > 2; let ov = $('v3-off');
+        { const nS = structureCount(), off = nS > 3; let ov = $('v3-off');
           if (off && !ov) { ov = document.createElement('div'); ov.id = 'v3-off'; vwrap.appendChild(ov); }
-          if (ov) { ov.hidden = !off; if (off) ov.innerHTML = `<b>3D view paused</b><span>${nS} structures are drawn — the 3D viewer shows up to 2.<br>Delete structures until 2 or fewer remain and it comes back.</span>`; }
+          if (ov) { ov.hidden = !off; if (off) ov.innerHTML = `<b>3D view paused</b><span>${nS} structures are drawn — the 3D viewer shows up to 3.<br>Delete structures until 3 or fewer remain and it comes back.</span>`; }
           set3DAvailable(!off);
           if (off) { if (typeof bgBuild === 'function') bgBuild(); return; } }
         if (!mol.atoms.length) return;
@@ -9286,7 +9660,8 @@ function autoMapAtoms(m, R, P) {
     }
     // camera distance at which the model fills about 70% of the window (the narrower direction)
     function fitDistance() {
-        const r = Math.max(1.5, ...M3.base.map(v => v.length())) + 0.9, tv = Math.tan(camera.fov * deg / 2), t = Math.min(tv, tv * camera.aspect);
+        const B = FOCUS3D ? [...FOCUS3D].map(i => M3.base[i]).filter(Boolean) : M3.base;      // single IR spectrum: frame only its structure
+        const r = Math.max(1.5, ...B.map(v => v.length())) + 0.9, tv = Math.tan(camera.fov * deg / 2), t = Math.min(tv, tv * camera.aspect);
         return r / (0.93 * t);      // the model fills most of its window
     }
     function fitCamera() {
@@ -9484,7 +9859,7 @@ function autoMapAtoms(m, R, P) {
         VOFF.x = VOFF.y = 0;
         if (M3 && !NV) {      // put the (current) centre of mass back on the pivot, keeping the zoom and viewing angle
             world.updateMatrixWorld(); const c = V(0, 0, 0); let W = 0;
-            M3.g.atoms.forEach((a, i) => { const m = (ELEMENTS[a.el] && ELEMENTS[a.el].m) || 12; c.addScaledVector(M3.cur[i], m); W += m; });
+            M3.g.atoms.forEach((a, i) => { if (FOCUS3D && !FOCUS3D.has(i)) return; const m = (ELEMENTS[a.el] && ELEMENTS[a.el].m) || 12; c.addScaledVector(M3.cur[i], m); W += m; });
             c.multiplyScalar(1 / (W || 1)).applyMatrix4(world.matrixWorld);
             const off = camera.position.clone().sub(controls.target);
             world.position.sub(c); controls.target.set(0, 0, 0); camera.position.copy(off);
@@ -10781,6 +11156,90 @@ function autoMapAtoms(m, R, P) {
     $('adj-in').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); adjApply(parseFloat($('adj-in').value)); $('adj-in').blur(); } e.stopPropagation(); });
     const adjStep = (sg) => { const m = measShown(); if (!m) return; adjApply(measVal(m) + sg * (m.c == null ? 0.05 : 5)); };
     $('adj-m').addEventListener('click', () => adjStep(-1)); $('adj-p').addEventListener('click', () => adjStep(1));
+    // ---- named results, saved side by side for comparison (heats of formation, dipoles, orbital energies …)
+    const CMP_KEY = 'zms-compare-v1';
+    const CMP = { list: (() => { try { const v = JSON.parse(localStorage.getItem(CMP_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (err) { return []; } })(), ref: null, sort: 'saved', name: '' };
+    const cmpStore = () => { try { localStorage.setItem(CMP_KEY, JSON.stringify(CMP.list)); } catch (err) { showMsg('Could not keep the saved results (browser storage is full)'); } };
+    function cmpDefaultName() { const t = TABS.list[TABS.cur]; return (t && t.name) || tabAutoName(mol) || 'Result ' + (CMP.list.length + 1); }
+    function cmpSave(name) {
+        const P = COMP.props; if (!P || P.error || !COMP.optimized) { showMsg('Run a computation first, then save its result'); return; }
+        if (CMP.list.length >= 30) { showMsg('Up to 30 saved results — remove some first'); return; }
+        const ids = mol.atoms.map((_, i) => i); let thumb = ''; try { thumb = structThumb(ids, 120, 76); } catch (err) {}
+        const f = (() => { try { return tabAutoName(mol); } catch (err) { return ''; } })();
+        CMP.list.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: (name || '').trim() || cmpDefaultName(), formula: f, charge: totCharge(),
+            lot: COMP.method, task: COMP.task, qmLot: P.qmLot || null, Hf: P.Hf ?? null, E: (P.E != null && !P.ani && !P.aim) ? P.E : null,
+            Eh: P.aim ? P.aim.Eh : P.ani ? P.ani.Eh : null, steric: P.mm ? P.mm.total : null, mu: P.dipoleTotal ?? null,
+            homo: P.huckel ? null : (P.homo ?? null), lumo: P.huckel ? null : (P.lumo ?? null), nAtoms: M3 ? M3.g.atoms.length : null, thumb, mol: JSON.stringify(mol), t: Date.now() });
+        { const t = TABS.list[TABS.cur], nm = (name || '').trim(); if (t && !t.name && nm) { t.name = nm; t.auto = false; tabsDraw(); } }      // a named result names its tab too
+        cmpStore(); COMP.open.cmp = true; CMP.name = ''; compResults(); showMsg('Saved “' + CMP.list[CMP.list.length - 1].name + '” for comparison (' + CMP.list.length + ' saved)');
+    }
+    const CMP_ROWS = [
+        ['formula', 'Formula', (r) => r.formula ? fmtSub(r.formula) : '—'],
+        ['level', 'Level of theory', (r) => escX(r.lot) + ({ opt: ' · opt', freq: ' · freq', scan: ' · scan' }[r.task] || ' · SP')],
+        ['Hf', 'ΔH<sub>f</sub> (kcal/mol)', null, 2], ['dHf', 'ΔΔH<sub>f</sub> vs ★ (kcal/mol)', null, 2],
+        ['E', 'Total energy (eV)', null, 3], ['Eh', 'ML energy (hartree)', null, 5], ['dEh', 'ΔE vs ★ (kcal/mol)', null, 2],
+        ['steric', 'Steric energy (kcal/mol)', null, 2], ['mu', 'Dipole μ (D)', null, 2],
+        ['homo', 'HOMO (eV)', null, 2], ['lumo', 'LUMO (eV)', null, 2], ['gap', 'HOMO–LUMO gap (eV)', null, 2]];
+    function cmpVal(r, k, ref) {
+        if (k === 'gap') return r.homo != null && r.lumo != null ? r.lumo - r.homo : null;
+        if (k === 'dHf') return ref && r.Hf != null && ref.Hf != null ? r.Hf - ref.Hf : null;
+        if (k === 'dEh') return ref && r.Eh != null && ref.Eh != null && r.formula === ref.formula ? (r.Eh - ref.Eh) * 627.5095 : null;
+        return r[k] ?? null;
+    }
+    function cmpHTML() {
+        if (!CMP.list.length && !(COMP.optimized && COMP.props && !COMP.props.error)) return '';
+        const OPEN = COMP.open; let h = '';
+        const canSave = COMP.optimized && COMP.props && !COMP.props.error && !COMP.pending;
+        const L = CMP.list.slice(), ref = L.find(r => r.id === CMP.ref) || L[0] || null;
+        if (CMP.sort !== 'saved') { const k = CMP.sort; L.sort((p, q) => { const a = cmpVal(p, k, ref), b = cmpVal(q, k, ref); return (a == null) - (b == null) || (a ?? 0) - (b ?? 0); }); }
+        const rows = CMP_ROWS.filter(([k]) => k === 'formula' || k === 'level' || L.some(r => cmpVal(r, k, ref) != null));
+        const best = {}; ['Hf', 'mu', 'gap', 'steric'].forEach(k => { const v = L.map(r => cmpVal(r, k, ref)).filter(x => x != null); if (v.length > 1) best[k] = k === 'mu' ? Math.max(...v) : Math.min(...v); });
+        let table = '';
+        if (L.length) {
+            table = `<div class="cmp-wrap"><table class="cmp"><thead><tr><th class="cmp-lab"><span class="hint-in">${L.length} saved</span></th>${L.map(r => `<th class="cmp-col${ref && r.id === ref.id ? ' ref' : ''}" data-id="${r.id}">
+                <div class="cmp-th">${r.thumb ? `<div class="cmp-img" title="Open this structure in a new tab">${r.thumb}</div>` : ''}
+                <div class="cmp-name" title="Click to rename">${escX(r.name)}</div>
+                <div class="cmp-act"><button class="cmp-ref${ref && r.id === ref.id ? ' on' : ''}" data-ref="${r.id}" title="Make this the reference (★) for the Δ rows">★</button><button class="cmp-open" data-open="${r.id}" title="Open this structure in a new tab">↗</button><button class="cmp-del" data-del="${r.id}" title="Remove this saved result">×</button></div></div></th>`).join('')}</tr></thead><tbody>`
+                + rows.map(([k, lab, fn, dp]) => `<tr><th class="cmp-lab${CMP.sort === k ? ' sorted' : ''}" ${fn ? '' : `data-sort="${k}" title="Sort the columns by this row"`}>${lab}${CMP.sort === k ? ' ▲' : ''}</th>${L.map(r => { const v = fn ? null : cmpVal(r, k, ref);
+                    const txt = fn ? fn(r) : v == null ? '<span class="cmp-na">—</span>' : (k[0] === 'd' && v > 0 ? '+' : '') + mns(v, dp);
+                    const cls = (!fn && v != null && best[k] != null && Math.abs(v - best[k]) < 1e-9 ? ' best' : '') + (ref && r.id === ref.id ? ' ref' : '');
+                    return `<td class="${fn ? '' : 'n'}${cls}">${txt}</td>`; }).join('')}</tr>`).join('') + '</tbody></table></div>';
+            const notes = [];
+            if (ref && L.some(r => r.Hf != null && r.formula !== ref.formula)) notes.push('ΔΔH<sub>f</sub> between different formulas is not a reaction energy: it compares isomers only when the formulas match (for ions of different size, compare the reactions that make them).');
+            if (L.some(r => r.lot !== L[0].lot)) notes.push('These results use different levels of theory; compare numbers from the same method.');
+            if (L.some(r => r.Eh != null)) notes.push('ML energies (hartree) are compared only between identical formulas.');
+            table += `<div class="cmp-foot">${notes.map(n => `<div>• ${n}</div>`).join('')}<div class="cmp-tools"><span class="hint-in">Green = lowest ΔH<sub>f</sub>, steric energy and gap, largest μ · click a row name to sort</span><span class="grow"></span>${CMP.sort !== 'saved' ? '<button class="chip-t" id="cmp-unsort">ORDER SAVED</button>' : ''}<button class="chip-t" id="cmp-copy" title="Copy the table (paste into Excel or Sheets)">COPY TABLE</button><button class="chip-t" id="cmp-clear" title="Remove every saved result">CLEAR ALL</button></div></div>`;
+        } else table = '<div class="hint-sm">Name this result and save it; then compute another structure (or another level of theory) and save that too. The saved results line up here side by side.</div>';
+        const saveRow = canSave ? `<div class="cmp-save"><input id="cmp-name" maxlength="40" placeholder="Name this result, e.g. tert-butyl cation" value="${escX(CMP.name || '')}" aria-label="Name for this result"><button class="btn cmp-go" id="cmp-save" title="Keep this result (with its structure) for side-by-side comparison">SAVE RESULT</button></div>` : '';
+        h += `<details class="rd rd-cmp" data-k="cmp" ${OPEN.cmp !== false ? 'open' : ''}><summary>COMPARE RESULTS <span class="src">${CMP.list.length ? CMP.list.length + ' saved · kept in this browser' : 'save named results to line them up'}</span></summary><div class="rd-in">${saveRow}${table}</div></details>`;
+        return `<div style="margin-top:8px">${h}</div>`;
+    }
+    function cmpBind(el) {
+        const q = (s) => el.querySelector(s);
+        if (q('#cmp-name')) { q('#cmp-name').placeholder = 'Name this result, e.g. ' + cmpDefaultName();
+            q('#cmp-name').addEventListener('input', (e) => { CMP.name = e.target.value; });
+            q('#cmp-name').addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') cmpSave(e.target.value); }); }
+        if (q('#cmp-save')) q('#cmp-save').addEventListener('click', () => cmpSave(q('#cmp-name').value));
+        el.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => { CMP.list = CMP.list.filter(r => r.id !== b.dataset.del); if (CMP.ref === b.dataset.del) CMP.ref = null; cmpStore(); compResults(); }));
+        el.querySelectorAll('[data-ref]').forEach(b => b.addEventListener('click', () => { CMP.ref = b.dataset.ref; compResults(); }));
+        const open = (id) => { const r = CMP.list.find(x => x.id === id); if (!r || !r.mol) return; try { tabNew(normMol(JSON.parse(r.mol)), r.name); showMsg('Opened “' + r.name + '” in a new tab'); } catch (err) { showMsg('Could not open it: ' + err.message); } };
+        el.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => open(b.dataset.open)));
+        el.querySelectorAll('.cmp-img').forEach(d => d.addEventListener('click', () => open(d.closest('[data-id]').dataset.id)));
+        el.querySelectorAll('[data-sort]').forEach(t => t.addEventListener('click', () => { CMP.sort = CMP.sort === t.dataset.sort ? 'saved' : t.dataset.sort; compResults(); }));
+        if (q('#cmp-unsort')) q('#cmp-unsort').addEventListener('click', () => { CMP.sort = 'saved'; compResults(); });
+        if (q('#cmp-clear')) q('#cmp-clear').addEventListener('click', () => { if (!confirm('Remove all ' + CMP.list.length + ' saved results?')) return; CMP.list = []; CMP.ref = null; cmpStore(); compResults(); });
+        if (q('#cmp-copy')) q('#cmp-copy').addEventListener('click', () => {
+            const L = CMP.list, ref = L.find(r => r.id === CMP.ref) || L[0], strip = (s) => String(s).replace(/<[^>]+>/g, '');
+            const lines = [['', ...L.map(r => r.name)].join('\t')].concat(CMP_ROWS.map(([k, lab, fn, dp]) => [strip(lab), ...L.map(r => { if (fn) return strip(fn(r)); const v = cmpVal(r, k, ref); return v == null ? '' : v.toFixed(dp); })].join('\t')));
+            navigator.clipboard.writeText(lines.join('\n')).then(() => showMsg('Comparison table copied — paste it into a spreadsheet'), () => showMsg('Copy was blocked by the browser'));
+        });
+        el.querySelectorAll('.cmp-name').forEach(d => d.addEventListener('click', () => {
+            const id = d.closest('[data-id]').dataset.id, r = CMP.list.find(x => x.id === id), inp = document.createElement('input'); inp.className = 'cmp-in'; inp.value = r.name; inp.maxLength = 40;
+            d.replaceWith(inp); inp.focus(); inp.select();
+            const done = (ok) => { if (ok && inp.value.trim()) { r.name = inp.value.trim(); cmpStore(); } compResults(); };
+            inp.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') done(true); if (e.key === 'Escape') done(false); });
+            inp.addEventListener('blur', () => done(true)); }));
+    }
     function compResults() {
         try { adjUpdate(); } catch (err) {}
         const el = $('comp-res'); if (!el) return; let h = '';
@@ -10829,7 +11288,9 @@ function autoMapAtoms(m, R, P) {
         if (COMP.meas.length) { const kind = (m) => m.d != null ? 'dihedral' : m.c != null ? 'angle' : 'distance';
             h += `<div class="res-grid" style="margin-top:8px">${tbl('MEASUREMENTS <button class="meas-clr" id="meas-clr" title="Delete every recorded measurement">CLEAR</button>', ['#', 'atoms', 'type', 'value', 'geometry'], COMP.meas.map((m, k) =>
                 `<tr${k === COMP.vis && measShown() ? ' class="hl"' : ''}><td>${m.n}</td><td>${m.lab}</td><td>${kind(m)}</td><td class="n"><b>${measFmt(m, m.v)}</b></td><td><span class="src">${escX(m.geo)}</span></td></tr>`))}</div>`; }
+        try { h += cmpHTML(); } catch (err) { console.warn(err); }
         el.innerHTML = h;
+        try { cmpBind(el); } catch (err) { console.warn(err); }
         { const b = $('meas-clr'); if (b) b.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); measClear(); }); }
         el.querySelectorAll('details.rd, details.rsub').forEach(d => d.addEventListener('toggle', () => { OPEN[d.dataset.k] = d.open; }));
         if (!$('cp-math').hidden) mathShow();
@@ -13113,6 +13574,74 @@ function autoMapAtoms(m, R, P) {
     mkBtn(viewBar, 'v-hist', ico('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/><path d="M3.5 12H1.8M4.2 7.6 3 6.4"/>'), 'History: every step (click one to go back to it) and autosaved recovery points', () => {
         histPanel.hidden = !histPanel.hidden; $('v-hist').classList.toggle('active', !histPanel.hidden); renderHistory(); }, 'tool');
 
+
+    // ---- structure tabs: each tab is its own drawing with its own undo history and view
+    const TABS_KEY = 'molstudio-tabs-v1';
+    const TABS = { list: [{ id: 1, name: '', auto: true, mol: null, undo: [], redo: [], view: null }], cur: 0, seq: 1 };
+    function tabAutoName(m) {
+        if (!m || !(m.atoms || []).length) return '';
+        try { const f = formula(chemView(m)), q = f.charge; return f.text + (q ? (Math.abs(q) > 1 ? Math.abs(q) : '') + (q > 0 ? '+' : '−') : ''); } catch (err) { return ''; }
+    }
+    const tabLabel = (t, k) => t.name || (k === TABS.cur ? tabAutoName(mol) : tabAutoName(t.mol ? JSON.parse(t.mol) : null)) || 'Structure ' + (k + 1);
+    const fmtSub = (s) => escX(s).replace(/([A-Za-z\)])(\d+)/g, '$1<sub>$2</sub>').replace(/(\d*[+−])$/, '<sup>$1</sup>');
+    function tabSave() { const t = TABS.list[TABS.cur]; t.mol = JSON.stringify(mol); t.undo = undoStack.slice(); t.redo = redoStack.slice(); t.view = { ...view }; }
+    function tabLoad(k) {
+        const t = TABS.list[k]; TABS.cur = k;
+        mol = normMol(t.mol ? JSON.parse(t.mol) : newMol()); undoStack.length = 0; undoStack.push(...(t.undo || [])); redoStack.length = 0; redoStack.push(...(t.redo || []));
+        clearSel(); if (t.view) Object.assign(view, t.view);
+        changed(true); if (!t.view) fitView();
+        tabsDraw(); afterChange();
+    }
+    function tabSwitch(k) { if (k === TABS.cur || !TABS.list[k]) return; tabSave(); tabLoad(k); }
+    function tabNew(m, name) {
+        if (TABS.list.length >= 20) { showMsg('Up to 20 tabs — close one first'); return; }
+        tabSave(); TABS.list.push({ id: ++TABS.seq, name: name || '', auto: !name, mol: m ? JSON.stringify(m) : null, undo: [], redo: [], view: null });
+        tabLoad(TABS.list.length - 1);
+    }
+    function tabClose(k) {
+        const t = TABS.list[k], m = k === TABS.cur ? mol : (t.mol ? JSON.parse(t.mol) : null);
+        if (m && ((m.atoms || []).length || (m.arrows || []).length) && !confirm('Close “' + tabLabel(t, k) + '”? Its drawing and history will be gone.')) return;
+        if (TABS.list.length === 1) { markStep('Close tab'); commit(); mol = normMol(newMol()); t.name = ''; t.auto = true; clearSel(); changed(true); tabsDraw(); return; }
+        if (k !== TABS.cur) { TABS.list.splice(k, 1); if (k < TABS.cur) TABS.cur--; tabsDraw(); tabsStore(); return; }
+        TABS.list.splice(k, 1); tabLoad(Math.min(k, TABS.list.length - 1));
+    }
+    function tabsDraw() {
+        const el = $('tabs'); if (!el) return;
+        el.innerHTML = TABS.list.map((t, k) => `<div class="tab${k === TABS.cur ? ' on' : ''}" data-k="${k}" title="${k === TABS.cur ? 'Double-click to rename' : 'Switch to this structure'}"><span class="tab-n">${fmtSub(tabLabel(t, k))}</span><button class="tab-x" data-x="${k}" aria-label="Close tab" title="Close this tab">×</button></div>`).join('')
+            + `<button class="tab-add" id="tab-add" title="New tab (a new, empty drawing)" aria-label="New tab">+</button>`;
+    }
+    $('tabs').addEventListener('click', (e) => {
+        const x = e.target.closest('[data-x]'); if (x) { e.stopPropagation(); tabClose(+x.dataset.x); return; }
+        if (e.target.closest('#tab-add')) { tabNew(); return; }
+        const t = e.target.closest('.tab'); if (t && !e.target.closest('input')) tabSwitch(+t.dataset.k);
+    });
+    $('tabs').addEventListener('dblclick', (e) => {
+        const tEl = e.target.closest('.tab'); if (!tEl || e.target.closest('[data-x]')) return; const k = +tEl.dataset.k, t = TABS.list[k]; if (k !== TABS.cur) return;
+        const n = tEl.querySelector('.tab-n'), inp = document.createElement('input'); inp.className = 'tab-in'; inp.value = tabLabel(t, k); inp.maxLength = 40;
+        n.replaceWith(inp); inp.focus(); inp.select();
+        const done = (ok) => { if (ok) { const v = inp.value.trim(); t.name = v; t.auto = !v; } tabsDraw(); tabsStore(); };
+        inp.addEventListener('keydown', (ev) => { ev.stopPropagation(); if (ev.key === 'Enter') done(true); if (ev.key === 'Escape') done(false); });
+        inp.addEventListener('blur', () => done(true));
+    });
+    function tabsStore() {      // the other tabs' drawings ride along with the autosave (their undo history does not)
+        try { localStorage.setItem(TABS_KEY, JSON.stringify({ cur: TABS.cur, list: TABS.list.map((t, k) => ({ name: t.name, mol: k === TABS.cur ? JSON.stringify(mol) : t.mol })) })); } catch (err) {}
+    }
+    function tabsRecover() {
+        let d = null; try { d = JSON.parse(localStorage.getItem(TABS_KEY) || 'null'); } catch (err) {}
+        if (!d || !Array.isArray(d.list) || d.list.length < 2) return false;
+        TABS.list = d.list.map((t, k) => ({ id: k + 1, name: t.name || '', auto: !t.name, mol: t.mol || null, undo: [], redo: [], view: null })); TABS.seq = TABS.list.length;
+        TABS.cur = clamp(d.cur | 0, 0, TABS.list.length - 1); const t = TABS.list[TABS.cur];
+        mol = normMol(t.mol ? JSON.parse(t.mol) : newMol()); clearSel(); changed(true); fitView(); tabsDraw();
+        showMsg('Welcome back — your ' + TABS.list.length + ' structure tabs are restored'); return true;
+    }
+    tabsDraw();
+    {   // the tabs sit on the 2D canvas, and move into the Computations header while that window is open (so structures can be switched there too)
+        const place = () => { const t = $('tabs'), cp = $('comp-pane'), head = cp && cp.querySelector('.cp-head'); if (!t || !head) return;
+            if (!cp.hidden) { if (t.parentElement !== head) head.appendChild(t); t.classList.add('in-cp'); }
+            else { if (t.parentElement !== wrap) wrap.insertBefore(t, $('props-box')); t.classList.remove('in-cp'); } };
+        new MutationObserver(place).observe($('comp-pane'), { attributes: true, attributeFilter: ['hidden'] }); place();
+    }
+
     // ---- autosave + recovery points
     const AUTO_KEY = 'molstudio-autosave-v1', REC_KEY = 'molstudio-recovery-v1';
     let autoTimer = null, lastRecT = 0, lastRecKey = '';
@@ -13127,15 +13656,18 @@ function autoMapAtoms(m, R, P) {
     }
     function autosaveNow() {
         try { localStorage.setItem(AUTO_KEY, JSON.stringify({ t: Date.now(), mol })); } catch (err) {}
+        tabsStore();
         if (Date.now() - lastRecT > 120000) addRecPoint(false);       // a recovery point every couple of minutes of work
     }
     function afterChange() {
         clearTimeout(autoTimer); autoTimer = setTimeout(autosaveNow, 700);
+        try { tabsDraw(); } catch (err) {}
         if (!histPanel.hidden) renderHistory();
         chemCache.key = chemCache.key;        // (recomputed lazily on the next render)
     }
-    window.addEventListener('beforeunload', () => { try { localStorage.setItem(AUTO_KEY, JSON.stringify({ t: Date.now(), mol })); } catch (err) {} });
+    window.addEventListener('beforeunload', () => { try { localStorage.setItem(AUTO_KEY, JSON.stringify({ t: Date.now(), mol })); } catch (err) {} tabsStore(); });
     function startupRecover() {
+        if (tabsRecover()) return;
         let d = null; try { d = JSON.parse(localStorage.getItem(AUTO_KEY) || 'null'); } catch (err) {}
         if (!d || !d.mol || !((d.mol.atoms || []).length || (d.mol.arrows || []).length)) return;
         if (mol.atoms.length || mol.arrows.length) return;
